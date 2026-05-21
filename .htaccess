@@ -1,0 +1,45 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /shop/
+
+    # Don't rewrite if file or directory exists
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # =========================
+    # 1. Sub category (2 levels)
+    # /category/sell-phone/apple
+    # =========================
+    RewriteRule ^category/([a-z0-9-]+)/([a-z0-9-]+)/?$ sub-category.php?parent=$1&slug=$2 [QSA,L]
+
+    # =========================
+    # 2. Parent category (1 level)
+    # /category/sell-phone
+    # =========================
+    RewriteRule ^category/([a-z0-9-]+)/?$ category.php?slug=$1 [QSA,L]
+
+    # =========================
+    # 3. Shop home category page
+    # /category
+    # =========================
+    RewriteRule ^category/?$ shop.php [QSA,L]
+
+    # =========================
+    # 4. Cart page
+    # /cart-view
+    # =========================
+    RewriteRule ^cart-view/?$ cart-view.php [QSA,L]
+
+    # =========================
+    # 5. Checkout page
+    # /checkout
+    # =========================
+    RewriteRule ^checkout/?$ checkout.php [QSA,L]
+
+    # =========================
+    # 6. WordPress content pages
+    # /about-us
+    # =========================
+    RewriteRule ^([a-z0-9-]+)/?$ page.php?slug=$1 [QSA,L]
+
+</IfModule>
