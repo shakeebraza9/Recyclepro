@@ -537,6 +537,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    updateHeaderWishlistCount();
+});
 </script>
 </head>
 
@@ -581,39 +588,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
             </div>
 
-            <!-- Search -->
-            <div class="header-search">
+            <style>
+.search-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 9999;
+}
 
-                <div class="input-group header-search-group">
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #f5f5f5;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.2s;
+}
 
-                    <input
-                        type="text"
-                        class="form-control"
-                        placeholder="Search products..."
-                    >
+.search-result-item:hover {
+    background: #f8f9fa;
+    color: #13564f;
+}
 
-                    <button class="btn bg-light" type="button">
-                        <i class="bi bi-search"></i>
-                    </button>
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 12px;
+}
 
-                </div>
+.search-result-info {
+    flex: 1;
+}
 
-            </div>
+.search-result-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.search-result-price {
+    font-size: 0.8rem;
+    color: #28a745;
+    font-weight: 700;
+}
+</style>
+<div class="header-search position-relative">
+    <div class="input-group header-search-group">
+        <input
+            type="text"
+            id="header-search-input"
+            class="form-control"
+            placeholder="Search products..."
+            autocomplete="off"
+        >
+        <button class="btn bg-light" id="header-search-btn" type="button">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+
+    <div id="search-results-dropdown" class="search-dropdown-menu d-none"></div>
+</div>
 
             <!-- Account / Cart -->
             <div class="header-actions">
 
-                <a
-                    href="/shop/cart-view"
-                    class="btn text-white position-relative cart-btn"
-                    title="View Cart"
-                >
-                    <i class="bi bi-cart3"></i>
+            <a href="/shop/wishlist" 
+            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+            title="View Wishlist"
+            style="width: 40px; height: 40px; font-size: 1.2rem;">
+                <i class="bi bi-heart"></i>
+                <span id="globalWishlistCount" 
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
+                    style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
+                    0
+                </span>
+            </a>
 
-                    <span class="position-absolute top-0 start-100 translate-middle badge bg-danger cart-count">
-                        0
-                    </span>
-                </a>
+            <a href="/shop/cart-view" 
+            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+            title="View Cart"
+            style="width: 40px; height: 40px; font-size: 1.2rem;">
+                <i class="bi bi-cart3"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-count" 
+                    style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
+                    0
+                </span>
+            </a>
 
                 <span id="guestAccountActions" class="account-actions">
                     <button type="button" class="btn btn-login text-white" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="login">

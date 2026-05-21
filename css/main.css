@@ -1192,7 +1192,7 @@ div#centerBanner a {
 /* Slick height fix */
 .slick-slide {
     height: auto;
-    margin: 10px 0;
+    /* margin: 0px 0; */
 }
 
 .home-slider ul.slick-dots {

@@ -32,7 +32,7 @@ function sanitize_slug($slug) {
 }
 
 // Fetch all categories for sidebar navigation
-$categories_api_url = "http://localhost:8080/bkrecyclepro/wp-json/wp/v2/categories-tree";
+$categories_api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/categories-tree";
 $categories_context = stream_context_create(['http' => ['timeout' => 5]]);
 $categories_response = @file_get_contents($categories_api_url, false, $categories_context);
 
@@ -49,7 +49,7 @@ if ($categories_response !== false) {
 $api_slug = $sub_slug ?: $slug;
 
 // Fetch category and products from API
-$api_url = "http://localhost:8080/bkrecyclepro/wp-json/wp/v2/category/" . $api_slug;
+$api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/category/" . $api_slug;
 
 // Try to fetch API data
 $context = stream_context_create(['http' => ['timeout' => 5]]);
@@ -78,7 +78,7 @@ $subcategories = array_filter($all_categories, function($cat) use ($category) {
 // If there are subcategories, fetch their products too
 $all_products = $products;
 foreach ($subcategories as $subcat) {
-    $sub_api_url = "http://localhost:8080/bkrecyclepro/wp-json/wp/v2/category/" . $subcat['slug'];
+    $sub_api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/category/" . $subcat['slug'];
     $sub_response = @file_get_contents($sub_api_url, false, $context);
 
     if ($sub_response !== false) {

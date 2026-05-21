@@ -2,6 +2,7 @@ class JqueryApiService {
 
     constructor() {
         this.baseUrl = 'https://www.recyclepro.co.uk/rp-dashboard/';
+        // this.baseUrl = 'http://localhost:8080/bkrecyclepro/';
     }
 
     _buildUrl(endpoint) {

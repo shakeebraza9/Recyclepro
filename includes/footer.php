@@ -64,5 +64,128 @@
 </footer>
  <div class="copy"> © 2024 RECYCLEPRO, All Rights Reserved</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function updateHeaderWishlistCount() {
+    const badge = $("#globalWishlistCount");
+    if (!badge.length) return;
+
+    const wishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+    
+    if (wishlist.length > 0) {
+        badge.text(wishlist.length);
+        badge.removeClass('d-none'); 
+    } else {
+        badge.addClass('d-none'); 
+    }
+}
+
+let debounceTimer;
+
+const $input = $("#header-search-input");
+const $btn = $("#header-search-btn");
+const $dropdown = $("#search-results-dropdown");
+
+
+// ========================
+// 🔥 SEARCH FUNCTION
+// ========================
+function searchProducts(query) {
+
+    $.ajax({
+        url: 'http://localhost:8080/bkrecyclepro/wp-json/custom/v1/search-products',
+        method: 'GET',
+        data: { term: query },
+        success: function (response) {
+
+            console.log("DEBUG RESPONSE:", response);
+
+            let products = Array.isArray(response) ? response : [response];
+
+            if (products.length > 0) {
+
+                let html = "";
+
+                $.each(products, function (i, product) {
+
+                    html += `
+                        <a href="${product.permalink}" class="search-result-item">
+                            <img src="${product.image || '/placeholder.png'}">
+                            <div class="search-result-info">
+                                <h4>${product.name}</h4>
+                                <div>£${product.price}</div>
+                            </div>
+                        </a>
+                    `;
+                });
+
+                $dropdown.html(html).removeClass("d-none");
+
+            } else {
+                $dropdown.html("<div class='p-3 text-center'>No product found</div>")
+                         .removeClass("d-none");
+            }
+        },
+
+        error: function () {
+            $dropdown.html("<div class='p-3 text-danger text-center'>API Error</div>")
+                     .removeClass("d-none");
+        }
+    });
+}
+
+
+$btn.on("click", function () {
+    let query = $input.val().trim();
+    if (!query) return;
+
+    searchProducts(query);
+});
+
+
+$input.on("input", function () {
+
+    let query = $(this).val().trim();
+
+    clearTimeout(debounceTimer);
+
+    if (query.length < 2) {
+        $dropdown.addClass("d-none").html("");
+        return;
+    }
+
+    debounceTimer = setTimeout(function () {
+        searchProducts(query);
+    }, 300);
+});
+
+
+$input.on("keydown", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+
+        let first = $(".search-result-item").first();
+
+        if (first.length) {
+            window.location.href = first.attr("href");
+        }
+    }
+});
+
+
+$(document).on("click", function (e) {
+    if (!$(e.target).closest(".header-search").length) {
+        $dropdown.addClass("d-none");
+    }
+});
+
+
+$input.on("focus", function () {
+    if ($(this).val().trim().length >= 2) {
+        $dropdown.removeClass("d-none");
+    }
+});
+
+
+</script>
 </body>
 </html>

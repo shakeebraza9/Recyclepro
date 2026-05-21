@@ -42,4 +42,7 @@
     # =========================
     RewriteRule ^([a-z0-9-]+)/?$ page.php?slug=$1 [QSA,L]
 
+
+    RewriteRule ^wishlist/?$ wishlist.php [QSA,L]
+
 </IfModule>

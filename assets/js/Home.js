@@ -18,10 +18,6 @@ class Home {
 
     renderHome() {
         const data = this.data;
-
-        // =========================
-        // SLIDER
-        // =========================
         const slider = $(".home-slider");
 
         if (slider.hasClass("slick-initialized")) {
@@ -103,11 +99,46 @@ class Home {
 
         $("#banner2").html(
             data.banner_2?.image
-                ? `<section style="background:url('${data.banner_2.image}') center/cover;">
-                        <a href="${data.banner_2.link || '#'}">
-                            ${data.banner_2.content || ''}
-                        </a>
-                   </section>`
+                ? `<section
+                    class="py-5 px-5"
+                    style="
+                      background:
+                      linear-gradient(
+                        90deg,
+                        rgba(26,26,26,0.8) 50%,
+                        transparent
+                      ),
+                      url('${data.banner_2?.image}');
+                      background-size: cover;
+                      background-position: center;
+                      color: white;
+                    "
+                  >
+
+                    <div class="container">
+
+                      <div class="row align-items-center">
+
+                        <div class="col-md-6">
+
+                          <a
+                            href="${data.banner_2?.link}"
+                            class="text-white newsletter-link"
+                          >
+
+                            <div class="newsletter-content">
+                              ${data.banner_2?.content}
+                            </div>
+
+                          </a>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </section>`
                 : ""
         );
     }
@@ -118,70 +149,92 @@ class Home {
         if (!box.length) return;
 
         box.html("");
+        
 
+        const currentWishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+        
         (products || []).forEach(p => {
+
+            const productKey = p.slug || p.permalink || '';
+            const isExist = currentWishlist.some(item => (item.slug === productKey || item.permalink === productKey));
+            
+
+            const heartColor = isExist ? '#13564f' : '#212529';
+            const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
+
             box.append(`
-<div class="px-2">
+                <div class="product-item-wrap py-1">
+                    <div class="card h-100 product-card border-light shadow-sm rounded-4 position-relative p-3">
+                      
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-uppercase text-muted small fw-semibold tracking-wider">
+                          ${p.category || ''}
+                        </span>
+                        <div class="d-flex flex-column gap-2 align-items-center">
+                          
+                          <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                                  style="color: ${heartColor};"
+                                  aria-label="Add to Wishlist" 
+                                  onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
+                              <i class="bi ${heartIcon}"></i>
+                          </button>
+                          
+                          <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5" aria-label="Compare Product"
+                                  onclick="$('#${id}').slick('slickGoTo', 0);">
+                              <i class="bi bi-arrow-left-right"></i>
+                          </button>
+                        </div>
+                      </div>
 
-        <div class="card h-100">
+                      <div class="position-relative text-center my-3">
+                        ${p.isNew ? `
+                          <span class="badge position-absolute start-0 bottom-0 px-3 py-2 rounded-3 text-uppercase fw-bold text-white" style="background-color: #f26500;">
+                            New
+                          </span>
+                        ` : ''}
+                        
+                        <a class="d-block featured-product-image-link" href="/shop/buy/${p.permalink || '#'}">
+                          <img 
+                            src="${p.image}" 
+                            class="img-fluid object-fit-contain" 
+                            alt="${p.name}" 
+                            style="max-height: 220px; width: 100%;"
+                          >
+                        </a>
+                      </div>
 
-          <div class="position-relative">
+                      <div class="card-body p-0 mt-3 d-flex flex-column justify-content-end">
+                        
+                        <h5 class="card-title fw-bold text-dark mb-3" style="font-size: 1rem;">
+                          <a href="/shop/buy/${p.permalink || '#'}" class="text-decoration-none text-dark hover-primary">
+                            ${p.name || 'Electric Hand Blender, 150 Watts'}
+                          </a>
+                        </h5>
 
-            <strong class="category-link">
-              ${p.category || 'Product'}
-            </strong>
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                          <span class="fw-semibold">
+                            ${p.currencySymbol || '£'}${p.price}
+                          </span>
+                          
+                          <a class="btn btn-link p-0 text-dark fs-3" href="/shop/buy/${p.permalink || '#'}" aria-label="Add to Cart">
+                            <i class="bi bi-cart3"></i>
+                          </a>
+                        </div>
 
-            <a
-              class="featured-product-image-link"
-              href="/shop/buy/${p.permalink || '#'}"
-            >
+                      </div>
 
-              <img
-                src="${p.image}"
-                class="card-img-top"
-                alt="${p.name}"
-              >
-
-            </a>
-
-          </div>
-
-          <div class="card-body">
-
-            <h6 class="card-title mt-2">
-
-              <a href="/shop/buy/${p.permalink || '#'}">
-                ${p.name}
-              </a>
-
-            </h6>
-
-            <div class="d-flex mt-2 justify-content-between align-items-center gap-2">
-
-              <strong>£${p.price}</strong>
-
-              <a
-                class="buy-now"
-                href="/shop/buy/${p.permalink || '#'}"
-              >
-                Buy Now
-              </a>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
+                    </div>
+                </div>
             `);
         });
 
         if ((products || []).length) {
             box.slick({
-                slidesToShow: 1,
+                slidesToShow: 1, 
+                slidesToScroll: 1,
                 autoplay: true,
-                arrows: false
+                arrows: false,
+                dots: false
             });
         }
     }
@@ -193,104 +246,148 @@ class Home {
         $("#leftProducts").html("");
         $("#rightProducts").html("");
 
+
+        const currentWishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+
+
         products.slice(0, 4).forEach(p => {
+
+            const isExist = currentWishlist.some(item => item.slug === p.slug);
+            
+            
+            const heartColor = isExist ? '#13564f' : '#212529';
+            const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
+
             $("#leftProducts").append(`
-              <div class="col-md-6">
+                <div class="col-md-6 p-2">
+                    <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
+                        
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <strong class="category-link text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
+                                    ${p.category || 'Sell Phone'}
+                                </strong>
+                                
+                                <div class="d-flex flex-column gap-2 align-items-center">
+                                  <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                                          style="color: ${heartColor};"
+                                          aria-label="Add to Wishlist" 
+                                          onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
+                                      <i class="bi ${heartIcon}"></i>
+                                  </button>
+                                    <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5 lh-1" aria-label="Compare Product">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-        <div class="card h-100">
+                            <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
+                                <a href="/shop/buy/${p.slug || '#'}" class="d-block w-100 h-100">
+                                    <img 
+                                        src="${p.image}" 
+                                        class="img-fluid h-100" 
+                                        alt="${p.name}" 
+                                        style="object-fit: contain; max-width: 100%;"
+                                    >
+                                </a>
+                            </div>
+                        </div>
 
-          <div class="position-relative">
+                        <div class="mt-3">
+                            <h6 class="fw-bold text-dark mb-2 text-truncate-2-lines" style="font-size: 0.95rem; min-height: 2.4rem; line-height: 1.2;">
+                                <a href="/shop/buy/${p.slug || '#'}" class="text-decoration-none text-dark">
+                                    ${p.name}
+                                </a>
+                            </h6>
 
-            <strong class="category-link">
-              ${p.category || 'Sell Phone'}
-            </strong>
-
-            <a href="/shop/buy/${p.slug || '#'}">
-              <img src="${p.image}" class="card-img-top">
-            </a>
-
-          </div>
-
-          <div class="card-body">
-
-            <h6>${p.name}</h6>
-
-            <div class="d-flex justify-content-between">
-
-              <strong>£${p.price}</strong>
-
-              <a
-                class="buy-now"
-                href="/shop/buy/${p.url || '#'}"
-              >
-                Buy Now
-              </a>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-              `);
-        });
-        products.slice(4, 8).forEach(p => {
-          $("#rightProducts").append(`
-                <div class="col-md-6">
-
-                  <div class="card h-100">
-
-                    <div class="position-relative">
-
-                      <strong class="category-link">
-                        ${p.category || 'Sell Phone'}
-                      </strong>
-
-                      <a href="/shop/buy/${p.slug || '#'}">
-                        <img src="${p.image}" class="card-img-top">
-                      </a>
+                            <div class="d-flex justify-content-between align-items-end pt-1">
+                                <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
+                                
+                                <a href="/shop/buy/${p.url || '#'}" class="text-dark fs-4 lh-1 p-1" aria-label="Buy Now">
+                                    <i class="bi bi-cart3"></i>
+                                </a>
+                            </div>
+                        </div>
 
                     </div>
-
-                    <div class="card-body">
-
-                      <h6>${p.name}</h6>
-
-                      <div class="d-flex justify-content-between">
-
-                        <strong>£${p.price}</strong>
-
-                        <a
-                          class="buy-now"
-                          href="/shop/buy/${p.url || '#'}"
-                        >
-                          Buy Now
-                        </a>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
                 </div>
-                
-                `);
-          });
-            if (data.banner?.image) {
+            `);
+        });
 
-    bannerBox.innerHTML = `
-      <a   class="img-fluid w-100 rounded"
- style=" background-image: url(${data.banner.image}); background-size: cover; background-position: center; " href="${data.banner.url || '#'}">
+        products.slice(4, 8).forEach(p => {
 
-      
+            const isExist = currentWishlist.some(item => item.slug === p.slug);
+            const heartColor = isExist ? '#13564f' : '#212529';
+            const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
 
-      </a>
-    `;
+            $("#rightProducts").append(`
+                <div class="col-md-6 p-2">
+                    <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
+                        
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <strong class="category-link text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
+                                    ${p.category || 'Sell Phone'}
+                                </strong>
+                                
+                                <div class="d-flex flex-column gap-2 align-items-center">
+                                  <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                                          style="color: ${heartColor};"
+                                          aria-label="Add to Wishlist" 
+                                          onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
+                                      <i class="bi ${heartIcon}"></i>
+                                   </button>
+                                    <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5 lh-1" aria-label="Compare Product">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-  }
+                            <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
+                                <a href="/shop/buy/${p.slug || '#'}" class="d-block w-100 h-100">
+                                    <img 
+                                        src="${p.image}" 
+                                        class="img-fluid h-100" 
+                                        alt="${p.name}" 
+                                        style="object-fit: contain; max-width: 100%;"
+                                    >
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <h6 class="fw-bold text-dark mb-2 text-truncate-2-lines" style="font-size: 0.95rem; min-height: 2.4rem; line-height: 1.2;">
+                                <a href="/shop/buy/${p.slug || '#'}" class="text-decoration-none text-dark">
+                                    ${p.name}
+                                </a>
+                            </h6>
+
+                            <div class="d-flex justify-content-between align-items-end pt-1">
+                                <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
+                                
+                                <a href="/shop/buy/${p.url || '#'}" class="text-dark fs-4 lh-1 p-1" aria-label="Buy Now">
+                                    <i class="bi bi-cart3"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `);
+        });
+
+
+        if (data.banner?.image) {
+            const bannerBox = document.getElementById('bannerBox'); 
+            if (bannerBox) {
+                bannerBox.innerHTML = `
+                    <a class="img-fluid w-100 rounded d-block" 
+                      style="background-image: url(${data.banner.image}); background-size: cover; background-position: center; min-height: 250px;" 
+                      href="${data.banner.url || '#'}">
+                    </a>
+                `;
+            }
+        }
     }
 
     renderSmall(products, id) {
@@ -301,14 +398,38 @@ class Home {
 
         (products || []).forEach(p => {
             box.append(`
-                <div class="small-product">
-                    <img src="${p.image}" width="60"/>
-                    <div>
-                        <h6>${p.name}</h6>
-                        <strong>£${p.price}</strong>
-                    </div>
-                </div>
+                <div class="product-card mb-3">
+
+        <a
+          href="/shop/buy/${p.permalink || '#'}"
+          class="d-flex gap-3 align-items-start text-decoration-none text-dark"
+        >
+
+          <img
+            src="${p.image}"
+            alt="${p.name}"
+            class="rounded"
+            style="
+              width:84px;
+              height:84px;
+              object-fit:cover;
+            "
+          >
+
+          <div class="product-info">
+
+            <h6 class="mb-1">${p.name}</h6>
+
+            <strong>£${p.price}</strong>
+
+          </div>
+
+        </a>
+
+      </div>
             `);
         });
     }
+
+  
 }
