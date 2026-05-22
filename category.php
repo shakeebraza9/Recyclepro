@@ -1,24 +1,24 @@
+
 <?php
+
 session_start();
 
-// Get category slug from URL - handle both rewritten and direct query parameters
-$slug = '';
+function sanitize_slug($slug) {
+    return preg_replace('/[^a-z0-9-]/', '', strtolower($slug));
+}
+
+$slug     = '';
 $sub_slug = '';
 
-// First check $_GET['slug'] (from .htaccess rewrite)
 if (isset($_GET['slug'])) {
     $slug = sanitize_slug($_GET['slug']);
 }
-// Check for sub_slug parameter
 if (isset($_GET['sub_slug'])) {
     $sub_slug = sanitize_slug($_GET['sub_slug']);
-}
-// If not found, check URI path
-elseif (!empty($_SERVER['REQUEST_URI'])) {
-    // Extract slug from /category/{slug} or /category/{slug}/{sub_slug}
-    if (preg_match('/\/category\/([a-z0-9-]+)(?:\/([a-z0-9-]+))?\/?(\?.*)?$/i', $_SERVER['REQUEST_URI'], $matches)) {
-        $slug = sanitize_slug($matches[1]);
-        $sub_slug = isset($matches[2]) ? sanitize_slug($matches[2]) : '';
+} elseif (!empty($_SERVER['REQUEST_URI'])) {
+    if (preg_match('/\/category\/([a-z0-9-]+)(?:\/([a-z0-9-]+))?\/?(\?.*)?$/i', $_SERVER['REQUEST_URI'], $m)) {
+        $slug     = sanitize_slug($m[1]);
+        $sub_slug = isset($m[2]) ? sanitize_slug($m[2]) : '';
     }
 }
 
@@ -26,437 +26,664 @@ if (!$slug) {
     echo "Error: No category slug provided";
     exit;
 }
-
-function sanitize_slug($slug) {
-    return preg_replace('/[^a-z0-9-]/', '', strtolower($slug));
-}
-
-// Fetch all categories for sidebar navigation
-$categories_api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/categories-tree";
-$categories_context = stream_context_create(['http' => ['timeout' => 5]]);
-$categories_response = @file_get_contents($categories_api_url, false, $categories_context);
-
-$all_categories = [];
-if ($categories_response !== false) {
-    $all_categories = json_decode($categories_response, true) ?: [];
-    // Filter out empty categories
-    $all_categories = array_filter($all_categories, function($cat) {
-        return $cat['count'] > 0;
-    });
-}
-
-// Use sub_slug if provided, otherwise use main slug
-$api_slug = $sub_slug ?: $slug;
-
-// Fetch category and products from API
-$api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/category/" . $api_slug;
-
-// Try to fetch API data
-$context = stream_context_create(['http' => ['timeout' => 5]]);
-$response = @file_get_contents($api_url, false, $context);
-// var_dump($response);
-if ($response === false) {
-    http_response_code(500);
-    die("Error: Could not fetch category data from API. URL: " . htmlspecialchars($api_url));
-}
-
-$data = json_decode($response, true);
-
-if (!$data || !isset($data['category'])) {
-    http_response_code(404);
-    die("Error: Category '" . htmlspecialchars($slug) . "' not found");
-}
-
-$category = $data['category'];
-$products = $data['products'] ?? [];
-
-// Get subcategories for this category
-$subcategories = array_filter($all_categories, function($cat) use ($category) {
-    return isset($cat['parent']) && $cat['parent'] == $category['id'];
-});
-
-// If there are subcategories, fetch their products too
-$all_products = $products;
-foreach ($subcategories as $subcat) {
-    $sub_api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/category/" . $subcat['slug'];
-    $sub_response = @file_get_contents($sub_api_url, false, $context);
-
-    if ($sub_response !== false) {
-        $sub_data = json_decode($sub_response, true);
-        if ($sub_data && isset($sub_data['products'])) {
-            $all_products = array_merge($all_products, $sub_data['products']);
-        }
-    }
-}
-
-// Remove duplicates based on product ID
-$all_products = array_unique($all_products, SORT_REGULAR);
-
-// Extract all unique attributes from products
-$all_attributes = [];
-foreach ($all_products as $product) {
-    if (isset($product['product_attributes'])) {
-        foreach ($product['product_attributes'] as $attr) {
-            $attr_name = $attr['name'];
-            if (!isset($all_attributes[$attr_name])) {
-                $all_attributes[$attr_name] = [
-                    'slug' => $attr['slug'],
-                    'values' => []
-                ];
-            }
-            // Merge values and keep unique
-            $all_attributes[$attr_name]['values'] = array_unique(
-                array_merge($all_attributes[$attr_name]['values'], $attr['values'])
-            );
-        }
-    }
-}
-
-// Sort attribute values
-foreach ($all_attributes as &$attr) {
-    sort($attr['values']);
-}
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($category['name']); ?> - Category</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-    
-</head>
-<body>
+
     <?php include 'includes/header.php'; ?>
+    <?php include_once 'css/category_style.php'; ?>
 
-     <section class="breadcrumb">
+ 
+    <section class="rp-breadcrumb">
         <div class="container">
-                    <nav class="content-breadcrumb" aria-label="Breadcrumb">
-                                   <a href="/shop/"><i class="bi bi-house"></i></a>
-
-                        <span>/</span>
-                        
-                        <?php if ($sub_slug): ?>
-                            <!-- Sub-category breadcrumb -->
-                            <a href="/shop/category/<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>">
-                                <?php 
-                                // Find parent category name
-                                $parent_cat = array_values(array_filter($all_categories, function($cat) use ($slug) {
-                                    return $cat['slug'] === $slug;
-                                }));
-                                echo htmlspecialchars($parent_cat[0]['name'] ?? ucfirst($slug), ENT_QUOTES, 'UTF-8');
-                                ?>
-                            </a>
-                            <span>/</span>
-                            <span><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
-                        <?php else: ?>
-                            <!-- Main category breadcrumb -->
-                            <span><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
-                        <?php endif; ?>
-                    </nav>
-
+            <nav aria-label="Breadcrumb">
+                <a href="/shop/"><i class="bi bi-house-fill" style="font-size:12px;"></i></a>
+                <span class="sep">/</span>
+                <span id="breadcrumb-dynamic">
+                    <span class="skeleton" style="display:inline-block;width:110px;height:13px;vertical-align:middle;"></span>
+                </span>
+            </nav>
         </div>
     </section>
 
-
-    <div class="container" style="margin-bottom: 50px;">
-        <div class="row">
-            <!-- Categories Sidebar -->
-            <div class="col-lg-3 mb-4">
-                <div class="categories-sidebar">
-                    <h5 style="margin-bottom: 20px; font-weight: 700;">Categories</h5>
-                    <div class="categories-list">
-                       <div class="category-tree">
-
-   <div class="category-menu">
-
-    <?php foreach ($all_categories as $cat): ?>
-        
-        <?php 
-        // Filter children to only show those with products
-        $children_with_products = [];
-        if (!empty($cat['children'])) {
-            $children_with_products = array_filter($cat['children'], function($child) {
-                return $child['count'] > 0;
-            });
-        }
-        ?>
-
-        <div class="category-block">
-
-            <!-- Parent -->
-            <a href="/shop/category/<?php echo htmlspecialchars($cat['slug']); ?>"
-               class="parent-category">
-                <?php echo htmlspecialchars($cat['name']); ?>
-            </a>
-
-            <!-- Children (only show if they have products) -->
-            <?php if (!empty($children_with_products)): ?>
-                <div class="children">
-
-                    <?php foreach ($children_with_products as $child): ?>
-                        <a href="/shop/category/<?php echo htmlspecialchars($cat['slug']); ?>/<?php echo htmlspecialchars($child['slug']); ?>"
-                           class="child-category">
-                             <?php echo htmlspecialchars($child['name']); ?>
-                        </a>
-                    <?php endforeach; ?>
-
-                </div>
-            <?php endif; ?>
-
-        </div>
-
-    <?php endforeach; ?>
-
-</div>
-
-</div>
-                    </div>
-                </div>
-
-                <!-- Filters Sidebar -->
-                <div class="filters-sidebar" style="margin-top: 30px;">
-                    <h5 style="margin-bottom: 20px; font-weight: 700;">Filters</h5>
-
-                    <!-- Price Filter -->
-                    <div class="filter-group" style="margin-bottom: 25px;">
-                        <div class="filter-title" style="margin-bottom: 15px;">Price</div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <input
-                                type="number"
-                                id="price-min"
-                                class="filter-price-input"
-                                placeholder="Min"
-                                min="0"
-                                style="    width: 50%; flex: 1; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;"
-                            >
-                            <input
-                                type="number"
-                                id="price-max"
-                                class="filter-price-input"
-                                placeholder="Max"
-                                min="0"
-                                style= "  width: 50%;  flex: 1; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;"
-                            >
-                        </div>
-                        <button id="apply-price-filter" style="width: 100%; padding: 8px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
-                            Apply Price
-                        </button>
-                    </div>
-
-                    <?php foreach ($all_attributes as $attr_name => $attr_data): ?>
-                        <div class="filter-group">
-                            <div class="filter-title"><?php echo htmlspecialchars($attr_name); ?></div>
-                            <?php foreach ($attr_data['values'] as $value): ?>
-                                <div class="filter-option">
-                                    <input
-                                        type="checkbox"
-                                        class="filter-checkbox"
-                                        data-attribute="<?php echo htmlspecialchars($attr_name); ?>"
-                                        value="<?php echo htmlspecialchars($value); ?>"
-                                    >
-                                    <label><?php echo htmlspecialchars($value); ?></label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <button class="clear-filters-btn" id="clear-filters">Clear All Filters</button>
-                </div>
-            </div>
-
-            <!-- Products Grid -->
-            <div class="col-lg-9">
-                <div class="products-grid" id="products-container">
-                    <!-- Products will be loaded here via AJAX -->
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <p style="margin-top: 15px;">Loading products...</p>
-                    </div>
-                </div>
-            </div>
+    <div class="subcategory-strip" id="subcategory-strip" style="display:none;">
+        <div class="container" style="position:relative;">
+            <div class="subcat-inner" id="subcat-tabs"></div>
+            <button class="subcat-scroll-btn" id="subcat-right" style="position:absolute;right:0;top:50%;transform:translateY(-50%);">
+                <i class="bi bi-chevron-right"></i>
+            </button>
         </div>
     </div>
 
-    <script>
-        const categorySlug = '<?php echo htmlspecialchars($slug); ?>';
-        const allProducts = <?php echo json_encode($all_products); ?>;
+    <div class="container">
+        <div class="shop-layout">
 
-        // Calculate min/max prices for display
-        function getMinMaxPrices() {
-            let minPrice = Infinity;
-            let maxPrice = -Infinity;
-            
-            allProducts.forEach(product => {
-                const price = parseFloat(product.price) || 0;
-                minPrice = Math.min(minPrice, price);
-                maxPrice = Math.max(maxPrice, price);
-            });
-            
-            return { minPrice: minPrice === Infinity ? 0 : minPrice, maxPrice: maxPrice === -Infinity ? 0 : maxPrice };
-        }
+ 
+            <aside class="shop-sidebar">
 
-        const prices = getMinMaxPrices();
-
-        // Set placeholder values
-        document.getElementById('price-min').placeholder = `Min: £${prices.minPrice.toFixed(2)}`;
-        document.getElementById('price-max').placeholder = `Max: £${prices.maxPrice.toFixed(2)}`;
-
-        function renderProducts(productsToDisplay) {
-            const container = document.getElementById('products-container');
-            
-            if (productsToDisplay.length === 0) {
-                container.innerHTML = '<div class="no-products" style="grid-column: 1/-1;">No products found matching your filters.</div>';
-                return;
-            }
-
-            let html = '';
           
-            productsToDisplay.forEach(product => {
-                html += `
-                    <div class="product-card">
-                    <a href="${product.permalink.replace(
-    'https://www.recyclepro.co.uk/rp-dashboard/',
-    'https://www.recyclepro.co.uk/shop/'
-)}" class="product-link-img">
-   
+                <div class="sidebar-card">
+                    <div class="cat-search-wrap" id="cat-search-wrap">
+                        <span class="cat-search-label">Browse by Category</span>
+                        <!-- <div class="cat-search-input-row" id="cat-search-row">
+                            <i class="bi bi-search search-icon"></i>
+                            <input
+                                type="text"
+                                class="cat-search-input"
+                                id="cat-search-input"
+                                placeholder="Search categories…"
+                                autocomplete="off"
+                            >
+                            <button class="cat-search-clear" id="cat-search-clear" title="Clear">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </div> -->
 
-                        <img src="${product.image}" alt="${product.name}" class="product-image">
-                        </a>
-                        <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <div class="product-price">£${product.price}</div>
-                            <div class="product-actions">
-                                <a href="http://localhost:8080/shop/buy/motorola-edge-60-fusion/" class="product-link">
-    View product
-</a>
+             
+                        <div class="cat-dropdown" id="cat-dropdown"></div>
 
+                        <!-- SELECTED CHIP -->
+                        <div class="selected-cat-chip" id="selected-cat-chip">
+                            <div class="chip-icon"><i class="bi bi-tag-fill"></i></div>
+                            <div class="chip-info">
+                                <div class="chip-name" id="chip-name">-</div>
+                                <div class="chip-sub" id="chip-sub"></div>
                             </div>
+                            <button class="chip-remove" id="chip-remove" title="Remove filter">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         </div>
                     </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-            // document.getElementById('product-count').textContent = productsToDisplay.length + ' products';
+
+                    <div class="select-cat-label">All Categories</div>
+                    <button class="clear-all-link" id="clear-all-btn">Clear All Filters</button>
+                    <div id="sidebar-categories">
+                        <?php for($i=0;$i<5;$i++): ?>
+                        <div class="skeleton skel-line" style="margin:10px 14px;"></div>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+
+                <!-- FILTERS CARD -->
+                <div class="sidebar-card" id="filters-card">
+                    <div class="filter-group">
+                        <div class="filter-group-header" data-target="fg-price">
+                            <span class="filter-group-title">Price Range</span>
+                            <i class="bi bi-dash toggle-icon"></i>
+                        </div>
+                        <div class="filter-group-body" id="fg-price">
+                            <div class="price-row">
+                                <input type="number" id="price-min" class="price-input" placeholder="From" min="0">
+                                <span class="price-sep">&mdash;</span>
+                                <input type="number" id="price-max" class="price-input" placeholder="To" min="0">
+                            </div>
+                            <button class="btn-apply" id="apply-price">Apply</button>
+                        </div>
+                    </div>
+                    <div id="attribute-filters"></div>
+                </div>
+
+            </aside>
+
+            <!-- ══ MAIN ══ -->
+            <main>
+                <div class="results-bar">
+                    <div class="results-count" id="results-count">
+                        <span class="skeleton" style="display:inline-block;width:150px;height:13px;"></span>
+                    </div>
+                    <select class="sort-sel" id="sort-main">
+                        <option value="">Sort by</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="name-asc">Name: A&ndash;Z</option>
+                        <option value="name-desc">Name: Z&ndash;A</option>
+                    </select>
+                </div>
+
+                <div class="products-grid" id="products-container">
+                    <?php for($i=0;$i<6;$i++): ?>
+                    <div class="skel-card">
+                        <div class="skeleton skel-img"></div>
+                        <div class="skel-body">
+                            <div class="skeleton skel-line w40"></div>
+                            <div class="skeleton skel-line w80"></div>
+                            <div class="skeleton skel-line w60"></div>
+                            <div class="skeleton skel-line w40"></div>
+                        </div>
+                    </div>
+                    <?php endfor; ?>
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+
+    <script>
+    (() => {
+        'use strict';
+
+        const SLUG     = '<?php echo addslashes($slug); ?>';
+        const SUB_SLUG = '<?php echo addslashes($sub_slug); ?>';
+        const API_BASE = 'https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2';
+
+        let allProducts   = [];
+        let allCategories = [];
+        let categoryInfo  = {};
+        let currentSort   = '';
+        let activeCatFilter = null; // { slug, name, count }
+        let focusedDropdownIdx = -1;
+
+        const $ = id => document.getElementById(id);
+
+        // DOM refs
+        const productsContainer = $('products-container');
+        const categoriesMenu    = $('sidebar-categories');
+        const attrFilters       = $('attribute-filters');
+        const breadcrumbEl      = $('breadcrumb-dynamic');
+        const priceMinEl        = $('price-min');
+        const priceMaxEl        = $('price-max');
+        const resultsCount      = $('results-count');
+        const sortMain          = $('sort-main');
+        const subcatStrip       = $('subcategory-strip');
+        const subcatTabs        = $('subcat-tabs');
+
+        // Category search DOM
+        // const catSearchInput  = $('cat-search-input');
+        // const catSearchClear  = $('cat-search-clear');
+        const catDropdown     = $('cat-dropdown');
+        const catSearchRow    = $('cat-search-row');
+        const selectedChip    = $('selected-cat-chip');
+        const chipName        = $('chip-name');
+        const chipSub         = $('chip-sub');
+        const chipRemove      = $('chip-remove');
+
+        // ── Fetch ────────────────────────────────────────────────────
+        async function fetchJSON(url) {
+            const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
         }
 
-        function getSelectedFilters() {
-            const filters = {};
-            document.querySelectorAll('.filter-checkbox:checked').forEach(checkbox => {
-                const attr = checkbox.dataset.attribute;
-                if (!filters[attr]) {
-                    filters[attr] = [];
+        // ── INIT ─────────────────────────────────────────────────────
+        async function init() {
+            try {
+                const [catsData, mainData] = await Promise.all([
+                    fetchJSON(API_BASE + '/categories-tree'),
+                    fetchJSON(API_BASE + '/category/' + (SUB_SLUG || SLUG))
+                ]);
+
+                allCategories = (catsData || []).filter(c => c.count > 0);
+                renderCategoriesSidebar();
+
+                if (!mainData || !mainData.category) { showError('Category not found.'); return; }
+                categoryInfo = mainData.category;
+                allProducts  = mainData.products || [];
+
+                document.title = categoryInfo.name + ' - RecyclePro';
+                renderBreadcrumb();
+                renderSubcatTabs();
+
+                // Fetch subcategory products
+                const subs = allCategories.filter(c => c.parent && c.parent == categoryInfo.id && c.count > 0);
+                if (subs.length) {
+                    const results = await Promise.all(
+                        subs.map(s => fetchJSON(API_BASE + '/category/' + s.slug)
+                            .then(d => d && d.products ? d.products : []).catch(() => []))
+                    );
+                    results.forEach(p => { allProducts = allProducts.concat(p); });
                 }
-                filters[attr].push(checkbox.value);
+
+                // Deduplicate
+                const seen = new Set();
+                allProducts = allProducts.filter(p => { if(seen.has(p.id)) return false; seen.add(p.id); return true; });
+
+                buildAttrFilters();
+
+                const prices = getMinMax();
+                priceMinEl.placeholder = 'From: £' + prices.min.toFixed(2);
+                priceMaxEl.placeholder = 'To: £'   + prices.max.toFixed(2);
+
+                applyFilters();
+            } catch(err) {
+                console.error(err);
+                showError('Could not load products. Please try again.');
+            }
+        }
+
+        // ── CATEGORY SEARCH ──────────────────────────────────────────
+
+        // Build a flat list of all searchable categories (parent + children)
+        function buildSearchList() {
+            const list = [];
+            allCategories.forEach(cat => {
+                list.push({ slug: cat.slug, name: cat.name, count: cat.count, parent: null, parentName: null });
+                (cat.children || []).filter(c => c.count > 0).forEach(ch => {
+                    list.push({ slug: ch.slug, name: ch.name, count: ch.count, parent: cat.slug, parentName: cat.name });
+                });
             });
-            return filters;
+            return list;
         }
 
-        function getPriceRange() {
-            const minPrice = parseFloat(document.getElementById('price-min').value) || 0;
-            const maxPrice = parseFloat(document.getElementById('price-max').value) || Infinity;
-            return { minPrice, maxPrice };
+        // Icons map for common categories
+        const catIcons = {
+            'mobile-phones':'phone','tablets':'tablet','laptops':'laptop','earbuds':'headphones',
+            'headphones':'headset','speakers':'speaker','smart-watches':'smartwatch',
+            'game-console':'controller','default':'tag'
+        };
+        function getCatIcon(slug) {
+            for (const key in catIcons) {
+                if (slug && slug.includes(key)) return catIcons[key];
+            }
+            return catIcons.default;
         }
 
-        function filterProducts() {
-            const selectedFilters = getSelectedFilters();
-            const priceRange = getPriceRange();
-            const hasFilters = Object.keys(selectedFilters).length > 0;
-            const hasPriceFilter = document.getElementById('price-min').value !== '' || document.getElementById('price-max').value !== '';
+        function renderDropdown(query) {
+            const q = (query || '').trim().toLowerCase();
+            const list = buildSearchList();
 
-            if (!hasFilters && !hasPriceFilter) {
-                renderProducts(allProducts);
+            let matches;
+            if (!q) {
+                // Show all when empty and focused
+                matches = list.slice(0, 20);
+            } else {
+                matches = list.filter(c =>
+                    c.name.toLowerCase().includes(q) ||
+                    (c.parentName && c.parentName.toLowerCase().includes(q))
+                );
+            }
+
+            focusedDropdownIdx = -1;
+
+            if (!matches.length) {
+                catDropdown.innerHTML = '<div class="cat-dropdown-empty"><i class="bi bi-search" style="margin-right:6px;"></i>No categories found</div>';
+                openDropdown();
                 return;
             }
 
-            // Filter products based on selected attributes and price
-            const filtered = allProducts.filter(product => {
-                // Check price filter
-                const productPrice = parseFloat(product.price) || 0;
-                if (hasPriceFilter) {
-                    if (productPrice < priceRange.minPrice || productPrice > priceRange.maxPrice) {
-                        return false;
-                    }
-                }
+            catDropdown.innerHTML = matches.map((cat, idx) => {
+                const icon = getCatIcon(cat.slug);
+                const href = cat.parent
+                    ? '/shop/category/' + esc(cat.parent) + '/' + esc(cat.slug)
+                    : '/shop/category/' + esc(cat.slug);
 
-                // Check attribute filters
-                if (hasFilters) {
-                    return Object.keys(selectedFilters).every(attrName => {
-                        const selectedValues = selectedFilters[attrName];
-                        const productAttr = product.product_attributes.find(a => a.name === attrName);
-                        
-                        if (!productAttr) return false;
-                        
-                        return selectedValues.some(value => productAttr.values.includes(value));
+                // Highlight match
+                const displayName = q
+                    ? cat.name.replace(new RegExp('(' + escRegex(q) + ')', 'gi'), '<mark style="background:#fef08a;border-radius:2px;padding:0 1px;">$1</mark>')
+                    : esc(cat.name);
+
+                return '<a class="cat-dropdown-item" href="' + href + '" data-idx="' + idx + '" data-slug="' + esc(cat.slug) + '" data-name="' + esc(cat.name) + '" data-parent="' + esc(cat.parent || '') + '" data-parentname="' + esc(cat.parentName || '') + '" data-count="' + cat.count + '">' +
+                    '<div class="cat-dropdown-icon"><i class="bi bi-' + icon + '"></i></div>' +
+                    '<div class="cat-dropdown-text">' +
+                        '<div class="cat-dropdown-name">' + displayName + '</div>' +
+                        (cat.parentName ? '<div class="cat-dropdown-meta">in ' + esc(cat.parentName) + '</div>' : '<div class="cat-dropdown-meta">Main Category</div>') +
+                    '</div>' +
+                    '<span class="cat-dropdown-count">' + cat.count + '</span>' +
+                    '</a>';
+            }).join('');
+
+            openDropdown();
+
+            // Click on dropdown item
+            catDropdown.querySelectorAll('.cat-dropdown-item').forEach(item => {
+                item.addEventListener('mousedown', e => {
+                    e.preventDefault();
+                    selectCategory({
+                        slug:       item.dataset.slug,
+                        name:       item.dataset.name,
+                        parent:     item.dataset.parent || null,
+                        parentName: item.dataset.parentname || null,
+                        count:      parseInt(item.dataset.count) || 0
+                    });
+                });
+            });
+        }
+
+        function openDropdown() {
+            catDropdown.classList.add('open');
+            catSearchRow.classList.add('active');
+        }
+
+        function closeDropdown() {
+            catDropdown.classList.remove('open');
+            catSearchRow.classList.remove('active');
+            focusedDropdownIdx = -1;
+        }
+
+        function selectCategory(cat) {
+            activeCatFilter = cat;
+            // catSearchInput.value = cat.name;
+            // catSearchClear.style.display = 'block';
+            closeDropdown();
+
+            // Show chip
+            chipName.textContent = cat.name;
+            chipSub.textContent  = cat.parentName ? 'in ' + cat.parentName : 'Main Category · ' + cat.count + ' products';
+            selectedChip.classList.add('show');
+
+            // Navigate to category page
+            const href = cat.parent
+                ? '/shop/category/' + encodeURIComponent(cat.parent) + '/' + encodeURIComponent(cat.slug)
+                : '/shop/category/' + encodeURIComponent(cat.slug);
+            window.location.href = href;
+        }
+
+        function clearCatSearch() {
+            // catSearchInput.value = '';
+            // catSearchClear.style.display = 'none';
+            selectedChip.classList.remove('show');
+            activeCatFilter = null;
+            closeDropdown();
+        }
+
+        // Keyboard nav
+        // catSearchInput.addEventListener('keydown', e => {
+        //     const items = catDropdown.querySelectorAll('.cat-dropdown-item');
+        //     if (!items.length) return;
+        //     if (e.key === 'ArrowDown') {
+        //         e.preventDefault();
+        //         focusedDropdownIdx = Math.min(focusedDropdownIdx + 1, items.length - 1);
+        //         updateDropdownFocus(items);
+        //     } else if (e.key === 'ArrowUp') {
+        //         e.preventDefault();
+        //         focusedDropdownIdx = Math.max(focusedDropdownIdx - 1, 0);
+        //         updateDropdownFocus(items);
+        //     } else if (e.key === 'Enter') {
+        //         e.preventDefault();
+        //         if (focusedDropdownIdx >= 0 && items[focusedDropdownIdx]) {
+        //             items[focusedDropdownIdx].dispatchEvent(new MouseEvent('mousedown'));
+        //         }
+        //     } else if (e.key === 'Escape') {
+        //         closeDropdown();
+        //         catSearchInput.blur();
+        //     }
+        // });
+
+        function updateDropdownFocus(items) {
+            items.forEach((el, i) => el.classList.toggle('focused', i === focusedDropdownIdx));
+            if (items[focusedDropdownIdx]) {
+                items[focusedDropdownIdx].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        // catSearchInput.addEventListener('focus', () => {
+        //     if (allCategories.length) renderDropdown(catSearchInput.value);
+        // });
+
+        // catSearchInput.addEventListener('input', () => {
+        //     const val = catSearchInput.value;
+        //     catSearchClear.style.display = val ? 'block' : 'none';
+        //     renderDropdown(val);
+        // });
+
+        // catSearchInput.addEventListener('blur', () => {
+        //     setTimeout(closeDropdown, 150);
+        // });
+
+        // catSearchClear.addEventListener('click', clearCatSearch);
+        chipRemove.addEventListener('click', clearCatSearch);
+
+        // ── BREADCRUMB ───────────────────────────────────────────────
+        function renderBreadcrumb() {
+            if (SUB_SLUG) {
+                const parent = allCategories.find(c => c.slug === SLUG);
+                const pName  = parent ? parent.name : cap(SLUG);
+                breadcrumbEl.innerHTML =
+                    '<a href="/shop/category/' + esc(SLUG) + '" style="color:var(--text-secondary);text-decoration:none;">' + esc(pName) + '</a>' +
+                    '<span class="sep"> / </span>' +
+                    '<span class="current">' + esc(categoryInfo.name) + '</span>';
+            } else {
+                breadcrumbEl.innerHTML = '<span class="current">' + esc(categoryInfo.name) + '</span>';
+            }
+        }
+
+        // ── SUB-CAT TABS ─────────────────────────────────────────────
+        function renderSubcatTabs() {
+            const subs = allCategories.filter(c => c.parent && c.parent == categoryInfo.id && c.count > 0);
+            if (!subs.length) return;
+            subcatStrip.style.display = 'block';
+            let html = '<a href="/shop/category/' + esc(SLUG) + '" class="subcat-tab' + (!SUB_SLUG ? ' active' : '') + '">All ' + esc(categoryInfo.name) + '</a>';
+            subs.forEach(s => {
+                html += '<a href="/shop/category/' + esc(SLUG) + '/' + esc(s.slug) + '" class="subcat-tab' + (s.slug === SUB_SLUG ? ' active' : '') + '">' + esc(s.name) + '</a>';
+            });
+            subcatTabs.innerHTML = html;
+            $('subcat-right').addEventListener('click', () => { subcatTabs.scrollBy({ left: 180, behavior: 'smooth' }); });
+        }
+
+        // ── CATEGORIES SIDEBAR ───────────────────────────────────────
+        function renderCategoriesSidebar() {
+            let html = '';
+            allCategories.forEach(cat => {
+                const children = (cat.children || []).filter(c => c.count > 0);
+                const active   = cat.slug === SLUG;
+                html += '<div>';
+                html += '<a href="/shop/category/' + esc(cat.slug) + '" class="sidebar-cat-link' + (active ? ' active' : '') + '">';
+                html += '<span>' + esc(cat.name) + '</span><span class="cat-count">' + cat.count + '</span></a>';
+                if (active && children.length) {
+                    children.forEach(ch => {
+                        html += '<a href="/shop/category/' + esc(cat.slug) + '/' + esc(ch.slug) + '" class="sidebar-cat-child' + (ch.slug === SUB_SLUG ? ' active' : '') + '">';
+                        html += '<span>' + esc(ch.name) + '</span><span class="cat-count">' + ch.count + '</span></a>';
                     });
                 }
+                html += '</div>';
+            });
+            categoriesMenu.innerHTML = html || '<p style="padding:14px;font-size:13px;color:var(--text-muted);">No categories.</p>';
+        }
 
+
+        function buildAttrFilters() {
+            const attrs = {};
+            allProducts.forEach(p => {
+                (p.product_attributes || []).forEach(attr => {
+                    if (!attrs[attr.name]) attrs[attr.name] = new Map();
+                    attr.values.forEach(v => attrs[attr.name].set(v, (attrs[attr.name].get(v) || 0) + 1));
+                });
+            });
+
+            let html = '';
+            Object.entries(attrs).forEach(([name, valMap]) => {
+                const sorted  = [...valMap.entries()].sort((a,b) => a[0].localeCompare(b[0]));
+                const visible = sorted.slice(0, 5);
+                const hidden  = sorted.slice(5);
+                const fid     = 'fg-' + slugify(name);
+
+                html += '<div class="filter-group">';
+                html += '<div class="filter-group-header" data-target="' + fid + '">';
+                html += '<span class="filter-group-title">' + esc(name) + '</span>';
+                html += '<i class="bi bi-dash toggle-icon"></i></div>';
+                html += '<div class="filter-group-body" id="' + fid + '">';
+                visible.forEach(([val, cnt]) => { html += optionHTML(name, val, cnt); });
+                if (hidden.length) {
+                    html += '<div class="hidden-opts" style="display:none;">';
+                    hidden.forEach(([val, cnt]) => { html += optionHTML(name, val, cnt); });
+                    html += '</div>';
+                    html += '<button class="show-more-btn" onclick="toggleMore(this)">Show more (' + hidden.length + ')</button>';
+                }
+                html += '</div></div>';
+            });
+
+            attrFilters.innerHTML = html;
+            attrFilters.querySelectorAll('.filter-checkbox').forEach(cb => cb.addEventListener('change', applyFilters));
+
+            document.querySelectorAll('.filter-group-header').forEach(h => {
+                h.addEventListener('click', () => {
+                    const body = document.getElementById(h.dataset.target);
+                    const icon = h.querySelector('.toggle-icon');
+                    if (!body) return;
+                    body.classList.toggle('collapsed');
+                    icon.className = body.classList.contains('collapsed')
+                        ? icon.className.replace('bi-dash','bi-plus')
+                        : icon.className.replace('bi-plus','bi-dash');
+                });
+            });
+        }
+
+        function optionHTML(name, val, cnt) {
+            return '<div class="filter-option">' +
+                '<input type="checkbox" class="filter-checkbox" data-attribute="' + esc(name) + '" value="' + esc(val) + '">' +
+                '<label><span>' + esc(val) + '</span><span class="fcount">(' + cnt + ')</span></label>' +
+                '</div>';
+        }
+
+        window.toggleMore = function(btn) {
+            const wrap = btn.previousElementSibling;
+            const open = wrap.style.display !== 'none';
+            wrap.style.display = open ? 'none' : 'block';
+            btn.textContent = open ? 'Show more (' + wrap.querySelectorAll('.filter-option').length + ')' : 'Show less';
+        };
+
+        // ── RENDER PRODUCTS ──────────────────────────────────────────
+        function renderProducts(products) {
+            resultsCount.innerHTML = 'Showing <strong>' + products.length + '</strong> product' + (products.length !== 1 ? 's' : '');
+            if (!products.length) {
+                productsContainer.innerHTML =
+                    '<div class="no-products">' +
+                    '<i class="bi bi-box-seam"></i>' +
+                    '<p>No products match your filters.</p>' +
+                    '<button onclick="document.getElementById(\'clear-all-btn\').click()" style="margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;">Clear Filters</button>' +
+                    '</div>';
+                return;
+            }
+            productsContainer.innerHTML = products.map(cardHTML).join('');
+        }
+
+ function cardHTML(p) {
+    const link = (p.permalink || '').replace('https://www.recyclepro.co.uk/rp-dashboard/', 'https://www.recyclepro.co.uk/shop/');
+    const price = parseFloat(p.price);
+    const priceStr = price ? '£' + price.toFixed(2) : 'POA';
+
+    const condAttr = (p.product_attributes || []).find(a => /condition|grade/i.test(a.name));
+    const condVal  = condAttr && condAttr.values && condAttr.values[0] ? condAttr.values[0] : '';
+
+
+    return `
+        <div class="product-card">
+            <div class="top-accent-bar"></div>
+            
+            <div class="product-img-wrap">
+                <a href="${esc(link)}">
+                    <img src="${esc(p.image || '')}" alt="${esc(p.name)}" loading="lazy" onerror="this.src='/images/placeholder.png'">
+                </a>
+            </div>
+            
+            <div class="product-body">
+                <h3 class="product-name">${esc(p.name)}</h3>
+                
+                ${condVal ? `
+                    <div class="product-condition-wrap">
+                        <span class="product-condition">${esc(condVal)}</span>
+                        <span class="info-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </span>
+                    </div>
+                ` : ''}
+
+                <div class="product-condition-wrap" style="text-align:center;margin-bottom:10px; font-size:12px; color:var(--text-muted);   ">
+                    <span class="product-condition">Refurbished - Pristine </span>
+                    <span class="info-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </span>
+                </div>
+                
+                <div class="product-price">${priceStr}</div>
+                
+      
+                
+                <a href="${esc(link)}" class="btn-view">View product</a>
+                
+         
+            </div>
+        </div>
+    `;
+}
+        // ── FILTER LOGIC ─────────────────────────────────────────────
+        function applyFilters() {
+            const selFilters = {};
+            document.querySelectorAll('.filter-checkbox:checked').forEach(cb => {
+                if (!selFilters[cb.dataset.attribute]) selFilters[cb.dataset.attribute] = [];
+                selFilters[cb.dataset.attribute].push(cb.value);
+            });
+            const prMin    = parseFloat(priceMinEl.value) || 0;
+            const prMax    = parseFloat(priceMaxEl.value) || Infinity;
+            const hasAttr  = Object.keys(selFilters).length > 0;
+            const hasPrice = priceMinEl.value !== '' || priceMaxEl.value !== '';
+
+            let filtered = allProducts.filter(p => {
+                if (hasPrice) {
+                    const pr = parseFloat(p.price) || 0;
+                    if (pr < prMin || pr > prMax) return false;
+                }
+                if (hasAttr) {
+                    return Object.keys(selFilters).every(attr => {
+                        const pa = (p.product_attributes || []).find(a => a.name === attr);
+                        if (!pa) return false;
+                        return selFilters[attr].some(v => pa.values.includes(v));
+                    });
+                }
                 return true;
             });
 
+            if (currentSort) {
+                filtered = filtered.slice().sort((a,b) => {
+                    if (currentSort === 'price-asc')  return (parseFloat(a.price)||0)-(parseFloat(b.price)||0);
+                    if (currentSort === 'price-desc') return (parseFloat(b.price)||0)-(parseFloat(a.price)||0);
+                    if (currentSort === 'name-asc')   return a.name.localeCompare(b.name);
+                    if (currentSort === 'name-desc')  return b.name.localeCompare(a.name);
+                    return 0;
+                });
+            }
             renderProducts(filtered);
         }
 
-        // Event listeners
-        document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', filterProducts);
-        });
-
-        document.getElementById('apply-price-filter').addEventListener('click', filterProducts);
-
-        document.getElementById('price-min').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') filterProducts();
-        });
-
-        document.getElementById('price-max').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') filterProducts();
-        });
-
-        document.getElementById('clear-filters').addEventListener('click', () => {
-            document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            document.getElementById('price-min').value = '';
-            document.getElementById('price-max').value = '';
-            renderProducts(allProducts);
-        });
-
-        // Initial render
-        renderProducts(allProducts);
-
-        function addToCart(product) {
-            cartManager.addItem(product).then(() => {
-                showToast('Product added to cart!', 'success');
-            });
+        function getMinMax() {
+            let min=Infinity, max=-Infinity;
+            allProducts.forEach(p => { const pr=parseFloat(p.price)||0; if(pr<min)min=pr; if(pr>max)max=pr; });
+            return { min:min===Infinity?0:min, max:max===-Infinity?0:max };
         }
 
-        function showToast(message, type = 'info') {
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#28a745' : '#007bff'};
-                color: white;
-                padding: 12px 20px;
-                border-radius: 4px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                z-index: 9999;
-                font-weight: 500;
-            `;
-            toast.textContent = message;
-
-            document.body.appendChild(toast);
-
-            // Remove after 3 seconds
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+        // ── ERROR ────────────────────────────────────────────────────
+        function showError(msg) {
+            productsContainer.innerHTML = '<div class="no-products"><i class="bi bi-exclamation-triangle" style="color:var(--red);"></i><p style="color:var(--red);">' + esc(msg) + '</p></div>';
+            resultsCount.textContent = '';
         }
+
+        // ── UTILS ────────────────────────────────────────────────────
+        function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+        function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
+        function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,'-'); }
+        function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+        // ── EVENTS ───────────────────────────────────────────────────
+        $('apply-price').addEventListener('click', applyFilters);
+        priceMinEl.addEventListener('keypress', e => { if(e.key==='Enter') applyFilters(); });
+        priceMaxEl.addEventListener('keypress', e => { if(e.key==='Enter') applyFilters(); });
+
+        sortMain.addEventListener('change', () => { currentSort = sortMain.value; applyFilters(); });
+
+        $('clear-all-btn').addEventListener('click', () => {
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            priceMinEl.value = '';
+            priceMaxEl.value = '';
+            currentSort = '';
+            sortMain.value = '';
+            clearCatSearch();
+            applyFilters();
+        });
+
+        window.showToast = function(msg, type) {
+            const t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:20px;right:20px;background:' + (type==='success'?'#16a34a':'#2563eb') + ';color:#fff;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:9999;font-family:DM Sans,sans-serif;font-weight:500;font-size:14px;';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        };
+
+        init();
+    })();
     </script>
 
     <?php include 'includes/footer.php'; ?>
+</body>
+</html>

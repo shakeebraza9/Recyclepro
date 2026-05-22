@@ -11,7 +11,7 @@
 //if (session_status() === PHP_SESSION_NONE) {
   //  session_start();
 //}
-
+$config = require_once __DIR__ . '/config.php';
 $pageTitle = $pageTitle ?? 'Recycle Pro';
 ?>
 <!DOCTYPE html>
@@ -32,7 +32,9 @@ $pageTitle = $pageTitle ?? 'Recycle Pro';
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 <script>
-const headerAPI = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/header";
+const baseAPI = "<?= $config['API_URL'] ?>";
+const BASE_URL = "<?= $config['BASE_URL'] ?>";
+const headerAPI = `${baseAPI}wp-json/wp/v2/header`;
 
 async function loadHeaderData() {
     try {
@@ -95,8 +97,22 @@ function renderHeader(data) {
                     ? 'dropdown-item dropdown-toggle'
                     : 'dropdown-item';
 
+            let cleanUrl = (item.url || '#').replace(/^https?:\/\/[^\/]+\/shop\/?/i, '');
+
+            if (cleanUrl.startsWith('/shop/')) {
+                cleanUrl = cleanUrl.replace(/^\/shop\//i, '');
+            } else if (cleanUrl.startsWith('shop/')) {
+                cleanUrl = cleanUrl.replace(/^shop\//i, '');
+            }
+
+            if (cleanUrl.startsWith('/')) {
+                cleanUrl = cleanUrl.substring(1);
+            }
+
+            const finalUrl = `${BASE_URL}${cleanUrl}`;
+
             let itemHtml = `
-                <a class="${linkClass}" href="${item.url || '#'}">
+                <a class="${linkClass}" href="${finalUrl}">
                     ${item.name}
                 </a>
             `;
@@ -127,12 +143,48 @@ function renderHeader(data) {
             return li;
         };
 
+        // 1. Pehle API wale saare menu items add karo
         (data.menu || []).forEach((m) => {
             menu.appendChild(createMenuItem(m, 0));
         });
+
+        // 2. MOBILE ENHANCEMENT: Shop/Sell aur Account Buttons dono ko aakhir me add karo
+        const mobileSwitchLi = document.createElement('li');
+        mobileSwitchLi.className = 'nav-item d-md-none mt-3 pt-3 border-top-mobile'; 
+        mobileSwitchLi.innerHTML = `
+            <div class="mobile-header-switch-links d-flex gap-2 px-3 mb-3">
+                <a class="v-nav-link btn-shop-mobile w-50 text-center py-2" href="/shop/">
+                    <span>Shop</span>
+                </a>
+                <a class="v-nav-link btn-sell-mobile w-50 text-center py-2" href="/">
+                    <span>Sell</span>
+                </a>
+            </div>
+
+            <div id="mobileGuestActions" class="px-3 d-flex flex-column gap-2">
+                <button type="button" class="btn btn-login-mobile w-100 py-2" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="login">
+                    Login
+                </button>
+                <button type="button" class="btn btn-account-mobile w-100 py-2" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="open-account">
+                    <i class="bi bi-person"></i> Open Account
+                </button>
+            </div>
+
+            <div id="mobileUserActions" class="px-3 d-none flex-column gap-2 text-center">
+                <span id="mobileWelcomeName" class="fw-semibold text-dark mb-1 d-block"></span>
+                <button type="button" class="btn btn-sm btn-danger w-100 py-2" id="mobileLogoutButton">
+                    Logout
+                </button>
+            </div>
+        `;
+        menu.appendChild(mobileSwitchLi);
+
+        // Mobile logout trigger attach karein
+        setTimeout(() => {
+            document.getElementById('mobileLogoutButton')?.addEventListener('click', clearAccount);
+        }, 150);
     }
 }
-
 document.addEventListener('DOMContentLoaded', loadHeaderData);
 
 function setupMobileMenu() {
@@ -544,6 +596,43 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener("DOMContentLoaded", function () {
     updateHeaderWishlistCount();
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const searchToggleBtn = document.getElementById('mobileSearchToggleBtn');
+    const searchWrapper = document.getElementById('mobileSearchWrapper');
+
+    if (searchToggleBtn && searchWrapper) {
+        searchToggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation(); 
+            
+  
+            searchWrapper.classList.toggle('d-none');
+            searchWrapper.classList.toggle('search-animate-open');
+
+            
+            const icon = searchToggleBtn.querySelector('i');
+            if (searchWrapper.classList.contains('d-none')) {
+                icon.className = 'bi bi-search';
+            } else {
+                icon.className = 'bi bi-x-lg';
+        
+                document.getElementById('header-search-input')?.focus();
+            }
+        });
+
+  
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth < 768 && !searchWrapper.classList.contains('d-none')) {
+                if (!searchWrapper.contains(e.target) && !searchToggleBtn.contains(e.target)) {
+                    searchWrapper.classList.add('d-none');
+                    searchWrapper.classList.remove('search-animate-open');
+                    searchToggleBtn.querySelector('i').className = 'bi bi-search';
+                }
+            }
+        });
+    }
+});
 </script>
 </head>
 
@@ -564,15 +653,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     >
                 </a>
                 <button
-            class="mobile-menu-toggle"
-            type="button"
-            id="mobileMenuToggle"
-            aria-controls="menu"
-            aria-expanded="false"
-            aria-label="Open menu"
-        >
-            <i class="bi bi-list"></i>
-        </button>
+                    class="mobile-menu-toggle"
+                    type="button"
+                    id="mobileMenuToggle"
+                    aria-controls="menu"
+                    aria-expanded="false"
+                    aria-label="Open menu"
+                >
+                    <i class="bi bi-list"></i>
+                </button>
             </div>
 
             <!-- Navigation -->
@@ -588,61 +677,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             </div>
 
-            <style>
-.search-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    max-height: 350px;
-    overflow-y: auto;
-    z-index: 9999;
-}
 
-.search-result-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    border-bottom: 1px solid #f5f5f5;
-    text-decoration: none;
-    color: #333;
-    transition: background 0.2s;
-}
-
-.search-result-item:hover {
-    background: #f8f9fa;
-    color: #13564f;
-}
-
-.search-result-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-right: 12px;
-}
-
-.search-result-info {
-    flex: 1;
-}
-
-.search-result-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.search-result-price {
-    font-size: 0.8rem;
-    color: #28a745;
-    font-weight: 700;
-}
-</style>
-<div class="header-search position-relative">
+    <div class="header-search position-relative my-2 d-none d-md-block" id="mobileSearchWrapper">
     <div class="input-group header-search-group">
         <input
             type="text"
@@ -651,39 +687,42 @@ document.addEventListener("DOMContentLoaded", function () {
             placeholder="Search products..."
             autocomplete="off"
         >
-        <button class="btn bg-light" id="header-search-btn" type="button">
+        <button class="btn bg-light text-muted" id="header-search-btn" type="button">
             <i class="bi bi-search"></i>
         </button>
     </div>
-
     <div id="search-results-dropdown" class="search-dropdown-menu d-none"></div>
 </div>
 
-            <!-- Account / Cart -->
-            <div class="header-actions">
+<div class="header-actions d-flex align-items-center gap-1">
 
-            <a href="/shop/wishlist" 
-            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
-            title="View Wishlist"
-            style="width: 40px; height: 40px; font-size: 1.2rem;">
-                <i class="bi bi-heart"></i>
-                <span id="globalWishlistCount" 
-                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
-                    style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
-                    0
-                </span>
-            </a>
+    <button type="button" class="btn text-white p-2 d-inline-flex d-md-none align-items-center justify-content-center" 
+            id="mobileSearchToggleBtn" title="Toggle Search" style="width: 40px; height: 40px; font-size: 1.2rem;">
+        <i class="bi bi-search"></i>
+    </button>
 
-            <a href="/shop/cart-view" 
-            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
-            title="View Cart"
-            style="width: 40px; height: 40px; font-size: 1.2rem;">
-                <i class="bi bi-cart3"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-count" 
-                    style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
-                    0
-                </span>
-            </a>
+    <a href="/shop/wishlist" 
+        class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+        title="View Wishlist"
+        style="width: 40px; height: 40px; font-size: 1.2rem;">
+        <i class="bi bi-heart"></i>
+        <span id="globalWishlistCount" 
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
+            style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
+            0
+        </span>
+    </a>
+
+    <a href="/shop/cart-view" 
+        class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+        title="View Cart"
+        style="width: 40px; height: 40px; font-size: 1.2rem;">
+        <i class="bi bi-cart3"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-count" 
+            style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
+            0
+        </span>
+    </a>
 
                 <span id="guestAccountActions" class="account-actions">
                     <button type="button" class="btn btn-login text-white" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="login">
@@ -714,13 +753,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         
 
-        <ul class="navbar-nav mx-auto" id="menu"></ul>
+        <ul class="navbar-nav mx-auto" id="menu">
+       
+        </ul>
 
     </div>
 
 </nav>
 
-<div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+<div class="mobile-menu-overlay" id="mobileMenuOverlay">
+    
+</div>
 
 <!-- Top Info Bar -->
 <!--<div class="bg-light border-bottom py-2 small text-secondary">

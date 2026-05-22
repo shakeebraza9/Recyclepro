@@ -121,12 +121,41 @@ foreach ($all_attributes as &$attr) {
 <body>
     <?php include 'includes/header.php'; ?>
 
-    <div class="category-header">
+-
         <div class="container">
-            <h1><?php echo htmlspecialchars($category['name']); ?></h1>
-            <p id="product-count"><?php echo $category['count']; ?> products</p>
+                               <nav class="content-breadcrumb" aria-label="Breadcrumb">
+                                   <a href="/shop/"><i class="bi bi-house"></i></a>
+
+                        <span>/</span>
+                        
+                    <?php 
+
+                    $parent_id = isset($category['parent']) ? (int)$category['parent'] : 0;
+                    $is_subcategory = ($parent_id > 0);
+
+                    if ($is_subcategory): 
+
+                        $parent_cat = array_values(array_filter($all_categories, function($cat) use ($parent_id) {
+                            return (int)$cat['id'] === $parent_id;
+                        }));
+                        
+          
+                        $parent_slug = !empty($parent_cat[0]['slug']) ? $parent_cat[0]['slug'] : '';
+                        $parent_name = !empty($parent_cat[0]['name']) ? $parent_cat[0]['name'] : 'Parent';
+                    ?>
+                        <a href="/shop/category/<?php echo htmlspecialchars($parent_slug, ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php echo htmlspecialchars($parent_name, ENT_QUOTES, 'UTF-8'); ?>
+                        </a>
+                        <span class="mx-2">/</span>
+                        <span class="text-muted"><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+
+                    <?php else: ?>
+                        <span class="text-muted"><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <?php endif; ?>
+                    </nav>
+            
         </div>
-    </div>
+-
 
     <div class="container" style="margin-bottom: 50px;">
         <div class="row">
@@ -134,6 +163,7 @@ foreach ($all_attributes as &$attr) {
             <div class="col-lg-3 mb-4">
                 <div class="categories-sidebar">
                     <h5 style="margin-bottom: 20px; font-weight: 700;">Categories</h5>
+                    <p id="product-count"><?php echo $category['count']; ?> products</p>
                     <div class="categories-list">
                        <div class="category-tree">
 

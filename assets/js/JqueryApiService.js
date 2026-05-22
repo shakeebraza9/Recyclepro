@@ -1,8 +1,7 @@
 class JqueryApiService {
 
     constructor() {
-        this.baseUrl = 'https://www.recyclepro.co.uk/rp-dashboard/';
-        // this.baseUrl = 'http://localhost:8080/bkrecyclepro/';
+        this.baseUrl = baseAPI; 
     }
 
     _buildUrl(endpoint) {
@@ -17,7 +16,7 @@ class JqueryApiService {
     async get(endpoint) {
 
         try {
-
+         
             const url = this._buildUrl(endpoint);
 
             return await $.getJSON(url);
