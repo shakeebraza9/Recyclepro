@@ -216,8 +216,8 @@ $.ajax({
         });
 
 
+        parentCategories.reverse()
         const topCategories = parentCategories.slice(0, 6);
-
 
         topCategories.forEach(category => {
             let cleanSlug = (category.slug || '').trim();
