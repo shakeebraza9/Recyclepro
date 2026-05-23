@@ -12,7 +12,9 @@ html {
 .navbar-nav .dropdown {
     position: relative;
 }
-
+.mobile-header-switch-links {
+    display: none !important;
+}
 .navbar-nav .dropdown-toggle::after {
     display: inline-block;
     margin-left: .1em;
@@ -451,7 +453,7 @@ body {
     /* background: linear-gradient(135deg, #33383d 0%, #4d5358 100%) !important; */
     padding: 1rem 0;
     /* box-shadow: 0 14px 34px rgba(18, 29, 42, 0.12); */
-    background-color: #505050 !important;
+    background-color: #13564f !important;
 }
 
 .header-layout {
@@ -504,7 +506,7 @@ a.v-nav-link {
     height: 65px;
     transform: skew(333deg);
     text-align: center;
-    background-color: #505050 !important;
+    background-color: #13564f !important;
 }
 
 a.v-nav-link:hover,
@@ -595,11 +597,13 @@ a.btn-account {
     border-radius: 999px;
     background: #076258;
     box-shadow: 0 12px 24px rgba(7, 98, 88, 0.2);
+    border: 2px solid #ffffffc7;
 }
 
 button.btn.btn-account.text-white:hover,
 a.btn-account:hover {
     background: #0a766a;
+
 }
 
 .btn-account i.bi-person {
@@ -635,7 +639,7 @@ strong.category-link {
 }
 
 .info-bar span span {
-    color: #505050;
+    color: #13564f;
 }
 
 .info-bar strong { color: #333; }
@@ -1228,6 +1232,9 @@ div#centerBanner a {
         flex-wrap: wrap;
         display: none;
     }
+    .mobile-header-switch-links{
+        display: inline-flex !important;
+    }
 
     .btn-login,
     button.btn.btn-account.text-white {
@@ -1764,7 +1771,7 @@ button.btn.btn-account.text-white {
         }
 
         #products-container .product-card {
-    border-top: 27px #D4EFFF solid;
+    border-top: 27px #80beb5 solid;
     text-align: center;
 }
 
@@ -3188,3 +3195,4 @@ button.btn.btn-account.text-white {
         width: 100% !important; 
     }
 }
+

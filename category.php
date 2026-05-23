@@ -93,8 +93,8 @@ if (!$slug) {
                         </div>
                     </div>
 
-                    <div class="select-cat-label">All Categories</div>
-                    <button class="clear-all-link" id="clear-all-btn">Clear All Filters</button>
+                    <!-- <div class="select-cat-label">All Categories</div> -->
+                   
                     <div id="sidebar-categories">
                         <?php for($i=0;$i<5;$i++): ?>
                         <div class="skeleton skel-line" style="margin:10px 14px;"></div>
@@ -105,9 +105,11 @@ if (!$slug) {
                 <!-- FILTERS CARD -->
                 <div class="sidebar-card" id="filters-card">
                     <div class="filter-group">
-                        <div class="filter-group-header" data-target="fg-price">
-                            <span class="filter-group-title">Price Range</span>
-                            <i class="bi bi-dash toggle-icon"></i>
+                        <div class="filter-group-header" data-target="">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px;">
+                                <span class="filter-group-title" style="margin: 0; padding: 0; white-space: nowrap;">Price Range</span>
+                                <button class="clear-all-link" id="clear-all-btn" style="margin: 0; padding: 0; white-space: nowrap; background: none; border: none; cursor: pointer;">Clear All Filters</button>
+                            </div>
                         </div>
                         <div class="filter-group-body" id="fg-price">
                             <div class="price-row">
@@ -118,17 +120,26 @@ if (!$slug) {
                             <button class="btn-apply" id="apply-price">Apply</button>
                         </div>
                     </div>
-                    <div id="attribute-filters"></div>
+                    <div id="attribute-filters">
+                        
+                    </div>
                 </div>
 
             </aside>
 
-            <!-- ══ MAIN ══ -->
+  
             <main>
+        
                 <div class="results-bar">
                     <div class="results-count" id="results-count">
                         <span class="skeleton" style="display:inline-block;width:150px;height:13px;"></span>
                     </div>
+                    <div class="mobile_resposive_div">
+                    <button class="mobile-filter-btn" id="mobile-filter-btn">
+                        <i class="bi bi-funnel"></i>
+                        Filters
+                    </button>
+                  
                     <select class="sort-sel" id="sort-main">
                         <option value="">Sort by</option>
                         <option value="price-asc">Price: Low to High</option>
@@ -136,9 +147,12 @@ if (!$slug) {
                         <option value="name-asc">Name: A&ndash;Z</option>
                         <option value="name-desc">Name: Z&ndash;A</option>
                     </select>
+                      </div>
+                    
                 </div>
 
                 <div class="products-grid" id="products-container">
+                    
                     <?php for($i=0;$i<6;$i++): ?>
                     <div class="skel-card">
                         <div class="skeleton skel-img"></div>
@@ -151,12 +165,13 @@ if (!$slug) {
                     </div>
                     <?php endfor; ?>
                 </div>
+                <div class="pagination-wrap" id="pagination-wrap"></div>
             </main>
 
         </div>
     </div>
 
-
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <script>
     (() => {
         'use strict';
@@ -169,6 +184,8 @@ if (!$slug) {
         let allCategories = [];
         let categoryInfo  = {};
         let currentSort   = '';
+        let currentPage = 1;
+        const perPage = 12
         let activeCatFilter = null; // { slug, name, count }
         let focusedDropdownIdx = -1;
 
@@ -182,6 +199,7 @@ if (!$slug) {
         const priceMinEl        = $('price-min');
         const priceMaxEl        = $('price-max');
         const resultsCount      = $('results-count');
+        const paginationWrap = $('pagination-wrap');
         const sortMain          = $('sort-main');
         const subcatStrip       = $('subcategory-strip');
         const subcatTabs        = $('subcat-tabs');
@@ -195,6 +213,9 @@ if (!$slug) {
         const chipName        = $('chip-name');
         const chipSub         = $('chip-sub');
         const chipRemove      = $('chip-remove');
+
+    
+   ;
 
         // ── Fetch ────────────────────────────────────────────────────
         async function fetchJSON(url) {
@@ -530,75 +551,138 @@ if (!$slug) {
             btn.textContent = open ? 'Show more (' + wrap.querySelectorAll('.filter-option').length + ')' : 'Show less';
         };
 
-        // ── RENDER PRODUCTS ──────────────────────────────────────────
         function renderProducts(products) {
-            resultsCount.innerHTML = 'Showing <strong>' + products.length + '</strong> product' + (products.length !== 1 ? 's' : '');
+
+            resultsCount.innerHTML =
+                'Showing <strong>' + products.length + '</strong> products';
+
             if (!products.length) {
+
+                paginationWrap.innerHTML = '';
+
                 productsContainer.innerHTML =
                     '<div class="no-products">' +
                     '<i class="bi bi-box-seam"></i>' +
                     '<p>No products match your filters.</p>' +
-                    '<button onclick="document.getElementById(\'clear-all-btn\').click()" style="margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;">Clear Filters</button>' +
                     '</div>';
+
                 return;
             }
-            productsContainer.innerHTML = products.map(cardHTML).join('');
+
+            const totalPages = Math.ceil(products.length / perPage);
+
+            if (currentPage > totalPages) {
+                currentPage = 1;
+            }
+
+            const start = (currentPage - 1) * perPage;
+            const end   = start + perPage;
+
+            const paginatedProducts = products.slice(start, end);
+
+            productsContainer.innerHTML =
+                paginatedProducts.map(cardHTML).join('');
+
+            renderPagination(totalPages);
         }
+        function renderPagination(totalPages){
 
- function cardHTML(p) {
-    const link = (p.permalink || '').replace('https://www.recyclepro.co.uk/rp-dashboard/', 'https://www.recyclepro.co.uk/shop/');
-    const price = parseFloat(p.price);
-    const priceStr = price ? '£' + price.toFixed(2) : 'POA';
+            if(totalPages <= 1){
+                paginationWrap.innerHTML = '';
+                return;
+            }
 
-    const condAttr = (p.product_attributes || []).find(a => /condition|grade/i.test(a.name));
-    const condVal  = condAttr && condAttr.values && condAttr.values[0] ? condAttr.values[0] : '';
+            let html = '';
+
+            html += `
+                <button class="page-btn"
+                    ${currentPage === 1 ? 'disabled' : ''}
+                    onclick="changePage(${currentPage - 1})">
+                    Prev
+                </button>
+            `;
+
+            for(let i = 1; i <= totalPages; i++){
+
+                if(
+                    i === 1 ||
+                    i === totalPages ||
+                    (i >= currentPage - 1 && i <= currentPage + 1)
+                ){
+
+                    html += `
+                        <button class="page-btn ${i === currentPage ? 'active' : ''}"
+                            onclick="changePage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                }
+            }
+
+            html += `
+                <button class="page-btn"
+                    ${currentPage === totalPages ? 'disabled' : ''}
+                    onclick="changePage(${currentPage + 1})">
+                    Next
+                </button>
+            `;
+
+            paginationWrap.innerHTML = html;
+        } 
+        function cardHTML(p) {
+                    const link = (p.permalink || '').replace('https://www.recyclepro.co.uk/rp-dashboard/', 'https://www.recyclepro.co.uk/shop/');
+                    const price = parseFloat(p.price);
+                    const priceStr = price ? '£' + price.toFixed(2) : 'POA';
+
+                    const condAttr = (p.product_attributes || []).find(a => /condition|grade/i.test(a.name));
+                    const condVal  = condAttr && condAttr.values && condAttr.values[0] ? condAttr.values[0] : '';
 
 
-    return `
-        <div class="product-card">
-            <div class="top-accent-bar"></div>
-            
-            <div class="product-img-wrap">
-                <a href="${esc(link)}">
-                    <img src="${esc(p.image || '')}" alt="${esc(p.name)}" loading="lazy" onerror="this.src='/images/placeholder.png'">
-                </a>
-            </div>
-            
-            <div class="product-body">
-                <h3 class="product-name">${esc(p.name)}</h3>
-                
-                ${condVal ? `
-                    <div class="product-condition-wrap">
-                        <span class="product-condition">${esc(condVal)}</span>
-                        <span class="info-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        </span>
-                    </div>
-                ` : ''}
+                    return `
+                        <div class="product-card">
+                            <div class="top-accent-bar"></div>
+                            
+                            <div class="product-img-wrap">
+                                <a href="${esc(link)}">
+                                    <img src="${esc(p.image || '')}" alt="${esc(p.name)}" loading="lazy" onerror="this.src='/images/placeholder.png'">
+                                </a>
+                            </div>
+                            
+                            <div class="product-body">
+                                <h3 class="product-name">${esc(p.name)}</h3>
+                                
+                                ${condVal ? `
+                                    <div class="product-condition-wrap">
+                                        <span class="product-condition">${esc(condVal)}</span>
+                                        <span class="info-icon">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        </span>
+                                    </div>
+                                ` : ''}
 
-                <div class="product-condition-wrap" style="text-align:center;margin-bottom:10px; font-size:12px; color:var(--text-muted);   ">
-                    <span class="product-condition">Refurbished - Pristine </span>
-                    <span class="info-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                    </span>
-                </div>
-                
-                <div class="product-price">${priceStr}</div>
-                
-      
-                
-                <a href="${esc(link)}" class="btn-view">View product</a>
-                
-         
-            </div>
-        </div>
-    `;
-}
-        // ── FILTER LOGIC ─────────────────────────────────────────────
+                                <div class="product-condition-wrap" style="text-align:center;margin-bottom:10px; font-size:12px; color:var(--text-muted);   ">
+                                    <span class="product-condition">Condition - Pristine </span>
+                                    <span class="info-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                        </svg>
+                                    </span>
+                                </div>
+                                
+                                <div class="product-price">${priceStr}</div>
+                                
+                    
+                                
+                                <a href="${esc(link)}" class="btn-view" style="margin-top: 20px;">View product</a>
+                                
+                        
+                            </div>
+                        </div>
+                    `;
+                }
+                    
         function applyFilters() {
             const selFilters = {};
             document.querySelectorAll('.filter-checkbox:checked').forEach(cb => {
@@ -643,19 +727,18 @@ if (!$slug) {
             return { min:min===Infinity?0:min, max:max===-Infinity?0:max };
         }
 
-        // ── ERROR ────────────────────────────────────────────────────
+
         function showError(msg) {
             productsContainer.innerHTML = '<div class="no-products"><i class="bi bi-exclamation-triangle" style="color:var(--red);"></i><p style="color:var(--red);">' + esc(msg) + '</p></div>';
             resultsCount.textContent = '';
         }
 
-        // ── UTILS ────────────────────────────────────────────────────
+
         function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
         function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
         function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,'-'); }
         function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
-        // ── EVENTS ───────────────────────────────────────────────────
         $('apply-price').addEventListener('click', applyFilters);
         priceMinEl.addEventListener('keypress', e => { if(e.key==='Enter') applyFilters(); });
         priceMaxEl.addEventListener('keypress', e => { if(e.key==='Enter') applyFilters(); });
@@ -679,11 +762,41 @@ if (!$slug) {
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 3000);
         };
+            const mobileFilterBtn = $('mobile-filter-btn');
+        const sidebarOverlay = $('sidebar-overlay');
+        const sidebar = document.querySelector('.shop-sidebar');
 
+        mobileFilterBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.classList.add('sidebar-open');
+        });
+
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        function closeSidebar(){
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+window.changePage = function(page){
+
+    currentPage = page;
+
+    applyFilters();
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
         init();
     })();
+
+
     </script>
 
     <?php include 'includes/footer.php'; ?>
+  
 </body>
 </html>

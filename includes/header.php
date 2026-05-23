@@ -152,14 +152,7 @@ function renderHeader(data) {
         const mobileSwitchLi = document.createElement('li');
         mobileSwitchLi.className = 'nav-item d-md-none mt-3 pt-3 border-top-mobile'; 
         mobileSwitchLi.innerHTML = `
-            <div class="mobile-header-switch-links d-flex gap-2 px-3 mb-3">
-                <a class="v-nav-link btn-shop-mobile w-50 text-center py-2" href="/shop/">
-                    <span>Shop</span>
-                </a>
-                <a class="v-nav-link btn-sell-mobile w-50 text-center py-2" href="/">
-                    <span>Sell</span>
-                </a>
-            </div>
+
 
             <div id="mobileGuestActions" class="px-3 d-flex flex-column gap-2">
                 <button type="button" class="btn btn-login-mobile w-100 py-2" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="login">
@@ -598,41 +591,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    const searchToggleBtn = document.getElementById('mobileSearchToggleBtn');
-    const searchWrapper = document.getElementById('mobileSearchWrapper');
 
-    if (searchToggleBtn && searchWrapper) {
-        searchToggleBtn.addEventListener('click', function (e) {
-            e.stopPropagation(); 
-            
-  
-            searchWrapper.classList.toggle('d-none');
-            searchWrapper.classList.toggle('search-animate-open');
-
-            
-            const icon = searchToggleBtn.querySelector('i');
-            if (searchWrapper.classList.contains('d-none')) {
-                icon.className = 'bi bi-search';
-            } else {
-                icon.className = 'bi bi-x-lg';
-        
-                document.getElementById('header-search-input')?.focus();
-            }
-        });
-
-  
-        document.addEventListener('click', function (e) {
-            if (window.innerWidth < 768 && !searchWrapper.classList.contains('d-none')) {
-                if (!searchWrapper.contains(e.target) && !searchToggleBtn.contains(e.target)) {
-                    searchWrapper.classList.add('d-none');
-                    searchWrapper.classList.remove('search-animate-open');
-                    searchToggleBtn.querySelector('i').className = 'bi bi-search';
-                }
-            }
-        });
-    }
-});
 </script>
 </head>
 
@@ -678,52 +637,65 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
 
 
-    <div class="header-search position-relative my-2 d-none d-md-block" id="mobileSearchWrapper">
-    <div class="input-group header-search-group">
-        <input
-            type="text"
-            id="header-search-input"
-            class="form-control"
-            placeholder="Search products..."
-            autocomplete="off"
-        >
-        <button class="btn bg-light text-muted" id="header-search-btn" type="button">
-            <i class="bi bi-search"></i>
-        </button>
-    </div>
-    <div id="search-results-dropdown" class="search-dropdown-menu d-none"></div>
-</div>
+            <div class="header-search position-relative my-2  d-md-block" id="mobileSearchWrapper">
+                        <div class="input-group header-search-group">
+                            <input
+                                type="text"
+                                id="header-search-input"
+                                class="form-control"
+                                placeholder="Search products..."
+                                autocomplete="off"
+                            >
+                            <button class="btn bg-light text-muted" id="header-search-btn" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div id="search-results-dropdown" class="search-dropdown-menu d-none"></div>
+            </div>
 
-<div class="header-actions d-flex align-items-center gap-1">
+            <div class="header-actions d-flex align-items-center gap-1">
 
-    <button type="button" class="btn text-white p-2 d-inline-flex d-md-none align-items-center justify-content-center" 
-            id="mobileSearchToggleBtn" title="Toggle Search" style="width: 40px; height: 40px; font-size: 1.2rem;">
-        <i class="bi bi-search"></i>
-    </button>
+                <div class="mobile-header-switch-links d-flex gap-2 px-3 mb-3">
+  
+                        <a href="/shop/" 
+                            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+                            title="Shop"
+                            style="width: 40px; height: 40px; font-size: 1.1rem; background-color: #13564f; border-radius: 50%;">
+                            <i class="bi bi-bag"></i> <!-- Bag Icon -->
+                        </a>
 
-    <a href="/shop/wishlist" 
-        class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
-        title="View Wishlist"
-        style="width: 40px; height: 40px; font-size: 1.2rem;">
-        <i class="bi bi-heart"></i>
-        <span id="globalWishlistCount" 
-            class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
-            style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
-            0
-        </span>
-    </a>
+                
+                        <a href="/" 
+                            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+                            title="Sell"
+                            style="width: 40px; height: 40px; font-size: 1.1rem; background-color: #13564f; border-radius: 50%;">
+                            <i class="bi bi-tag"></i> <!-- Tag Icon -->
+                        </a>
+                    </div>
+                <div class=" d-flex gap-2 px-3 mb-3">
+                    <a href="/shop/wishlist" 
+                        class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+                        title="View Wishlist"
+                        style="width: 40px; height: 40px; font-size: 1.2rem;">
+                        <i class="bi bi-heart"></i>
+                        <span id="globalWishlistCount" 
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
+                            style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
+                            0
+                        </span>
+                    </a>
 
-    <a href="/shop/cart-view" 
-        class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
-        title="View Cart"
-        style="width: 40px; height: 40px; font-size: 1.2rem;">
-        <i class="bi bi-cart3"></i>
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-count" 
-            style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
-            0
-        </span>
-    </a>
-
+                    <a href="/shop/cart-view" 
+                        class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+                        title="View Cart"
+                        style="width: 40px; height: 40px; font-size: 1.2rem;">
+                        <i class="bi bi-cart3"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-count" 
+                            style="background-color: #13564f; color: white; font-size: 0.65rem; padding: 0.25em 0.45em; min-width: 18px;">
+                            0
+                        </span>
+                    </a>
+                </div>
                 <span id="guestAccountActions" class="account-actions">
                     <button type="button" class="btn btn-login text-white" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="login">
                         Login
@@ -746,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 </header>
 
-<!-- Main Menu -->
+
 <nav class="navbar navbar-expand-lg bg-light main-menu-navbar" id="mainMenuNav">
 
     <div class="container">
@@ -765,16 +737,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
 </div>
 
-<!-- Top Info Bar -->
-<!--<div class="bg-light border-bottom py-2 small text-secondary">
 
-    <div class="container">
-
-        <div class="info-bar d-flex gap-3 flex-wrap"></div>
-
-    </div>
-
-</div> -->
 
 <div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
