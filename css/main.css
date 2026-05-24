@@ -1047,7 +1047,7 @@ div#centerBanner a {
 
     .main-menu-navbar {
         position: relative;
-        z-index: 1052;
+        z-index: 1039;
         padding: 0.65rem 0;
     }
 
@@ -3282,3 +3282,9 @@ button.btn.btn-account.text-white {
 
 }
 
+@media (max-width: 992px) {
+    .tp-grid-container { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 576px) {
+    .tp-grid-container { grid-template-columns: 1fr !important; gap: 20px !important; }
+}

@@ -363,17 +363,19 @@ class Home {
         });
 
 
-        if (data.banner?.image) {
-            const bannerBox = document.getElementById('centerBanner'); 
-            if (bannerBox) {
-                bannerBox.innerHTML = `
-                    <a class="img-fluid w-100 rounded d-block" 
-                      style="background-image: url(${data.banner.image}); background-size: cover; background-position: center; min-height: 250px;" 
-                      href="${data.banner.url || '#'}">
-                    </a>
-                `;
-            }
-        }
+if (data.banner?.image) {
+    const bannerBox = document.getElementById('centerBanner'); 
+    if (bannerBox) {
+        bannerBox.innerHTML = `
+            <a class="d-block w-100 h-100" href="${data.banner.url || '#'}">
+                <img src="${data.banner.image}" 
+                     class="w-100 rounded" 
+                     alt="Banner" 
+                     style="display: block; height: 100%; min-height: 520px; max-height: 82%; object-fit: contain;">
+            </a>
+        `;
+    }
+}
     }
 
     renderSmall(products, id) {

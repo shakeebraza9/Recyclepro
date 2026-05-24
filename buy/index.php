@@ -113,6 +113,30 @@ while (count($similarProducts) < 4) {
 }
 ?>
 
+<!-- Added Zoom CSS Styling -->
+<style>
+.product-display {
+    position: relative;
+    overflow: hidden; /* Restricts the zoomed image within the container boundaries */
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: zoom-in;
+}
+
+.product-main-img.zoomable {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.1s ease-out; /* Smooth tracking response */
+    transform-origin: center center;
+}
+
+.product-display:hover .product-main-img.zoomable {
+    transform: scale(2); /* Magnification level (2x zoom) */
+}
+</style>
+
 <section class="breadcrumb">
     <div class="container">
         <nav class="content-breadcrumb" aria-label="Breadcrumb">
@@ -152,7 +176,8 @@ while (count($similarProducts) < 4) {
             </div>
 
             <div class="col-xl-6 col-lg-6">
-                <div class="product-display">
+                <!-- Wrapper element listens to cursor movements -->
+                <div class="product-display" id="zoomContainer">
                     <img id="mainImage" src="<?= htmlspecialchars($productImages[0], ENT_QUOTES, 'UTF-8') ?>" class="product-main-img zoomable" alt="<?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
@@ -213,14 +238,14 @@ while (count($similarProducts) < 4) {
                         <?php endforeach; ?>
                     </ul>
 
-                    <div class="d-flex gap-3 align-items-center flex-wrap mb-3">
-                        <div class="quantity-box">
-                            <button type="button" class="qty-btn" id="decreaseQty" aria-label="Decrease quantity">-</button>
-                            <input type="text" id="quantityInput" value="1" readonly aria-label="Quantity">
-                            <button type="button" class="qty-btn" id="increaseQty" aria-label="Increase quantity">+</button>
-                        </div>
-                        <button id="addToCart" class="btn btn-dark btn-lg px-5" style="background-color: #13564f;">Add to Cart</button>
+              <div class="d-flex gap-2 gap-sm-3 align-items-center flex-nowrap mb-3 w-100">
+                    <div class="quantity-box flex-shrink-0">
+                        <button type="button" class="qty-btn" id="decreaseQty" aria-label="Decrease quantity">-</button>
+                        <input type="text" id="quantityInput" value="1" readonly aria-label="Quantity">
+                        <button type="button" class="qty-btn" id="increaseQty" aria-label="Increase quantity">+</button>
                     </div>
+                    <button id="addToCart" class="btn btn-dark btn-lg px-3 px-sm-5 flex-grow-1 text-nowrap" style="background-color: #13564f;">Add to Cart</button>
+                </div>
 
                     <button id="buyNow" class="btn btn-outline-dark btn-lg w-100 mb-4">Buy Now</button>
 
@@ -289,12 +314,32 @@ while (count($similarProducts) < 4) {
 <script>
 const thumbButtons = document.querySelectorAll('.thumb-btn');
 const mainImage = document.getElementById('mainImage');
+const zoomContainer = document.getElementById('zoomContainer');
 const priceBox = document.getElementById('priceBox');
 const addToCartButton = document.getElementById('addToCart');
 const buyNowButton = document.getElementById('buyNow');
 const quantityInput = document.getElementById('quantityInput');
 const increaseQty = document.getElementById('increaseQty');
 const decreaseQty = document.getElementById('decreaseQty');
+
+// Dynamic Hover-to-Zoom Tracking Logic
+if (zoomContainer && mainImage) {
+    zoomContainer.addEventListener('mousemove', function(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        
+        // Calculate cursor position percentage inside container bounds
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        // Dynamically alter the zoom anchor point to map target details
+        mainImage.style.transformOrigin = `${x}% ${y}%`;
+    });
+
+    zoomContainer.addEventListener('mouseleave', function() {
+        // Reset anchor point back to absolute center when cursor steps away
+        mainImage.style.transformOrigin = 'center center';
+    });
+}
 
 function updateProductDisplay(price, image) {
     if (priceBox) {
@@ -305,7 +350,6 @@ function updateProductDisplay(price, image) {
     }
 }
 
-// FIXED: Radio buttons change event listner handles live theme display syncing
 document.querySelectorAll('.variation-radio').forEach(radio => {
     radio.addEventListener('change', function() {
         if (this.checked) {
@@ -313,7 +357,6 @@ document.querySelectorAll('.variation-radio').forEach(radio => {
             const image = this.dataset.image || (mainImage ? mainImage.src : '');
             updateProductDisplay(price, image);
             
-            // Sync current active state button highlights onto thumbnails mapping list
             const targetedThumb = document.querySelector(`.thumb-btn[data-image="${image}"]`);
             if (targetedThumb) {
                 setActiveThumb(targetedThumb);
@@ -334,7 +377,6 @@ thumbButtons.forEach((button) => {
             mainImage.src = image;
             setActiveThumb(this);
             
-            // Sync checked highlight inside horizontal radio items if image hits a perfect match
             const correspondingRadio = document.querySelector(`.variation-radio[data-image="${image}"]`);
             if (correspondingRadio) {
                 correspondingRadio.checked = true;
@@ -371,7 +413,6 @@ function getSelectedProductData() {
         selectedImage = activeThumb.dataset.image || selectedImage;
     }
 
-    // FIXED: Dropdown query logic shifted directly to active checked radio element
     const activeRadio = document.querySelector('.variation-radio:checked');
     if (activeRadio) {
         selectedPrice = activeRadio.dataset.price || selectedPrice;

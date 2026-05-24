@@ -15,8 +15,9 @@ include __DIR__ . '/includes/header.php';
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10">
                 <div class="content-scroll-wrapper">
-                    <div id="pageContent" class="custom-scroll-content p-3 p-md-4">
-                        </div>
+                    <div id="pageContent" class="custom-scroll-content p-3 p-md-4" 
+                         style="max-height: 300px; overflow-y: auto;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,7 +77,7 @@ include __DIR__ . '/includes/header.php';
       <div class="col-12 col-md-4">
         <div class="row g-3" id="leftProducts"></div>
       </div>
-      <div class="col-12 col-md-4" id="centerBanner"></div>
+      <div id="centerBanner" class="col-12 col-md-4"></div>
       <div class="col-12 col-md-4">
         <div class="row g-3" id="rightProducts"></div>
       </div>
@@ -156,6 +157,43 @@ include __DIR__ . '/includes/header.php';
                 </p>
             </div>
         </div>
+    </div>
+</section>
+<section style="padding: 60px 20px; background-color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif;">
+    <div class="tp-grid-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;">
+        
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-patch-check" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Quality Products</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">We hold high quality standards and offer best quality ever. The products that are designed by our experts are made from the top quality and genuine materials.</p>
+        </div>
+
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-shield-lock" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Secure Transaction</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">TV Jackets is concerned about the safety and security of customers. Our payment process is extremely safe, and our customers information is secure.</p>
+        </div>
+
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-headset" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Customer Service</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Customer support staff is always at your service and ready to assist you 24/7 to meet the customer expectations.</p>
+        </div>
+
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-truck" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Fast Delivery</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Enjoy fast time definite delivery of your product with no extra cost or hidden charges for the shipment world-wide. Happy Shopping!</p>
+        </div>
+
     </div>
 </section>
 
