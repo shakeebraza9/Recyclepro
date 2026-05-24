@@ -33,16 +33,15 @@ function renderWishlistPage() {
     // Total count update karein
     countBadge.text(wishlist.length);
 
-    // --- CONDITION 1: Agar Wishlist Khali Hai ---
     if (wishlist.length === 0) {
         container.html(`
             <div class="col-12 text-center py-5">
                 <div class="mb-4">
                     <i class="bi bi-heartbreak text-muted" style="font-size: 4rem;"></i>
                 </div>
-                <h4 class="fw-bold text-secondary">Aapki Wishlist Khali Hai!</h4>
-                <p class="text-muted">Apni pasandida products ko save karne ke liye shopping jari rakhein.</p>
-                <a href="/shop" class="btn text-white px-4 py-2 rounded-3 mt-2" style="background-color: #f26500;">
+                    <h4 class="fw-bold text-secondary">Your Wishlist Is Empty!</h4>
+                    <p class="text-muted">Continue shopping to save your favorite products.</p>
+                <a href="/shop" class="btn text-white px-4 py-2 rounded-3 mt-2" style="background-color: #13564f;">
                     Continue Shopping
                 </a>
             </div>
@@ -50,11 +49,10 @@ function renderWishlistPage() {
         return;
     }
 
-    // --- CONDITION 2: Agar Products Maujood Hain ---
-    container.html(""); // Container clear karein
+
+    container.html("");
     
     wishlist.forEach((p, index) => {
-        // Safe slug/permalink fallback link generate karne ke liye
         const productLink = `/shop/buy/${p.slug || p.permalink || '#'}`;
         
         container.append(`
@@ -108,25 +106,25 @@ function renderWishlistPage() {
     });
 }
 
-// Single item delete functionality directly inside the page view
+
 function removeFromWishlistPage(productKey, index) {
     let wishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
     
-    // Array se specific product filter out karein
+
     wishlist = wishlist.filter(item => (item.slug !== productKey && item.permalink !== productKey));
     
-    // Storage update karein
+
     localStorage.setItem('user_wishlist', JSON.stringify(wishlist));
     
-    // Card item ko screen se smooth tarike se remove karne ke liye animation drop effect
+
     $(`#wishlist-item-${index}`).fadeOut(300, function() {
         $(this).remove();
-        // Poore layout state ko refresh karein (Check if it became empty now)
+
         renderWishlistPage();
     });
 }
 
-// Poori wishlist ko ek click par saaf karne ke liye
+
 function clearFullWishlist() {
     if(confirm("Kya aap poori wishlist delete karna chahte hain?")) {
         localStorage.removeItem('user_wishlist');

@@ -18,6 +18,7 @@
     # =========================
     RewriteRule ^category/([a-z0-9-]+)/?$ category.php?slug=$1 [QSA,L]
     RewriteRule ^test/([a-z0-9-]+)/?$ test.php?slug=$1 [QSA,L]
+    RewriteRule ^brands/([a-z0-9-]+)/?$ brand-detail.php?brand=$1 [QSA,L]
 
     # =========================
     # 3. Shop home category page
@@ -30,6 +31,7 @@
     # /cart-view
     # =========================
     RewriteRule ^cart-view/?$ cart-view.php [QSA,L]
+    RewriteRule ^wishlist/?$ wishlist.php [QSA,L]
 
     # =========================
     # 5. Checkout page
@@ -43,7 +45,5 @@
     # =========================
     RewriteRule ^([a-z0-9-]+)/?$ page.php?slug=$1 [QSA,L]
 
-
-    RewriteRule ^wishlist/?$ wishlist.php [QSA,L]
 
 </IfModule>

@@ -615,7 +615,7 @@ $(document).ready(function() {
                              
                             </div>
                             <div>
-                                <a href="${p.permalink || '#'}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
+                                <a href="${BASE_URL}/buy/${p.slug || '#'}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
                            
                             </div>
                         </div>

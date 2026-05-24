@@ -73,7 +73,7 @@ class Home {
         (data.brands || []).forEach(b => {
             brands.append(`
                 <div class="brand-item text-center px-2">
-                    <a href="/brands/${b.slug}">
+                    <a href="${BASE_URL}brands/${b.slug}">
                         <img src="${b.thumbnail || ''}" class="img-fluid"/>
                     </a>
                 </div>

@@ -550,7 +550,7 @@ a.v-nav-link span {
     color: #076258;
 }
 .cart-count {
-    background: #FF9900 !important;
+    background: #076258 !important;
 }
 .header-actions,
 .account-actions,
@@ -1367,7 +1367,83 @@ div#centerBanner a {
 .product-details-tabs .tab-pane {
     color: #6c7a93;
 }
+#buyNow{
+    background: #13564f;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 999px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-check:checked + .btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check) + .btn:active {
+  background: #13564f !important;
+}
+.product-details-tabs-container {
+    background-color: #f9f9f9; 
+    border-radius: 4px;
+}
 
+
+.custom-nav-tabs {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-bottom: 2px solid #13564f; 
+}
+
+
+.custom-nav-tabs .nav-tab-link {
+    background: none;
+    border: none;
+    padding: 0 0 15px 0;
+    font-size: 24px; 
+    font-weight: 500;
+    color: #8c8c8c;    
+    position: relative;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+
+
+.custom-nav-tabs .nav-tab-link.active {
+    color: #4a4a4a;       
+    font-weight: 700;
+}
+
+
+.custom-nav-tabs .nav-tab-link:hover {
+    color: #4a4a4a;
+}
+
+
+.custom-nav-tabs .nav-tab-separator {
+    font-size: 22px;
+    color: #bfbfbf;
+    padding: 0 20px 15px 20px; 
+    user-select: none;
+}
+
+
+.product-description-content {
+    font-size: 16px;
+    line-height: 1.75;
+    color: #595959;
+}
+
+
+.product-description-content ul {
+    padding-left: 20px;
+    margin-top: 20px;
+}
+
+.product-description-content ul li {
+    margin-bottom: 10px;
+    color: #595959;
+}
 .similar-products .card {
     border: none;
     border-radius: 28px;
@@ -1378,7 +1454,7 @@ div#centerBanner a {
     position: absolute;
     top: 16px;
     left: 16px;
-    background: #212529;
+    background: #13564f;
     color: #ffffff;
     border-radius: 999px;
     padding: 0.35rem 0.85rem;

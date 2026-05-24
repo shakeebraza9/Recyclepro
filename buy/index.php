@@ -47,7 +47,6 @@ if (!empty($categories) && is_array($categories)) {
     }
 }
 
-
 $productImages = [];
 
 $addProductImage = function ($image) use (&$productImages) {
@@ -140,7 +139,6 @@ while (count($similarProducts) < 4) {
 </section>
 
 <div class="container py-5">
-
     <div class="product-page">
         <div class="row gx-3 gy-3 align-items-start">
             <div class="col-xl-1 col-lg-3">
@@ -175,7 +173,6 @@ while (count($similarProducts) < 4) {
                                 </span>
                             </div>
                         </div>
-                        
                     </div>
 
                     <div class="text-muted mb-4 product-short-description">
@@ -184,18 +181,29 @@ while (count($similarProducts) < 4) {
 
                     <?php if (!empty($product['variations']) && count($product['variations']) > 1): ?>
                         <div class="mb-4">
-                            <label for="variationSelect" class="form-label fw-semibold">Choose option</label>
-                            <select id="variationSelect" class="form-select">
+                            <label class="form-label fw-semibold">Choose option</label>
+                            <div class="variation-buttons-wrapper d-flex flex-wrap gap-2" id="variationSelectContainer">
                                 <?php foreach ($product['variations'] as $index => $variation): ?>
-                                    <?php $optionLabel = trim($variation['attributes']['storage'] ?? '') ?: 'Variation ' . ($index + 1) . ' - £' . $variation['price']; ?>
-                                    <option value="<?= htmlspecialchars($variation['id']) ?>"
-                                        data-price="<?= htmlspecialchars($variation['price']) ?>"
-                                        data-image="<?= htmlspecialchars($variation['image'] ?: $productImages[0], ENT_QUOTES, 'UTF-8') ?>"
-                                        <?= $index === 0 ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($optionLabel) ?>
-                                    </option>
+                                    <?php 
+                                    $optionLabel = trim($variation['attributes']['storage'] ?? '') ?: 'Variation ' . ($index + 1) . ' - £' . $variation['price']; 
+                                    $variationId = htmlspecialchars($variation['id']);
+                                    ?>
+                                    <div class="variation-btn-item">
+                                        <input type="radio" 
+                                               name="product_variation" 
+                                               id="var_<?= $variationId ?>" 
+                                               value="<?= $variationId ?>"
+                                               class="btn-check variation-radio btn-var" 
+                                               data-price="<?= htmlspecialchars($variation['price']) ?>"
+                                               data-image="<?= htmlspecialchars($variation['image'] ?: $productImages[0], ENT_QUOTES, 'UTF-8') ?>"
+                                               <?= $index === 0 ? 'checked' : '' ?>>
+                                               
+                                        <label class="btn btn-outline-secondary variation-btn-label py-2 px-3 fs-6" for="var_<?= $variationId ?>">
+                                            <?= htmlspecialchars($optionLabel) ?>
+                                        </label>
+                                    </div>
                                 <?php endforeach; ?>
-                            </select>
+                            </div>
                         </div>
                     <?php endif; ?>
 
@@ -211,7 +219,7 @@ while (count($similarProducts) < 4) {
                             <input type="text" id="quantityInput" value="1" readonly aria-label="Quantity">
                             <button type="button" class="qty-btn" id="increaseQty" aria-label="Increase quantity">+</button>
                         </div>
-                        <button id="addToCart" class="btn btn-dark btn-lg px-5">Add to Cart</button>
+                        <button id="addToCart" class="btn btn-dark btn-lg px-5" style="background-color: #13564f;">Add to Cart</button>
                     </div>
 
                     <button id="buyNow" class="btn btn-outline-dark btn-lg w-100 mb-4">Buy Now</button>
@@ -224,25 +232,27 @@ while (count($similarProducts) < 4) {
             </div>
         </div>
 
-        <div class="product-details-tabs py-5">
-            <ul class="nav nav-tabs mb-4" id="productTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews</button>
-                </li>
-            </ul>
+        <div class="product-details-tabs-container py-5 my-4">
+            <div class="container">
+                <ul class="custom-nav-tabs mb-4" id="productTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-tab-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+                    </li>
+                    <li class="nav-tab-separator">|</li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-tab-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews</button>
+                    </li>
+                </ul>
 
-            <div class="tab-content">
-                <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                    <div class="text-muted mb-4 product-description">
-                        <?= !empty($product['description']) ? $product['description'] : 'No description available.' ?>
+                <div class="tab-content pt-2">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                        <div class="product-description-content">
+                            <?= !empty($product['description']) ? $product['description'] : 'No description available.' ?>
+                        </div>
                     </div>
-                    
-                </div>
-                <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                    <p class="text-muted">No reviews yet. Be the first to review this product.</p>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <p class="text-muted m-0">No reviews yet. Be the first to review this product.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -260,14 +270,11 @@ while (count($similarProducts) < 4) {
                     <div class="col">
                         <a href="<?= htmlspecialchars($similarLink, ENT_QUOTES, 'UTF-8') ?>" class="similar-product-link">
                         <div class="card position-relative overflow-hidden h-100">
-                            
                             <img src="<?= htmlspecialchars($similar['image'], ENT_QUOTES, 'UTF-8') ?>" class="card-img-top" alt="<?= htmlspecialchars($similar['name'], ENT_QUOTES, 'UTF-8') ?>">
                             <div class="card-body product-card-body">
                                 <h3 class="card-title h6"><?= htmlspecialchars($similar['name'], ENT_QUOTES, 'UTF-8') ?></h3>
-                               
                                 <div class="price-row align-items-center">
                                     <span class="fw-semibold">£<?= htmlspecialchars($similar['price'], ENT_QUOTES, 'UTF-8') ?></span>
-                                    
                                 </div>
                             </div>
                         </div>
@@ -281,7 +288,6 @@ while (count($similarProducts) < 4) {
 
 <script>
 const thumbButtons = document.querySelectorAll('.thumb-btn');
-const variationSelect = document.getElementById('variationSelect');
 const mainImage = document.getElementById('mainImage');
 const priceBox = document.getElementById('priceBox');
 const addToCartButton = document.getElementById('addToCart');
@@ -299,14 +305,22 @@ function updateProductDisplay(price, image) {
     }
 }
 
-if (variationSelect) {
-    variationSelect.addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        const price = selected.dataset.price || priceBox.innerText;
-        const image = selected.dataset.image || mainImage.src;
-        updateProductDisplay(price, image);
+// FIXED: Radio buttons change event listner handles live theme display syncing
+document.querySelectorAll('.variation-radio').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.checked) {
+            const price = this.dataset.price || (priceBox ? priceBox.innerText : '0');
+            const image = this.dataset.image || (mainImage ? mainImage.src : '');
+            updateProductDisplay(price, image);
+            
+            // Sync current active state button highlights onto thumbnails mapping list
+            const targetedThumb = document.querySelector(`.thumb-btn[data-image="${image}"]`);
+            if (targetedThumb) {
+                setActiveThumb(targetedThumb);
+            }
+        }
     });
-}
+});
 
 function setActiveThumb(button) {
     thumbButtons.forEach((btn) => btn.classList.remove('active'));
@@ -319,6 +333,15 @@ thumbButtons.forEach((button) => {
         if (image) {
             mainImage.src = image;
             setActiveThumb(this);
+            
+            // Sync checked highlight inside horizontal radio items if image hits a perfect match
+            const correspondingRadio = document.querySelector(`.variation-radio[data-image="${image}"]`);
+            if (correspondingRadio) {
+                correspondingRadio.checked = true;
+                if (correspondingRadio.dataset.price && priceBox) {
+                    priceBox.innerText = correspondingRadio.dataset.price;
+                }
+            }
         }
     });
 });
@@ -348,11 +371,12 @@ function getSelectedProductData() {
         selectedImage = activeThumb.dataset.image || selectedImage;
     }
 
-    if (variationSelect) {
-        const option = variationSelect.options[variationSelect.selectedIndex];
-        selectedPrice = option.dataset.price || selectedPrice;
-        selectedImage = option.dataset.image || selectedImage;
-        selectedVariationId = option.value || selectedVariationId;
+    // FIXED: Dropdown query logic shifted directly to active checked radio element
+    const activeRadio = document.querySelector('.variation-radio:checked');
+    if (activeRadio) {
+        selectedPrice = activeRadio.dataset.price || selectedPrice;
+        selectedImage = activeRadio.dataset.image || selectedImage;
+        selectedVariationId = activeRadio.value || selectedVariationId;
     }
 
     return {
