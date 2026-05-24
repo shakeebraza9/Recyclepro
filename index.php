@@ -10,17 +10,23 @@ include __DIR__ . '/includes/header.php';
 </section>
 
 
-<section class="py-5">
-  <div class="container">
-    <div class="row">
-      <div id="pageContent"></div>
+<section class="py-5 bg-light-subtle">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="content-scroll-wrapper">
+                    <div id="pageContent" class="custom-scroll-content p-3 p-md-4">
+                        </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 
 <section class="py-5 featured-products-section">
   <div class="container">
+    <h2 id="category-heading">Product Category</h2>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4"> 
 
@@ -54,7 +60,7 @@ include __DIR__ . '/includes/header.php';
 
 
 
-<section class="py-4">
+<section class="py-4 ">
   <div class="container">
     <div id="banner"></div>
   </div>
@@ -133,8 +139,16 @@ include __DIR__ . '/includes/header.php';
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="email" class="form-control" placeholder="Please enter your email address">
-                    <button class="btn btn-dark" type="button">Subscribe</button>
+                <input type="email"
+                        class="form-control"
+                        id="newsletter-email"
+                        placeholder="Please enter your email address">
+
+                  <button class="btn btn-dark"
+                          type="button"
+                          id="subscribe-btn">
+                      Subscribe
+                  </button>
                 </div>
                 <p class="text-center mt-3 small text-muted">
                     <label for="terms"> <input type="checkbox" class="form-check-input me-2" id="terms">
@@ -157,7 +171,61 @@ $(document).ready(function () {
     home.load(); 
 });
 
+document.getElementById('subscribe-btn').addEventListener('click', async function(){
 
+    const btn = this;
+    const email = document.getElementById('newsletter-email').value.trim();
+
+    if(!email){
+        alert('Please enter email');
+        return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!emailRegex.test(email)){
+        alert('Please enter valid email');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'Submitting...';
+
+    try{
+
+        const response = await fetch(`${baseAPI}wp-json/wp/v2/subscribe`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        });
+
+        const data = await response.json();
+
+        if(data.success){
+
+            alert(data.message);
+
+            document.getElementById('newsletter-email').value = '';
+
+        }else{
+            alert(data.message);
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+        alert('Something went wrong');
+
+    }finally{
+
+        btn.disabled = false;
+        btn.innerText = 'Subscribe';
+    }
+});
 
 </script>
 <?php include __DIR__ . '/includes/footer.php'; ?>

@@ -672,7 +672,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <i class="bi bi-tag"></i> <!-- Tag Icon -->
                         </a>
                     </div>
-                <div class=" d-flex gap-2 px-3 mb-3">
+                <div class="">
                     <a href="/shop/wishlist" 
                         class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
                         title="View Wishlist"

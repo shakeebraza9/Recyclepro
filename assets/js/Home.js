@@ -46,11 +46,12 @@ class Home {
         $("#pageContent").html(data.page?.content || "");
 
 
-        this.renderProducts(data.featured_products?.featured_group_1, "featuredProducts1");
-        this.renderProducts(data.featured_products?.featured_group_2, "featuredProducts2");
-        this.renderProducts(data.featured_products?.featured_group_3, "featuredProducts3");
-        this.renderProducts(data.featured_products?.featured_group_4, "featuredProducts4");
-        this.renderProducts(data.featured_products?.featured_group_5, "featuredProducts5");
+   
+        this.renderProducts(data.featured_products?.featured_group_1, "featuredProducts1", 6000);
+        this.renderProducts(data.featured_products?.featured_group_2, "featuredProducts2", 7000);
+        this.renderProducts(data.featured_products?.featured_group_3, "featuredProducts3", 9000);
+        this.renderProducts(data.featured_products?.featured_group_4, "featuredProducts4", 10000);
+        this.renderProducts(data.featured_products?.featured_group_5, "featuredProducts5", 15000);
 
 
         this.renderTopRated(data.top_rated_products || {});
@@ -144,85 +145,77 @@ class Home {
     }
 
 
-    renderProducts(products, id) {
+    renderProducts(products, id, speed = 4000) {
         const box = $("#" + id);
         if (!box.length) return;
 
         box.html("");
-        
 
         const currentWishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
         
         (products || []).forEach(p => {
-
             const productKey = p.slug || p.permalink || '';
             const isExist = currentWishlist.some(item => (item.slug === productKey || item.permalink === productKey));
             
-
             const heartColor = isExist ? '#13564f' : '#212529';
             const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
 
             box.append(`
                 <div class="product-item-wrap py-1">
                     <div class="card h-100 product-card border-light shadow-sm rounded-4 position-relative p-3">
-                      
-                      <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-uppercase text-muted small fw-semibold tracking-wider">
-                          ${p.category || ''}
-                        </span>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="text-uppercase text-muted small fw-semibold tracking-wider">${p.category || ''}</span>
                         <div class="d-flex flex-column gap-2 align-items-center">
-                          
-                          <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
-                                  style="color: ${heartColor};"
-                                  aria-label="Add to Wishlist" 
-                                  onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
-                              <i class="bi ${heartIcon}"></i>
-                          </button>
-                          
-                          <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5" aria-label="Compare Product"
-                                  onclick="$('#${id}').slick('slickGoTo', 0);">
-                              <i class="bi bi-arrow-left-right"></i>
-                          </button>
+                 
+                        <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5 toggle-direction-btn" 
+                                aria-label="Toggle Slider Direction"
+                                onclick="
+                                    (() => {
+                                        const $slider = $('#${id}');
+                                        const current = $slider.slick('slickCurrentSlide'); // Current active index (0, 1, 2...)
+                                        const total = $slider.slick('getSlick').slideCount; // Total slides in this slider
+                                        
+                                        // Agar user aakhri slide par khada hai, to backward (prev) le jao
+                                        if (current === total - 1) {
+                                            $slider.slick('slickPrev');
+                                        } else {
+                                            // Start mein ho ya mid mein ho, to hamesha forward (next) karo
+                                            $slider.slick('slickNext');
+                                        }
+                                    })();
+                                ">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </button>
                         </div>
-                      </div>
-
-                      <div class="position-relative text-center my-3">
-                        ${p.isNew ? `
-                          <span class="badge position-absolute start-0 bottom-0 px-3 py-2 rounded-3 text-uppercase fw-bold text-white" style="background-color: #f26500;">
-                            New
-                          </span>
-                        ` : ''}
-                        
+                    </div>
+                    <div class="position-relative text-center my-3">
+                        ${p.isNew ? `<span class="badge position-absolute start-0 bottom-0 px-3 py-2 rounded-3 text-uppercase fw-bold text-white" style="background-color: #f26500;">New</span>` : ''}
                         <a class="d-block featured-product-image-link" href="/shop/buy/${p.permalink || '#'}">
-                          <img 
-                            src="${p.image}" 
-                            class="img-fluid object-fit-contain" 
-                            alt="${p.name}" 
-                            style="max-height: 220px; width: 100%;"
-                          >
+                        <img src="${p.image}" class="img-fluid object-fit-contain" alt="${p.name}" style="max-height: 220px; width: 100%;">
                         </a>
-                      </div>
-
-                      <div class="card-body p-0 mt-3 d-flex flex-column justify-content-end">
-                        
+                    </div>
+                    <div class="card-body p-0 mt-3 d-flex flex-column justify-content-end">
                         <h5 class="card-title fw-bold text-dark mb-3" style="font-size: 1rem;">
-                          <a href="/shop/buy/${p.permalink || '#'}" class="text-decoration-none text-dark hover-primary">
-                            ${p.name || 'Electric Hand Blender, 150 Watts'}
-                          </a>
+                        <a href="/shop/buy/${p.permalink || '#'}" class="text-decoration-none text-dark hover-primary">${p.name || 'Electric Hand Blender, 150 Watts'}</a>
                         </h5>
-
                         <div class="d-flex justify-content-between align-items-center mt-auto">
-                          <span class="fw-semibold">
-                            ${p.currencySymbol || '£'}${p.price}
-                          </span>
-                          
-                          <a class="btn btn-link p-0 text-dark fs-3" href="/shop/buy/${p.permalink || '#'}" aria-label="Add to Cart">
-                            <i class="bi bi-cart3"></i>
-                          </a>
+                        <span class="fw-semibold">${p.currencySymbol || '£'}${p.price}</span>
+                                <div class="d-inline-flex align-items-center gap-3">
+                                <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
+                                        style="color: ${heartColor};"
+                                        aria-label="Add to Wishlist" 
+                                        onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
+                                    <i class="bi ${heartIcon}"></i>
+                                </button>
+                                
+                                <a class="btn btn-link p-0 text-dark fs-4 lh-1 d-inline-flex align-items-center" 
+                                href="/shop/buy/${p.permalink || '#'}" 
+                                aria-label="Add to Cart">
+                                    <i class="bi bi-cart3"></i>
+                                </a>
+                            </div>
                         </div>
-
-                      </div>
-
+                    </div>
                     </div>
                 </div>
             `);
@@ -232,7 +225,8 @@ class Home {
             box.slick({
                 slidesToShow: 1, 
                 slidesToScroll: 1,
-                autoplay: true,
+                autoplay: true,          // ◄ Autoplay on rahega
+                autoplaySpeed: speed,    // ◄ Har row ki apni speed yahan set hogi
                 arrows: false,
                 dots: false
             });
@@ -268,17 +262,7 @@ class Home {
                                     ${p.category || 'Sell Phone'}
                                 </strong>
                                 
-                                <div class="d-flex flex-column gap-2 align-items-center">
-                                  <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
-                                          style="color: ${heartColor};"
-                                          aria-label="Add to Wishlist" 
-                                          onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
-                                      <i class="bi ${heartIcon}"></i>
-                                  </button>
-                                    <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5 lh-1" aria-label="Compare Product">
-                                        <i class="bi bi-arrow-left-right"></i>
-                                    </button>
-                                </div>
+                           
                             </div>
 
                             <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
@@ -303,9 +287,15 @@ class Home {
                             <div class="d-flex justify-content-between align-items-end pt-1">
                                 <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
                                 
-                                <a href="/shop/buy/${p.url || '#'}" class="text-dark fs-4 lh-1 p-1" aria-label="Buy Now">
-                                    <i class="bi bi-cart3"></i>
-                                </a>
+                                                     <div>
+                               <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                                style="color: ${heartColor};"
+                                aria-label="Add to Wishlist" 
+                                onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
+                            <i class="bi ${heartIcon}"></i>
+                        </button>
+                        <a class="btn btn-link p-0 text-dark fs-3" href="/shop/buy/${p.url || '#'}" aria-label="Add to Cart"><i class="bi bi-cart3"></i></a>
+                        </div>
                             </div>
                         </div>
 
@@ -330,17 +320,7 @@ class Home {
                                     ${p.category || 'Sell Phone'}
                                 </strong>
                                 
-                                <div class="d-flex flex-column gap-2 align-items-center">
-                                  <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
-                                          style="color: ${heartColor};"
-                                          aria-label="Add to Wishlist" 
-                                          onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
-                                      <i class="bi ${heartIcon}"></i>
-                                   </button>
-                                    <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5 lh-1" aria-label="Compare Product">
-                                        <i class="bi bi-arrow-left-right"></i>
-                                    </button>
-                                </div>
+                            
                             </div>
 
                             <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
@@ -365,9 +345,15 @@ class Home {
                             <div class="d-flex justify-content-between align-items-end pt-1">
                                 <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
                                 
-                                <a href="/shop/buy/${p.url || '#'}" class="text-dark fs-4 lh-1 p-1" aria-label="Buy Now">
-                                    <i class="bi bi-cart3"></i>
-                                </a>
+                                                    <div>
+                               <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                                style="color: ${heartColor};"
+                                aria-label="Add to Wishlist" 
+                                onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
+                            <i class="bi ${heartIcon}"></i>
+                        </button>
+                        <a class="btn btn-link p-0 text-dark fs-3" href="/shop/buy/${p.url || '#'}" aria-label="Add to Cart"><i class="bi bi-cart3"></i></a>
+                        </div>
                             </div>
                         </div>
 
@@ -378,7 +364,7 @@ class Home {
 
 
         if (data.banner?.image) {
-            const bannerBox = document.getElementById('bannerBox'); 
+            const bannerBox = document.getElementById('centerBanner'); 
             if (bannerBox) {
                 bannerBox.innerHTML = `
                     <a class="img-fluid w-100 rounded d-block" 

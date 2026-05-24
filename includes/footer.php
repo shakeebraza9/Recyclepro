@@ -2,79 +2,89 @@
 $config = require_once __DIR__ . '/config.php';
 $baseAPI = $config['API_URL'] ?? '';
 ?>
-<footer class="bg-dark text-white py-5">
+<footer class="bg-dark text-white py-5 mt-auto">
     <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <h5>Privacy Policy</h5>
-                <ul class="list-unstyled">
-                    <li><a href="/shop/delivery-terms" class="text-white-50 text-decoration-none">Delivery Terms</a></li>
-                    <li><a href="/shop/terms-conditions" class="text-white-50 text-decoration-none">Terms Conditions</a></li>
-                    <li><a href="/shop/privacy-policy" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
-                    <li><a href="/shop/cookies-policy" class="text-white-50 text-decoration-none">Cookies Policy</a></li>
-                    <li><a href="/shop/return-policy-warranty" class="text-white-50 text-decoration-none">Return Policy &amp; Warranty</a></li>
-                    <li><a href="/shop/legal-hub-page" class="text-white-50 text-decoration-none">Legal Hub</a></li>
+        <div class="row g-4 text-center text-md-start">
+            <div class="col-sm-6 col-md-3">
+                <h5 class="text-uppercase mb-3 tracking-wide text-white font-semibold">Privacy Policy</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="/shop/delivery-terms" class="text-white-50 text-decoration-none footer-link">Delivery Terms</a></li>
+                    <li class="mb-2"><a href="/shop/terms-conditions" class="text-white-50 text-decoration-none footer-link">Terms Conditions</a></li>
+                    <li class="mb-2"><a href="/shop/privacy-policy" class="text-white-50 text-decoration-none footer-link">Privacy Policy</a></li>
+                    <li class="mb-2"><a href="/shop/cookies-policy" class="text-white-50 text-decoration-none footer-link">Cookies Policy</a></li>
+                    <li class="mb-2"><a href="/shop/return-policy-warranty" class="text-white-50 text-decoration-none footer-link">Return & Warranty</a></li>
+                    <li class="mb-2"><a href="/shop/legal-hub-page" class="text-white-50 text-decoration-none footer-link">Legal Hub</a></li>
                 </ul>
             </div>
-            <div class="col-md-3">
-                <h5>Get Involved</h5>
-                <ul class="list-unstyled">
-                       <li><a href="/shop/about-us" class="text-white-50 text-decoration-none">About Us</a></li>
-                    <!-- <li><a href="/shop/orders-shipping" class="text-white-50 text-decoration-none">Orders &amp; Shipping</a></li> -->
-                    <!-- <li><a href="/shop/affiliate-program" class="text-white-50 text-decoration-none">Affiliate Program</a></li> -->
-                    <li><a href="/shop/shipment-payment" class="text-white-50 text-decoration-none">Shipment &amp; Payment</a></li>
+            
+            <div class="col-sm-6 col-md-3">
+                <h5 class="text-uppercase mb-3 tracking-wide text-white font-semibold">Get Involved</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="/shop/about-us" class="text-white-50 text-decoration-none footer-link">About Us</a></li>
+                    <li class="mb-2"><a href="/shop/shipment-payment" class="text-white-50 text-decoration-none footer-link">Shipment & Payment</a></li>
                 </ul>
             </div>
-            <div class="col-md-3">
-                <h5>Quick Links</h5>
-                <ul class="list-unstyled" id="quicklinks">
-                    
-                </ul>
+            
+            <div class="col-sm-6 col-md-3">
+                <h5 class="text-uppercase mb-3 tracking-wide text-white font-semibold">Quick Links</h5>
+                <ul class="list-unstyled mb-0" id="quicklinks">
+                    </ul>
             </div>
-            <div class="col-md-3">
-                <h5>Customer Care</h5>
-                <ul class="list-unstyled">
-                <li><a href="/shop/contact-us" class="text-white-50 text-decoration-none">Contact Us</a></li>
-                    <!-- <li><a href="/shop/customer-service" class="text-white-50 text-decoration-none">Customer Service</a></li> -->
-                    <li><a href="/shop/frequent-questions" class="text-white-50 text-decoration-none">Frequent Questions</a></li>
-                    <!-- <li><a href="/shop/frequently-asked-questions" class="text-white-50 text-decoration-none">Frequently Asked Questions</a></li> -->
+            
+            <div class="col-sm-6 col-md-3">
+                <h5 class="text-uppercase mb-3 tracking-wide text-white font-semibold">Customer Care</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="/shop/contact-us" class="text-white-50 text-decoration-none footer-link">Contact Us</a></li>
+                    <li class="mb-2"><a href="/shop/frequent-questions" class="text-white-50 text-decoration-none footer-link">Frequent Questions</a></li>
                 </ul>
             </div>
         </div>
-        <hr class="bg-secondary">
-        <div class="row align-items-center">
-            <div class="col-md-3">
-                <img src="/shop/img/logo white f.png" alt="PayPal" style="height: 100px;" class="me-2 img-fluid">
+        
+        <hr class="my-4 border-secondary">
+        
+        <div class="row align-items-center justify-content-between g-3 text-center text-md-start">
+            <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start align-items-center header-brand">
+                <a href="/shop/" class="header-logo-link">
+                    <img class="logo img-fluid" src="/shop/img/rplogo.png" alt="Recycle Pro Logo" style="max-height: 50px;">
+                </a>
+                <button class="mobile-menu-toggle d-md-none ms-2" type="button" id="mobileMenuToggle" aria-controls="menu" aria-expanded="true" aria-label="Collapse menu">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
-            <div class="col-md-6 text-center">
-                <p class="mb-0" style="font-size: 21px;">
-                    
-                    <i class="bi bi-envelope"></i> order@recyclerpro.co.uk
+            
+            <div class="col-12 col-md-6 text-center">
+                <p class="mb-0 footer-email-text">
+                    <i class="bi bi-envelope me-1"></i> order@recyclerpro.co.uk
                 </p>
             </div>
-            <div class="col-md-3 text-end">
-                <span class="me-2">Follow Us:</span>
-                <a href="#" class="text-white me-2"><i class="bi bi-facebook"></i></a>
-                <a href="#" class="text-white me-2"><i class="bi bi-twitter-x"></i></a>
-                <a href="#" class="text-white me-2"><i class="bi bi-tiktok"></i></a>
-                <a href="#" class="text-white me-2"><i class="bi bi-youtube"></i></a>
+            
+            <div class="col-12 col-md-3 text-center text-md-end social-container">
+                <span class="me-2 text-white-50 small">Follow Us:</span>
+                <div class="d-inline-flex gap-2 social-icons">
+                    <a href="#" class="text-white footer-icon"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-white footer-icon"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="text-white footer-icon"><i class="bi bi-tiktok"></i></a>
+                    <a href="#" class="text-white footer-icon"><i class="bi bi-youtube"></i></a>
+                </div>
             </div>
         </div>
 
-                    <div class="footer-bottom-bar">
-                <p class="copyright-txt">&copy; 2026 RECYCLEPRO, ALL RIGHTS RESERVED</p>
-                
-                <div class="payment-icons">
-                    <img src=<?php echo $baseAPI. "/shop/img/cards/pay_maestro.png"; ?> alt="Maestro">
-                    <img src=<?php echo $baseAPI . "/shop/img/cards/pay_mastercard.png"; ?> alt="Mastercard">
-                    <img src=<?php echo $baseAPI . "/shop/img/cards/pay_amex.png"; ?> alt="American Express">
-                    <img src=<?php echo $baseAPI . "/shop/img/cards/pay_visa.avif"; ?> alt="Visa">
-                    <img src=<?php echo $baseAPI . "/shop/img/cards/pay_paypal.webp"; ?> alt="PayPal">
-                    <!-- <img src="storage/images/pay_ideal.png" alt="iDEAL"> -->
-                </div>
+        <hr class="my-4 border-secondary">
+
+        <div class="row align-items-center g-3 text-center text-sm-between " style="display: flex; display: flex; justify-content: space-between;">
+            <div class="col-12 col-sm-auto">
+                <p class="copyright-txt mb-0 text-white-50 small">&copy; 2026 RECYCLEPRO. ALL RIGHTS RESERVED.</p>
             </div>
+            
+            <div class="col-12 col-sm-auto payment-icons d-flex flex-wrap justify-content-center gap-2">
+                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_maestro.png" alt="Maestro" class="img-fluid" style="height: 24px;">
+                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_mastercard.png" alt="Mastercard" class="img-fluid" style="height: 24px;">
+                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_amex.png" alt="American Express" class="img-fluid" style="height: 24px;">
+                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_visa.avif" alt="Visa" class="img-fluid" style="height: 24px;">
+                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_paypal.webp" alt="PayPal" class="img-fluid" style="height: 24px;">
+            </div>
+        </div>
     </div>
-  
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

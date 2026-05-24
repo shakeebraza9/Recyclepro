@@ -17,6 +17,7 @@
     # /category/sell-phone
     # =========================
     RewriteRule ^category/([a-z0-9-]+)/?$ category.php?slug=$1 [QSA,L]
+    RewriteRule ^test/([a-z0-9-]+)/?$ test.php?slug=$1 [QSA,L]
 
     # =========================
     # 3. Shop home category page
