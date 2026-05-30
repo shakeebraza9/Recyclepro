@@ -11,12 +11,13 @@ include __DIR__ . '/includes/header.php';
 
 
 <section class="py-5 bg-light-subtle">
-    <div class="container">
+    <div class="container" style="max-width: 100%;">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10">
                 <div class="content-scroll-wrapper">
-                    <div id="pageContent" class="custom-scroll-content p-3 p-md-4" 
-                         style="max-height: 300px; overflow-y: auto;">
+                    <div id="pageContent" class="custom-scroll-content p-3 p-md-4">
+                    <!-- <div id="pageContent" class="custom-scroll-content p-3 p-md-4" 
+                         style="max-height: 300px; overflow-y: auto;"> -->
                     </div>
                 </div>
             </div>
@@ -58,7 +59,7 @@ include __DIR__ . '/includes/header.php';
     </div>
     
     <div class="text-center mt-4">
-      <a href="shop/category/" class="btn btn-outline-dark">View All Category</a>
+      <a href="category/" class="btn btn-outline-dark">View All Category</a>
     </div>
   </div>
 </section>

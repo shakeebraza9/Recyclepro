@@ -35,7 +35,7 @@ $baseAPI = $config['API_URL'] ?? '';
                 <h5 class="text-uppercase mb-3 tracking-wide text-white font-semibold">Customer Care</h5>
                 <ul class="list-unstyled mb-0">
                     <li class="mb-2"><a href="/shop/contact-us" class="text-white-50 text-decoration-none footer-link">Contact Us</a></li>
-                    <li class="mb-2"><a href="/shop/frequent-questions" class="text-white-50 text-decoration-none footer-link">Frequent Questions</a></li>
+                    <li class="mb-2"><a href="/shop/frequently-asked-questions" class="text-white-50 text-decoration-none footer-link">Frequent Questions</a></li>
                 </ul>
             </div>
         </div>

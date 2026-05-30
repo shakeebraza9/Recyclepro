@@ -160,7 +160,7 @@ function renderHeader(data) {
                     Login
                 </button>
                 <button type="button" class="btn btn-account-mobile w-100 py-2" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="open-account">
-                    <i class="bi bi-person"></i> Open Account
+                    <i class="bi bi-person"></i> Create Account
                 </button>
             </div>
 
@@ -553,35 +553,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    openAccountForm?.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const status = document.getElementById('openAccountStatus');
-        const submitButton = openAccountForm.querySelector('button[type="submit"]');
-        const name = openAccountForm.name.value.trim();
-        const email = openAccountForm.email.value.trim();
-        const password = openAccountForm.password.value;
+openAccountForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = document.getElementById('openAccountStatus');
+    const submitButton = openAccountForm.querySelector('button[type="submit"]');
+    
 
-        status.textContent = '';
-        submitButton.disabled = true;
+    const firstName = document.getElementById('accountFirstName').value.trim();
+    const lastName = document.getElementById('accountLastName').value.trim();
+    const email = document.getElementById('accountEmail').value.trim();
+    const phone = document.getElementById('accountPhone').value.trim();
+    const address = document.getElementById('accountAddress').value.trim();
+    const postalCode = document.getElementById('accountPostalCode').value.trim();
+    const password = document.getElementById('accountPassword').value;
+    const confirmPassword = document.getElementById('accountConfirmPassword').value;
 
-        try {
-            const data = await submitAccountForm('open-account', { name, email, password });
-            storeAccount({
-                name: data?.name || data?.user?.name || data?.display_name || name,
-                email,
-                token: data.token || data.jwt || ''
-            });
-            status.textContent = 'Account created successfully.';
-            status.className = 'small text-success';
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('accountModal')).hide();
-            openAccountForm.reset();
-        } catch (error) {
-            status.textContent = error.message;
-            status.className = 'small text-danger';
-        } finally {
-            submitButton.disabled = false;
-        }
-    });
+    status.textContent = '';
+
+
+    if (password !== confirmPassword) {
+        status.textContent = 'Passwords do not match!';
+        status.className = 'small text-danger';
+        return; 
+    }
+
+    submitButton.disabled = true;
+
+    try {
+
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        const data = await submitAccountForm('open-account', { 
+            name: fullName, 
+            firstName,
+            lastName,
+            email, 
+            phone,
+            address,
+            postalCode,
+            password 
+        });
+
+        storeAccount({
+            name: data?.name || data?.user?.name || data?.display_name || fullName,
+            email,
+            token: data.token || data.jwt || ''
+        });
+
+        status.textContent = 'Account created successfully.';
+        status.className = 'small text-success';
+        
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('accountModal')).hide();
+        openAccountForm.reset();
+    } catch (error) {
+        status.textContent = error.message;
+        status.className = 'small text-danger';
+    } finally {
+        submitButton.disabled = false;
+    }
+});
 });
 
 
@@ -704,7 +735,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     <button type="button" class="btn btn-account text-white" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="open-account">
                         <i class="bi bi-person"></i>
-                        Open Account
+                        Create Account
                     </button>
                 </span>
 
@@ -741,58 +772,112 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content account-modal">
-            <div class="modal-header">
-                <h5 class="modal-title" id="accountModalLabel">Your Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content account-modal" style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            
+            <div class="modal-header" style="background-color: #ffffff; border-bottom: 1px solid #f1f1f1; padding: 20px 24px;">
+                <h5 class="modal-title" id="accountModalLabel" style="font-weight: 700; color: #212529; letter-spacing: -0.5px;">Your Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="box-shadow: none;"></button>
             </div>
-            <div class="modal-body">
-                <ul class="nav nav-pills account-tabs mb-4" id="accountTabs" role="tablist">
+
+            <div class="modal-body" style="padding: 24px;">
+                <ul class="nav nav-pills account-tabs mb-4" id="accountTabs" role="tablist" style="background: #f8f9fa; padding: 6px; border-radius: 30px; display: inline-flex;">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#loginPane" type="button" role="tab" aria-controls="loginPane" aria-selected="true">Login</button>
+                        <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#loginPane" type="button" role="tab" aria-controls="loginPane" aria-selected="true" 
+                                style="border-radius: 25px; font-weight: 600; padding: 8px 24px; transition: all 0.3s ease;">
+                            Login
+                        </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="open-account-tab" data-bs-toggle="pill" data-bs-target="#openAccountPane" type="button" role="tab" aria-controls="openAccountPane" aria-selected="false">Open Account</button>
+                        <button class="nav-link" id="open-account-tab" data-bs-toggle="pill" data-bs-target="#openAccountPane" type="button" role="tab" aria-controls="openAccountPane" aria-selected="false"
+                                style="border-radius: 25px; font-weight: 600; padding: 8px 24px; transition: all 0.3s ease;">
+                            Create Account
+                        </button>
                     </li>
                 </ul>
 
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="loginPane" role="tabpanel" aria-labelledby="login-tab">
-                        <form id="loginForm">
+                        <form id="loginForm" style="max-width: 450px; margin: 0 auto; padding: 10px 0;">
                             <div class="mb-3">
-                                <label for="loginEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="loginEmail" name="email" placeholder="name@emial.com" required>
+                                <label for="loginEmail" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">Email <span style="color: #dc3545;">*</span></label>
+                                <input type="email" class="form-control" id="loginEmail" name="email" placeholder="name@email.com" required 
+                                       style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                             </div>
-                            <div class="mb-3">
-                                <label for="loginPassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="loginPassword" name="password" placeholder="*****" required>
+                            <div class="mb-4">
+                                <label for="loginPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">Password <span style="color: #dc3545;">*</span></label>
+                                <input type="password" class="form-control" id="loginPassword" name="password" placeholder="••••••••" required 
+                                       style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                             </div>
-                            <p id="loginStatus" class="small mb-3"></p>
-                            <button type="submit" class="btn btn-dark w-100">Login</button>
+                            <p id="loginStatus" class="small mb-3" style="font-weight: 500;"></p>
+                            <button type="submit" class="btn btn-dark w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #212529; border: none; transition: background 0.2s;">Login</button>
                         </form>
                     </div>
 
                     <div class="tab-pane fade" id="openAccountPane" role="tabpanel" aria-labelledby="open-account-tab">
                         <form id="openAccountForm">
-                            <div class="mb-3">
-                                <label for="accountName" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="accountName" name="name" placeholder="Kamran" required>
+                            <div class="row g-3">
+                                
+                                <div class="col-md-6">
+                                    <label for="accountFirstName" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">First Name <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountFirstName" name="firstName" placeholder="Enter First Name" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountLastName" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Last Name <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountLastName" name="lastName" placeholder="Enter Last Name" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountEmail" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Email <span style="color: #dc3545;">*</span></label>
+                                    <input type="email" class="form-control" id="accountEmail" name="email" placeholder="Enter Email" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountPhone" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Phone Number <span style="color: #dc3545;">*</span></label>
+                                    <input type="tel" class="form-control" id="accountPhone" name="phone" placeholder="Enter Phone Number" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountAddress" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Address Line <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountAddress" name="address" placeholder="Enter Address Line" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountPostalCode" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Postal Code <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountPostalCode" name="postalCode" placeholder="postcode" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Password <span style="color: #dc3545;">*</span></label>
+                                    <input type="password" class="form-control" id="accountPassword" name="password" placeholder="Enter Password..." required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="accountConfirmPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Confirm Password <span style="color: #dc3545;">*</span></label>
+                                    <input type="password" class="form-control" id="accountConfirmPassword" name="confirmPassword" placeholder="Enter Confirm Password" required 
+                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                </div>
+
                             </div>
-                            <div class="mb-3">
-                                <label for="accountEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="accountEmail" name="email" placeholder="kamran@test.com" required>
+
+                            <p id="openAccountStatus" class="small mt-3 mb-2" style="font-weight: 500;"></p>
+                            
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-dark w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #212529; border: none; transition: background 0.2s;">Create Account</button>
                             </div>
-                            <div class="mb-3">
-                                <label for="accountPassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="accountPassword" name="password" placeholder="123456" required>
-                            </div>
-                            <p id="openAccountStatus" class="small mb-3"></p>
-                            <button type="submit" class="btn btn-dark w-100">Open Account</button>
                         </form>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

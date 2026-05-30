@@ -413,15 +413,9 @@ $(document).ready(function() {
 
     const $catDropdowns = $('.cat-select-dropdown');
 
-    // ==========================================
-    // ⚙️ URL STATE MANAGEMENT FUNCTIONS
-    // ==========================================
-    
-    // 1. URL parameters ko read karke system filters state set karna
     function parseUrlFiltersAndApply() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Price filters load karna
         if (urlParams.has('min_price')) {
             currentMinPriceFilter = parseFloat(urlParams.get('min_price'));
         }
@@ -579,10 +573,10 @@ $(document).ready(function() {
                 calculatePriceRangeLimits(allFetchedProducts);
                 buildDynamicAttributeFilters(allFetchedProducts);
                 
-                // CRITICAL FIX: Products fetch hone ke baad aur filters setup hone ke baad URL parse karna hai
+
                 parseUrlFiltersAndApply();
                 
-                applySelectedFilters(false); // Initial internal filter call without reset
+                applySelectedFilters(false); 
             },
             error: function(err) {
                 console.error("Products engine runtime failure: ", err);
@@ -654,13 +648,41 @@ $(document).ready(function() {
                                 <img src="${fallbackImg}" alt="${p.name}" class="img-fluid" style="max-height: 150px; object-fit: contain;">
                             </a>
                                 </div>
-                            <div>
-                                <h3 class="product-title text-start mb-1">${p.name || 'Device Catalog Item'}</h3>
-                                <div class="text-start product-meta mb-2">
-                                    ${dynamicGradeBadge} <i class="bi bi-info-circle" style="font-size: 10px;"></i>
-                                </div>
-                                <div class="text-start product-price mb-2">${priceLabel}</div>
+                        <div>
+                            <h3 class="product-title text-start mb-1">${p.name || 'Device Catalog Item'}</h3>
+                            
+                            <div class="text-start product-meta mb-2">
+                                ${dynamicGradeBadge} <i class="bi bi-info-circle" style="font-size: 10px;"></i>
                             </div>
+
+                            <div class="text-start product-colors mb-3">
+                                <span class="d-block text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; uppercase; letter-spacing: 0.5px;">
+                                    Color: <span id="selected-color-name-${p.slug || 'item'}" style="color: #212529; font-weight: 700;">Default</span>
+                                </span>
+                                
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button type="button" 
+                                            class="color-circle-btn active" 
+                                            onclick="selectProductColor(this, 'Bronze Gold', '${p.slug || 'item'}')"
+                                            style="width: 24px; height: 24px; border-radius: 50%; background-color: #bfa17f; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #212529; cursor: pointer; transition: all 0.2s ease; padding: 0;">
+                                    </button>
+
+                                    <button type="button" 
+                                            class="color-circle-btn" 
+                                            onclick="selectProductColor(this, 'Titanium Black', '${p.slug || 'item'}')"
+                                            style="width: 24px; height: 24px; border-radius: 50%; background-color: #232426; border: 2px solid #ffffff; box-shadow: 0 0 0 1px #dee2e6; cursor: pointer; transition: all 0.2s ease; padding: 0;">
+                                    </button>
+
+                                    <button type="button" 
+                                            class="color-circle-btn" 
+                                            onclick="selectProductColor(this, 'Titanium White', '${p.slug || 'item'}')"
+                                            style="width: 24px; height: 24px; border-radius: 50%; background-color: #e3e4e5; border: 2px solid #ffffff; box-shadow: 0 0 0 1px #dee2e6; cursor: pointer; transition: all 0.2s ease; padding: 0;">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="text-start product-price mb-2">${priceLabel}</div>
+                        </div>
                             <div>
                                 <a href="${BASE_URL}buy/${p.slug || '#'}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
                             </div>
@@ -734,7 +756,7 @@ $(document).ready(function() {
         Object.keys(attributesMatrix).forEach(key => {
             groupIndex++;
             const safeCollapseId = `collapse-attr-${groupIndex}`;
-            const urlFriendlyKey = key.replace(/\s+/g, '-').toLowerCase(); // Dynamic binding matching URL param keys
+            const urlFriendlyKey = key.replace(/\s+/g, '-').toLowerCase(); 
 
             let filterGroupBlock = `
                 <div class="mb-3 border-bottom pb-2">
@@ -769,7 +791,7 @@ $(document).ready(function() {
         });
     }
 
-    // UPDATED FUNCTION: URL Engine Injection
+
     function applySelectedFilters(shouldResetPage = true) {
         let activeFiltersMap = {};
         
@@ -783,12 +805,12 @@ $(document).ready(function() {
             activeFiltersMap[attrName].push(checkedVal);
         });
 
-        // Agar checkbox ya price khud click kiya hai, tabhi page resets to 1.
+       
         if (shouldResetPage) {
             currentPage = 1; 
         }
 
-        // Live Dynamic State Sync via URL Parameter String
+
         updateUrlWithFilters(activeFiltersMap);
 
         filteredProducts = allFetchedProducts.filter(product => {
@@ -818,9 +840,7 @@ $(document).ready(function() {
         renderProductsGrid();
     }
 
-    // ==========================================
-    // 🎛️ EVENTS & INTERACTIONS
-    // ==========================================
+
     $(document).on('click', '.apply-price-btn', function() {
         const parentSection = $(this).closest('.price-filter-section');
         let minVal = parseFloat(parentSection.find('.min-price-input').val());
@@ -877,19 +897,22 @@ $(document).ready(function() {
     $catDropdowns.on('change', function() {
         const parentSlugValue = $(this).val();
         if (!parentSlugValue) return;
-      
+
         $catDropdowns.not(this).val(parentSlugValue);
         renderSubCategoryLinksHtml(parentSlugValue);
 
         if (parentSlugValue === 'all') {
-            window.location.href = 'http://localhost:8080/shop';
+            window.location.href = BASE_URL;
         } else {
-            // Dropdown change par URL parameters clear ho kar naye series se render hote hain
-            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+            const baseUrlClean = BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/';
+            const targetUrl = baseUrlClean + "category/" + parentSlugValue + "/";
+
+            window.history.pushState({ path: targetUrl }, '', targetUrl);
+            
             currentMinPriceFilter = null;
             currentMaxPriceFilter = null;
             currentPage = 1;
+            
             fetchCategoryProducts(parentSlugValue);
         }
     });
@@ -897,7 +920,7 @@ $(document).ready(function() {
     $(document).on('click', '.numeric-index-btn', function(event) {
         event.preventDefault();
         currentPage = parseInt($(this).data('target-page'));
-        applySelectedFilters(false); // Pagination shift par attributes reset nahi honge
+        applySelectedFilters(false); 
         $('html, body').animate({ scrollTop: 0 }, 'fast');
     });
 
@@ -918,7 +941,7 @@ $(document).ready(function() {
         }
     });
 
-    // Back button/Forward button support handler
+
     window.addEventListener('popstate', function() {
         location.reload();
     });

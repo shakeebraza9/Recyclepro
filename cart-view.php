@@ -227,9 +227,9 @@ include __DIR__ . '/includes/header.php';
                                 <strong id="summary-total" class="text-dark fw-bold fs-5">£0.00</strong>
                             </div>
                             
-                            <a href="/shop/checkout" class="btn btn-checkout w-100 py-3 text-uppercase tracking-wider fw-semibold">
+                            <button type="button" id="checkoutBtn" onclick="handleCheckout()" class="btn btn-checkout w-100 py-3 text-uppercase tracking-wider fw-semibold">
                                 Proceed To Checkout
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -435,6 +435,31 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
     return escapeHtml(value).replace(/`/g, '&#096;');
+}
+
+function handleCheckout() {
+
+    const userAccount = localStorage.getItem('recycleproAccount');
+
+    if (userAccount) {
+
+        window.location.href = "/shop/checkout";
+    } else {
+
+        const accountModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('accountModal'));
+        accountModal.show();
+        showToast("You need to be logged in before you can checkout",'warning');
+        
+        sessionStorage.setItem('redirectAfterLogin', '/shop/checkout');
+    }
+}
+
+function checkPostLoginRedirect() {
+    const redirectTo = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectTo) {
+        sessionStorage.removeItem('redirectAfterLogin'); 
+        window.location.href = redirectTo; 
+    }
 }
 </script>
 

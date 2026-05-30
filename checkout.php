@@ -122,9 +122,7 @@ include __DIR__ . '/includes/header.php';
                                 <label for="shipping_country" class="form-label">Country <span>*</span></label>
                                 <select class="form-select" id="shipping_country" name="shipping_country" required>
                                     <option value="United Kingdom" selected>United Kingdom</option>
-                                    <option value="Ireland">Ireland</option>
-                                    <option value="United States">United States</option>
-                                    <option value="Other">Other</option>
+                      
                                 </select>
                             </div>
                         </div>
