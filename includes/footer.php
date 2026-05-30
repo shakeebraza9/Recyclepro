@@ -8,7 +8,7 @@ $baseAPI = $config['API_URL'] ?? '';
             <div class="col-sm-6 col-md-3">
                 <h5 class="text-uppercase mb-3 tracking-wide text-white font-semibold">Privacy Policy</h5>
                 <ul class="list-unstyled mb-0">
-                    <li class="mb-2"><a href="/shop/delivery-terms" class="text-white-50 text-decoration-none footer-link">Delivery Terms</a></li>
+                    
                     <li class="mb-2"><a href="/shop/terms-conditions" class="text-white-50 text-decoration-none footer-link">Terms Conditions</a></li>
                     <li class="mb-2"><a href="/shop/privacy-policy" class="text-white-50 text-decoration-none footer-link">Privacy Policy</a></li>
                     <li class="mb-2"><a href="/shop/cookies-policy" class="text-white-50 text-decoration-none footer-link">Cookies Policy</a></li>
@@ -77,17 +77,36 @@ $baseAPI = $config['API_URL'] ?? '';
             </div>
             
             <div class="col-12 col-sm-auto payment-icons d-flex flex-wrap justify-content-center gap-2">
-                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_maestro.png" alt="Maestro" class="img-fluid" style="height: 24px;">
-                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_mastercard.png" alt="Mastercard" class="img-fluid" style="height: 24px;">
-                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_amex.png" alt="American Express" class="img-fluid" style="height: 24px;">
-                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_visa.avif" alt="Visa" class="img-fluid" style="height: 24px;">
-                <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_paypal.webp" alt="PayPal" class="img-fluid" style="height: 24px;">
-            </div>
+    <div class="payment-card-box">
+        <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_maestro.png" alt="Maestro" class="img-fluid">
+    </div>
+    <div class="payment-card-box">
+        <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_mastercard.png" alt="Mastercard" class="img-fluid">
+    </div>
+    <div class="payment-card-box">
+        <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_amex.png" alt="American Express" class="img-fluid">
+    </div>
+    <div class="payment-card-box">
+        <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_visa.avif" alt="Visa" class="img-fluid">
+    </div>
+    <div class="payment-card-box">
+        <img src="<?php echo $baseAPI; ?>/shop/img/cards/pay_paypal.webp" alt="PayPal" class="img-fluid">
+    </div>
+</div>
         </div>
     </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function() {
+        const toastScript = document.createElement('script');
+        const rootPath = (typeof BASE_URL !== 'undefined') ? BASE_URL : '/';
+        
+        toastScript.src = rootPath + "assets/js/toast.js";
+        document.body.appendChild(toastScript);
+    })();
+</script>
 <script>
     function updateHeaderWishlistCount() {
     const badge = $("#globalWishlistCount");
@@ -112,29 +131,29 @@ const $dropdown = $("#search-results-dropdown");
 
 
 function searchProducts(query) {
+    const $dropdown = $("#search-results-dropdown"); // Ensure this variable is defined
 
     $.ajax({
         url: `${baseAPI}wp-json/custom/v1/search-products`,
         method: 'GET',
         data: { term: query },
         success: function (response) {
-
             console.log("DEBUG RESPONSE:", response);
 
             let products = Array.isArray(response) ? response : [response];
 
-            if (products.length > 0) {
-
+            if (products.length > 0 && products[0] !== null) {
                 let html = "";
 
                 $.each(products, function (i, product) {
-
+                    if (!product) return;
+                    
                     html += `
-                        <a href="${product.permalink}" class="search-result-item">
-                            <img src="${product.image || '/placeholder.png'}">
+                        <a href="${product.permalink || '#'}" class="search-result-item">
+                            <img src="${product.image || '/placeholder.png'}" alt="${product.name}">
                             <div class="search-result-info">
-                                <h4>${product.name}</h4>
-                                <div>£${product.price}</div>
+                                <h4 class="search-result-title">${product.name}</h4>
+                                <div class="search-result-price">£${product.price}</div>
                             </div>
                         </a>
                     `;
@@ -143,18 +162,25 @@ function searchProducts(query) {
                 $dropdown.html(html).removeClass("d-none");
 
             } else {
-                $dropdown.html("<div class='p-3 text-center'>No product found</div>")
-                         .removeClass("d-none");
+                $dropdown.html(`
+                    <div class="search-dropdown-status">
+                        <i class="bi bi-search text-muted d-block fs-3 mb-2"></i>
+                        <span>No products found matching "${query}"</span>
+                    </div>
+                `).removeClass("d-none");
             }
         },
 
         error: function () {
-            $dropdown.html("<div class='p-3 text-danger text-center'>API Error</div>")
-                     .removeClass("d-none");
+            $dropdown.html(`
+                <div class="search-dropdown-status text-danger">
+                    <i class="bi bi-exclamation-circle d-block fs-3 mb-2"></i>
+                    <span>Failed to fetch results. API Error.</span>
+                </div>
+            `).removeClass("d-none");
         }
     });
 }
-
 
 $btn.on("click", function () {
     let query = $input.val().trim();
@@ -238,7 +264,7 @@ $.ajax({
             li.innerHTML = `
 
 
-                <li><a href="${finalUrl}" class="text-white-50 text-decoration-none">${category.name}</a></li>
+                <li class="mb-2"><a href="${finalUrl}" class="text-white-50 text-decoration-none">${category.name}</a></li>
             `;
             quicklinksContainer.appendChild(li);
         });

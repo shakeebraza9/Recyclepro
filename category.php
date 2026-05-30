@@ -130,12 +130,7 @@ if (!$slug) {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
     }
-    .product-card-header {
-        background-color: var(--surface-3);
-        height: 25px;
-        border-top-left-radius: calc(var(--radius) - 1px);
-        border-top-right-radius: calc(var(--radius) - 1px);
-    }
+
     .product-title {
         font-size: 12px;
         font-weight: 700;
@@ -402,7 +397,6 @@ $(document).ready(function() {
     const activeCategorySlug = '<?php echo $slug; ?>';
     const activeSubCategorySlug = '<?php echo $sub_slug; ?>';
           
-
     let allFetchedProducts = []; 
     let filteredProducts = [];   
     let categoriesGlobalTree = []; 
@@ -419,8 +413,69 @@ $(document).ready(function() {
 
     const $catDropdowns = $('.cat-select-dropdown');
 
-
+    // ==========================================
+    // ⚙️ URL STATE MANAGEMENT FUNCTIONS
+    // ==========================================
     
+    // 1. URL parameters ko read karke system filters state set karna
+    function parseUrlFiltersAndApply() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Price filters load karna
+        if (urlParams.has('min_price')) {
+            currentMinPriceFilter = parseFloat(urlParams.get('min_price'));
+        }
+        if (urlParams.has('max_price')) {
+            currentMaxPriceFilter = parseFloat(urlParams.get('max_price'));
+        }
+
+
+        urlParams.forEach((value, key) => {
+            if (key !== 'min_price' && key !== 'max_price' && key !== 'page') {
+                const valuesArray = value.split(',');
+                valuesArray.forEach(val => {
+                    
+                    $(`.unified-filter-chk[data-parent-attr="${key}"][value="${val}"]`).prop('checked', true);
+                });
+            }
+        });
+
+        if (urlParams.has('page')) {
+            currentPage = parseInt(urlParams.get('page')) || 1;
+        }
+    }
+
+
+    function updateUrlWithFilters(activeFiltersMap) {
+        const url = new URL(window.location.href);
+        const searchParams = new URLSearchParams();
+
+        
+        for (let attrName in activeFiltersMap) {
+            if (activeFiltersMap[attrName].length > 0) {
+      
+                searchParams.set(attrName, activeFiltersMap[attrName].join(','));
+            }
+        }
+
+      
+        if (currentMinPriceFilter !== null && currentMinPriceFilter !== globalMinPrice) {
+            searchParams.set('min_price', currentMinPriceFilter);
+        }
+        if (currentMaxPriceFilter !== null && currentMaxPriceFilter !== globalMaxPrice) {
+            searchParams.set('max_price', currentMaxPriceFilter);
+        }
+
+
+        if (currentPage > 1) {
+            searchParams.set('page', currentPage);
+        }
+
+       
+        const newSearchString = searchParams.toString();
+        url.search = newSearchString ? '?' + newSearchString : '';
+        window.history.pushState({ path: url.href }, '', url.href);
+    }
 
     function loadCategoriesTree() {
         $.ajax({
@@ -431,8 +486,6 @@ $(document).ready(function() {
                 categoriesGlobalTree = response || [];
                 
                 let optionsHtml = '<option value="" disabled selected>Choose Category...</option>';
-                optionsHtml += '';
-
                 if (Array.isArray(categoriesGlobalTree)) {
                     categoriesGlobalTree.forEach(cat => {
                         if (cat.slug !== 'uncategorized') {
@@ -449,7 +502,6 @@ $(document).ready(function() {
                         renderSubCategoryLinksHtml(parentFinder);
                     }
                     fetchCategoryProducts(activeSubCategorySlug);
-              
                 } else if (activeCategorySlug) {
                     $catDropdowns.val(activeCategorySlug);
                     renderSubCategoryLinksHtml(activeCategorySlug);
@@ -482,7 +534,6 @@ $(document).ready(function() {
     function renderSubCategoryLinksHtml(parentSlug) {
         const $subContainers = $('.subcategories-container');
         const $subWrappers = $('.subcategories-wrapper');
-
         $subWrappers.empty();
 
         if (parentSlug === 'all') {
@@ -496,14 +547,12 @@ $(document).ready(function() {
             let linksHtml = '';
             selectedCategoryData.children.forEach(sub => {
                 const isActive = (sub.slug === activeSubCategorySlug) ? 'fw-bold text-primary' : '';
-                
                 linksHtml += `
                     <a href="http://localhost:8080/shop/category/${parentSlug}/${sub.slug}" class="sub-cat-link ${isActive}">
                         <i class="bi bi-chevron-right me-1"></i> ${sub.name} (${sub.count || 0})
                     </a>
                 `;
             });
-            
             $subWrappers.html(linksHtml);
             $subContainers.removeClass('d-none'); 
         } else {
@@ -528,12 +577,12 @@ $(document).ready(function() {
                 allFetchedProducts = response.products || [];
                 
                 calculatePriceRangeLimits(allFetchedProducts);
-
-                filteredProducts = [...allFetchedProducts]; 
-                currentPage = 1;
-
                 buildDynamicAttributeFilters(allFetchedProducts);
-                renderProductsGrid();
+                
+                // CRITICAL FIX: Products fetch hone ke baad aur filters setup hone ke baad URL parse karna hai
+                parseUrlFiltersAndApply();
+                
+                applySelectedFilters(false); // Initial internal filter call without reset
             },
             error: function(err) {
                 console.error("Products engine runtime failure: ", err);
@@ -591,32 +640,29 @@ $(document).ready(function() {
                     let gradeVal = '';
                     if (searchGradeKey.values && searchGradeKey.values.length > 0) gradeVal = searchGradeKey.values[0];
                     else if (searchGradeKey.options && searchGradeKey.options.length > 0) gradeVal = searchGradeKey.options[0];
-                    
                     if (gradeVal) dynamicGradeBadge = `Condition - ${gradeVal}`;
                 }
             }
 
-            const estimatedKlarna = p.price ? (parseFloat(p.price) / 24).toFixed(2) : '10.00';
-
             const itemNodeHtml = `
                 <div class="col">
                     <div class="product-card d-flex flex-column h-100">
-                        <div class="product-card-header"></div>
+                      
                         <div class="p-3 text-center flex-grow-1 d-flex flex-column justify-content-between">
                             <div class="my-3">
+                            <a href="${BASE_URL}buy/${p.slug || '#'}">
                                 <img src="${fallbackImg}" alt="${p.name}" class="img-fluid" style="max-height: 150px; object-fit: contain;">
-                            </div>
+                            </a>
+                                </div>
                             <div>
                                 <h3 class="product-title text-start mb-1">${p.name || 'Device Catalog Item'}</h3>
                                 <div class="text-start product-meta mb-2">
                                     ${dynamicGradeBadge} <i class="bi bi-info-circle" style="font-size: 10px;"></i>
                                 </div>
                                 <div class="text-start product-price mb-2">${priceLabel}</div>
-                             
                             </div>
                             <div>
-                                <a href="${BASE_URL}/buy/${p.slug || '#'}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
-                           
+                                <a href="${BASE_URL}buy/${p.slug || '#'}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
                             </div>
                         </div>
                     </div>
@@ -675,7 +721,6 @@ $(document).ready(function() {
                     if (!attributesMatrix[groupKey]) {
                         attributesMatrix[groupKey] = new Set();
                     }
-                    
                     if (attr.values && Array.isArray(attr.values)) {
                         attr.values.forEach(opt => attributesMatrix[groupKey].add(opt));
                     } else if (attr.options && Array.isArray(attr.options)) {
@@ -689,6 +734,7 @@ $(document).ready(function() {
         Object.keys(attributesMatrix).forEach(key => {
             groupIndex++;
             const safeCollapseId = `collapse-attr-${groupIndex}`;
+            const urlFriendlyKey = key.replace(/\s+/g, '-').toLowerCase(); // Dynamic binding matching URL param keys
 
             let filterGroupBlock = `
                 <div class="mb-3 border-bottom pb-2">
@@ -705,11 +751,11 @@ $(document).ready(function() {
             let internalCounter = 0;
             attributesMatrix[key].forEach(valString => {
                 internalCounter++;
-                const compoundId = `chk-${key.replace(/\s+/g, '-').toLowerCase()}-${groupIndex}-${internalCounter}`;
+                const compoundId = `chk-${urlFriendlyKey}-${groupIndex}-${internalCounter}`;
                 
                 filterGroupBlock += `
                     <div class="form-check mb-1">
-                        <input class="form-check-input unified-filter-chk" type="checkbox" value="${valString}" data-parent-attr="${key}" id="${compoundId}">
+                        <input class="form-check-input unified-filter-chk" type="checkbox" value="${valString}" data-parent-attr="${urlFriendlyKey}" id="${compoundId}">
                         <label class="form-check-label" for="${compoundId}">${valString}</label>
                     </div>
                 `;
@@ -723,7 +769,8 @@ $(document).ready(function() {
         });
     }
 
-    function applySelectedFilters() {
+    // UPDATED FUNCTION: URL Engine Injection
+    function applySelectedFilters(shouldResetPage = true) {
         let activeFiltersMap = {};
         
         $('.unified-filter-chk:checked').each(function() {
@@ -736,10 +783,17 @@ $(document).ready(function() {
             activeFiltersMap[attrName].push(checkedVal);
         });
 
+        // Agar checkbox ya price khud click kiya hai, tabhi page resets to 1.
+        if (shouldResetPage) {
+            currentPage = 1; 
+        }
+
+        // Live Dynamic State Sync via URL Parameter String
+        updateUrlWithFilters(activeFiltersMap);
+
         filteredProducts = allFetchedProducts.filter(product => {
             const itemPrice = product.price ? parseFloat(product.price) : 0;
             
-  
             if (currentMinPriceFilter !== null && itemPrice < currentMinPriceFilter) {
                 return false;
             }
@@ -747,10 +801,9 @@ $(document).ready(function() {
                 return false;
             }
 
-
             for (let filterName in activeFiltersMap) {
                 const allowedValues = activeFiltersMap[filterName];
-                const productAttr = product.product_attributes ? product.product_attributes.find(a => a.name === filterName) : null;
+                const productAttr = product.product_attributes ? product.product_attributes.find(a => a.name.replace(/\s+/g, '-').toLowerCase() === filterName) : null;
                 
                 if (!productAttr) return false;
 
@@ -762,12 +815,12 @@ $(document).ready(function() {
             return true;
         });
 
-        currentPage = 1; 
         renderProductsGrid();
     }
 
-
-
+    // ==========================================
+    // 🎛️ EVENTS & INTERACTIONS
+    // ==========================================
     $(document).on('click', '.apply-price-btn', function() {
         const parentSection = $(this).closest('.price-filter-section');
         let minVal = parseFloat(parentSection.find('.min-price-input').val());
@@ -782,7 +835,7 @@ $(document).ready(function() {
         $('.min-price-input').val(minVal);
         $('.max-price-input').val(maxVal);
 
-        applySelectedFilters();
+        applySelectedFilters(true);
     });
 
     $(document).on('show.bs.collapse', '.collapse', function () {
@@ -804,24 +857,21 @@ $(document).ready(function() {
             }
         });
 
-        applySelectedFilters();
+        applySelectedFilters(true);
     });
-
 
     $(document).on('click', '.clear-all-filters-btn', function(e) {
         e.preventDefault();
         
-
         $('.unified-filter-chk').prop('checked', false);
-        
-
         $('.min-price-input').val('');
         $('.max-price-input').val('');
 
         currentMinPriceFilter = null;
         currentMaxPriceFilter = null;
+        currentPage = 1;
         
-        applySelectedFilters();
+        applySelectedFilters(true);
     });
 
     $catDropdowns.on('change', function() {
@@ -834,15 +884,20 @@ $(document).ready(function() {
         if (parentSlugValue === 'all') {
             window.location.href = 'http://localhost:8080/shop';
         } else {
+            // Dropdown change par URL parameters clear ho kar naye series se render hote hain
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+            currentMinPriceFilter = null;
+            currentMaxPriceFilter = null;
+            currentPage = 1;
             fetchCategoryProducts(parentSlugValue);
-              
         }
     });
 
     $(document).on('click', '.numeric-index-btn', function(event) {
         event.preventDefault();
         currentPage = parseInt($(this).data('target-page'));
-        renderProductsGrid();
+        applySelectedFilters(false); // Pagination shift par attributes reset nahi honge
         $('html, body').animate({ scrollTop: 0 }, 'fast');
     });
 
@@ -850,7 +905,7 @@ $(document).ready(function() {
         event.preventDefault();
         if (currentPage > 1) {
             currentPage--;
-            renderProductsGrid();
+            applySelectedFilters(false);
         }
     });
 
@@ -859,58 +914,54 @@ $(document).ready(function() {
         const absoluteMaxPages = Math.ceil(filteredProducts.length / itemsPerPage);
         if (currentPage < absoluteMaxPages) {
             currentPage++;
-            renderProductsGrid();
+            applySelectedFilters(false);
         }
+    });
+
+    // Back button/Forward button support handler
+    window.addEventListener('popstate', function() {
+        location.reload();
     });
 
     loadCategoriesTree();
 
-function renderSimpleBreadcrumb(slug, subSlug = '') {
-    const container = document.getElementById('breadcrumb-dynamic');
-    const MainCategoryHeading = document.getElementById('category-heading');
-    // console.log(mainCategoryHeading);
-    if (!container) return;
+    function renderSimpleBreadcrumb(slug, subSlug = '') {
+        const container = document.getElementById('breadcrumb-dynamic');
+        const MainCategoryHeading = document.getElementById('category-heading');
+        if (!container) return;
 
-
-    function formatSlugToName(str) {
-        if (!str) return '';
-        return str
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-    }
-
-    let breadcrumbHtml = '';
-    const mainCategoryName = formatSlugToName(slug);
-    const subCategoryName = formatSlugToName(subSlug);
-
-    if (mainCategoryName) {
-        if (subCategoryName) {
-
-            breadcrumbHtml += `
-                <span class="breadcrumb-link">${mainCategoryName}</span>
-                <span class="sep">/</span>
-                <span class="breadcrumb-current">${subCategoryName}</span>
-            `;
-        } else {
-
-            breadcrumbHtml += `
-                <span class="breadcrumb-current">${mainCategoryName}</span>
-            `;
+        function formatSlugToName(str) {
+            if (!str) return '';
+            return str
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
         }
+
+        let breadcrumbHtml = '';
+        const mainCategoryName = formatSlugToName(slug);
+        const subCategoryName = formatSlugToName(subSlug);
+
+        if (mainCategoryName) {
+            if (subCategoryName) {
+                breadcrumbHtml += `
+                    <span class="breadcrumb-link">${mainCategoryName}</span>
+                    <span class="sep">/</span>
+                    <span class="breadcrumb-current">${subCategoryName}</span>
+                `;
+            } else {
+                breadcrumbHtml += `
+                    <span class="breadcrumb-current">${mainCategoryName}</span>
+                `;
+            }
+        }
+
+        container.innerHTML = breadcrumbHtml;
+        if(MainCategoryHeading) MainCategoryHeading.textContent = formatSlugToName(activeCategorySlug);
     }
 
-    container.innerHTML = breadcrumbHtml;
-    MainCategoryHeading.textContent = formatSlugToName(activeCategorySlug);
-}
-
-
-renderSimpleBreadcrumb(activeCategorySlug, activeSubCategorySlug);
-
+    renderSimpleBreadcrumb(activeCategorySlug, activeSubCategorySlug);
 });
-
-
-
 
 
 </script>

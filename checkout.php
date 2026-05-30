@@ -2,7 +2,72 @@
 $pageTitle = 'Checkout';
 include __DIR__ . '/includes/header.php';
 ?>
+<style>
+    /* --- Custom Radio Container Elements --- */
+.payment-card-option {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 15px 20px;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
 
+.payment-card-option:hover {
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
+}
+
+/* Card Selection Trigger CSS Class */
+.payment-card-option.selected {
+    border-color: #13564f;
+    background-color: rgba(19, 86, 79, 0.03);
+}
+
+/* Checkbox Dot Circles styling */
+.custom-radio-circle {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.payment-card-option.selected .custom-radio-circle {
+    border-color: #13564f;
+    background-color: #13564f;
+}
+
+.payment-card-option.selected .custom-radio-circle::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Brand Palette Icons Dynamic */
+.bi-paypal { color: #003087; }
+.bi-credit-card-2-front { color: #635bff; }
+
+/* Stripe Inner Card Helper Layout */
+.card-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.card-brands {
+    position: absolute;
+    right: 12px;
+    display: flex;
+    gap: 4px;
+}
+</style>
 <main class="checkout-page py-5">
     <div class="container">
         <div class="checkout-heading mb-4">
@@ -150,62 +215,89 @@ include __DIR__ . '/includes/header.php';
                                 <strong id="checkout-total">£0.00</strong>
                             </div>
 
-                            <div class="payment-method mt-4">
-                                <h3>Payment Method</h3>
-                                <label for="payment_method" class="form-label">Select Payment Method <span>*</span></label>
-                                <select class="form-select payment-select" id="payment_method" name="payment_method" required>
-                                    <option value="">Select Here</option>
-                                    <option value="paypal">PayPal Checkout</option>
-                                    <option value="stripe">Stripe</option>
-                                </select>
+                       <div class="payment-method mt-4">
+    <h3>Payment Method</h3>
+    <label class="form-label mb-3">Select Payment Method <span>*</span></label>
+    
+    <select class="d-none" id="payment_method" name="payment_method" required>
+        <option value="">Select Here</option>
+        <option value="paypal">PayPal Checkout</option>
+        <option value="stripe">Stripe</option>
+    </select>
 
-                                <div id="paypalPanel" class="payment-panel paypal-panel d-none">
-                                    <button type="submit" class="paypal-checkout-btn">
-                                        <span class="paypal-mark">P</span>
-                                        <strong>PayPal</strong>
-                                        <span>Checkout</span>
-                                    </button>
-                                    <p>The safer, easier way to pay</p>
-                                </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6">
+            <div class="payment-card-option" data-target="paypal">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="custom-radio-circle"></div>
+                        <span class="fw-semibold">PayPal Checkout</span>
+                    </div>
+                    <span class="payment-icon"><i class="bi bi-paypal fs-4"></i></span>
+                </div>
+            </div>
+        </div>
 
-                                <div id="stripePanel" class="payment-panel stripe-panel d-none">
-                                    <div class="mb-3">
-                                        <label for="stripe_card_number" class="form-label">Card Number</label>
-                                        <div class="card-input-wrap">
-                                            <input type="text" class="form-control stripe-field" id="stripe_card_number" name="stripe_card_number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234">
-                                            <span class="card-brands">
-                                                <span>MC</span>
-                                                <span>VISA</span>
-                                                <span>AMEX</span>
-                                            </span>
-                                        </div>
-                                    </div>
+        <div class="col-12 col-sm-6">
+            <div class="payment-card-option" data-target="stripe">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="custom-radio-circle"></div>
+                        <span class="fw-semibold">Credit Card / Stripe</span>
+                    </div>
+                    <span class="payment-icon"><i class="bi bi-credit-card-2-front fs-4"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label for="stripe_expiry" class="form-label">Expiration Date</label>
-                                            <input type="text" class="form-control stripe-field" id="stripe_expiry" name="stripe_expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / YY">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="stripe_cvc" class="form-label">Security Code</label>
-                                            <input type="text" class="form-control stripe-field" id="stripe_cvc" name="stripe_cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC">
-                                        </div>
-                                    </div>
+    <div id="paypalPanel" class="payment-panel paypal-panel d-none">
+        <button type="submit" class="paypal-checkout-btn">
+            <span class="paypal-mark">P</span>
+            <strong>PayPal</strong>
+            <span>Checkout</span>
+        </button>
+        <p class="text-muted mt-2 small">The safer, easier way to pay</p>
+    </div>
 
-                                    <div class="mt-3">
-                                        <label for="stripe_country" class="form-label">Country</label>
-                                        <select class="form-select stripe-field" id="stripe_country" name="stripe_country">
-                                            <option value="Pakistan" selected>Pakistan</option>
-                                            <option value="United Kingdom">United Kingdom</option>
-                                            <option value="Ireland">Ireland</option>
-                                            <option value="United States">United States</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
+    <div id="stripePanel" class="payment-panel stripe-panel d-none">
+        <div class="mb-3">
+            <label for="stripe_card_number" class="form-label">Card Number</label>
+            <div class="card-input-wrap">
+                <input type="text" class="form-control stripe-field" id="stripe_card_number" name="stripe_card_number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234">
+                <div class="card-brands">
+                    <span class="badge bg-light text-dark border">MC</span>
+                    <span class="badge bg-light text-dark border">VISA</span>
+                    <span class="badge bg-light text-dark border">AMEX</span>
+                </div>
+            </div>
+        </div>
 
-                                    <button type="submit" class="btn btn-success mt-3">Pay Now</button>
-                                </div>
-                            </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="stripe_expiry" class="form-label">Expiration Date</label>
+                <input type="text" class="form-control stripe-field" id="stripe_expiry" name="stripe_expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / YY">
+            </div>
+            <div class="col-md-6">
+                <label for="stripe_cvc" class="form-label">Security Code</label>
+                <input type="text" class="form-control stripe-field" id="stripe_cvc" name="stripe_cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC">
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label for="stripe_country" class="form-label">Country</label>
+            <select class="form-select stripe-field" id="stripe_country" name="stripe_country">
+                <option value="Pakistan" selected>Pakistan</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Ireland">Ireland</option>
+                <option value="United States">United States</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-4 px-4 py-2" style="background-color: #13564f; border: none;">Pay Now</button>
+    </div>
+</div>
                         </div>
                     </aside>
                 </div>
@@ -376,6 +468,28 @@ checkoutForm.addEventListener('submit', async (event) => {
         console.error(error);
         alert('API error');
     }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const paymentCards = document.querySelectorAll('.payment-card-option');
+    const hiddenSelect = document.getElementById('payment_method');
+
+    paymentCards.forEach(card => {
+        card.addEventListener('click', () => {
+
+            paymentCards.forEach(c => c.classList.remove('selected'));
+            
+          
+            card.classList.add('selected');
+            
+
+            const targetValue = card.getAttribute('data-target');
+            hiddenSelect.value = targetValue;
+            
+
+            updatePaymentPanel();
+        });
+    });
 });
 </script>
 

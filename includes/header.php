@@ -31,6 +31,7 @@ $pageTitle = $pageTitle ?? 'Recycle Pro';
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
+
 <script>
 const baseAPI = "<?= $config['API_URL'] ?>";
 const BASE_URL = "<?= $config['BASE_URL'] ?>";
@@ -658,18 +659,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="mobile-header-switch-links d-flex gap-2 px-3 mb-3">
   
                         <a href="/shop/" 
-                            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+                            class="btn text-white fw-semibold py-2 px-3 flex-fill text-center shadow-sm text-decoration-none d-inline-flex align-items-center justify-content-center"
                             title="Shop"
-                            style="width: 40px; height: 40px; font-size: 1.1rem; background-color: #13564f; border-radius: 50%;">
-                            <i class="bi bi-bag"></i> <!-- Bag Icon -->
+                            style="font-size: 0.95rem; background-color: #13564f; border-radius: 5px; border: 1px solid #2c7c74; letter-spacing: 0.5px;">
+                            Shop
                         </a>
 
                 
                         <a href="/" 
-                            class="btn text-white position-relative p-2 d-inline-flex align-items-center justify-content-center" 
+                            class="btn text-white fw-semibold py-2 px-3 flex-fill text-center shadow-sm text-decoration-none d-inline-flex align-items-center justify-content-center"
                             title="Sell"
-                            style="width: 40px; height: 40px; font-size: 1.1rem; background-color: #13564f; border-radius: 50%;">
-                            <i class="bi bi-tag"></i> <!-- Tag Icon -->
+                            style="font-size: 0.95rem;color:white; background-color: #13564f; border-radius: 5px; border: 1px solid #2c7c74; letter-spacing: 0.5px;">
+                            Sell
                         </a>
                     </div>
                 <div class="">
@@ -792,6 +793,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 10500;">
+    <div id="liveToast" class="toast align-items-center text-white border-0 shadow rounded-3" role="alert" aria-live="assertive" aria-atomic="true" style="transition: all 0.3s ease;">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2" style="font-weight: 500; font-size: 0.95rem;">
+                <span id="toast-icon"></span>
+                <span id="toast-message"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 </div>

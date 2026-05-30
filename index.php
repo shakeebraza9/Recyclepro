@@ -31,24 +31,28 @@ include __DIR__ . '/includes/header.php';
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4"> 
 
-      <div class="col">
-        <div id="featuredProducts1" class="featured-slider"></div>
+      <div class="mb-4">
+
+          <div id="featuredProducts1"></div>
+      </div>
+          <div class="mb-4">
+
+          <div id="featuredProducts2"></div>
       </div>
 
-      <div class="col">
-        <div id="featuredProducts2" class="featured-slider"></div>
+      <div class="mb-4 d-none d-sm-block">
+        
+          <div id="featuredProducts3"></div>
       </div>
 
-      <div class="col">
-        <div id="featuredProducts3" class="featured-slider"></div>
+      <div class="mb-4 d-none d-lg-block">
+        
+          <div id="featuredProducts4"></div>
       </div>
 
-      <div class="col">
-        <div id="featuredProducts4" class="featured-slider"></div>
-      </div>
+      <div class="mb-4 d-none d-lg-block">
 
-      <div class="col">
-        <div id="featuredProducts5" class="featured-slider"></div>
+          <div id="featuredProducts5"></div>
       </div>
 
     </div>
@@ -70,7 +74,7 @@ include __DIR__ . '/includes/header.php';
 
 
 <section class="py-5 bg-light">
-  <div class="container">
+  <div class="container container1">
     <h3>Top Rated Products</h3>
 
     <div class="row g-4">
@@ -85,6 +89,15 @@ include __DIR__ . '/includes/header.php';
   </div>
 </section>
 
+<section class="py-5 bg-light d-block d-md-none">
+  <div class="container">
+    <h3 style="text-align: center;">Top Rated Products</h3>
+
+    <div class="row top-products-slider" id="mobileProductsSlider">
+      </div>
+  </div>
+</section>
+
 
 <section class="py-4 bg-white">
   <div class="container">
@@ -93,7 +106,7 @@ include __DIR__ . '/includes/header.php';
 </section>
 
 
-<section class="py-4">
+<section class="py-4 bg-light">
   <div class="container">
     <div id="banner2"></div>
   </div>
@@ -120,7 +133,45 @@ include __DIR__ . '/includes/header.php';
 </section>
 
 
-<section class="py-5 bg-light">
+<section class="py-4 bg-light">
+    <div class="tp-grid-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;">
+        
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-patch-check" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Quality Products</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">We offer premium-quality pre-owned electronics that are carefully tested and verified by experts. From smartphones and laptops to gaming consoles and gadgets, every product meets high performance and reliability standards.</p>
+        </div>
+
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-shield-lock" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Secure Transaction</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Your security is our priority. Recycle Pro provides a safe and encrypted payment process to ensure your personal and financial information remains fully protected at all times.</p>
+        </div>
+
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-headset" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Customer Service</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Our dedicated support team is always ready to assist you with product inquiries, orders, trade-ins, and after-sales support. We’re committed to delivering a smooth customer experience.</p>
+        </div>
+
+        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
+            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-truck" style="font-size: 28px; color: #13564f;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Fast Delivery</h3>
+            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Enjoy quick and secure delivery across the UK. We ensure your devices are packed safely and delivered on time with transparent shipping and no hidden charges.</p>
+        </div>
+
+    </div>
+</section>
+
+<section class="py-5 bg-white">
     <div class="container">
         <h3 class="text-center mb-4">Stay up-to-date with Recycle Pro</h3>
         <div class="row justify-content-center mb-4">
@@ -159,43 +210,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
-<section style="padding: 60px 20px; background-color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif;">
-    <div class="tp-grid-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;">
-        
-        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
-            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-patch-check" style="font-size: 28px; color: #13564f;"></i>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Quality Products</h3>
-            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">We hold high quality standards and offer best quality ever. The products that are designed by our experts are made from the top quality and genuine materials.</p>
-        </div>
 
-        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
-            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-shield-lock" style="font-size: 28px; color: #13564f;"></i>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Secure Transaction</h3>
-            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">TV Jackets is concerned about the safety and security of customers. Our payment process is extremely safe, and our customers information is secure.</p>
-        </div>
-
-        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
-            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-headset" style="font-size: 28px; color: #13564f;"></i>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Customer Service</h3>
-            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Customer support staff is always at your service and ready to assist you 24/7 to meet the customer expectations.</p>
-        </div>
-
-        <div style="text-align: center; padding: 30px 20px; background: #ffffff; border: 1px solid #eeeeee; border-radius: 12px; transition: transform 0.3s ease;">
-            <div style="width: 70px; height: 70px; margin: 0 auto 20px auto; background-color: #ffffff; border: 2px solid #13564f; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-truck" style="font-size: 28px; color: #13564f;"></i>
-            </div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin: 0 0 12px 0;">Fast Delivery</h3>
-            <p style="font-size: 14px; color: #555555; line-height: 1.6; margin: 0;">Enjoy fast time definite delivery of your product with no extra cost or hidden charges for the shipment world-wide. Happy Shopping!</p>
-        </div>
-
-    </div>
-</section>
 
 <script src="assets/js/JqueryApiService.js"></script>
 <script src="assets/js/Home.js"></script>
@@ -215,13 +230,14 @@ document.getElementById('subscribe-btn').addEventListener('click', async functio
     const email = document.getElementById('newsletter-email').value.trim();
 
     if(!email){
-        alert('Please enter email');
+        // alert('Please enter email');
+        showToast('Please enter valid email','error');
         return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if(!emailRegex.test(email)){
-        alert('Please enter valid email');
+        showToast('Please enter valid email','error');
         return;
     }
 
@@ -244,12 +260,13 @@ document.getElementById('subscribe-btn').addEventListener('click', async functio
 
         if(data.success){
 
-            alert(data.message);
+            showToast(data.message,'success');
 
             document.getElementById('newsletter-email').value = '';
 
         }else{
-            alert(data.message);
+   
+            showToast(data.message,'error');
         }
 
     }catch(error){

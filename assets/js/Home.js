@@ -45,16 +45,28 @@ class Home {
 
         $("#pageContent").html(data.page?.content || "");
 
-
-   
+        const screenWidth = $(window).width();
         this.renderProducts(data.featured_products?.featured_group_1, "featuredProducts1", 6000);
         this.renderProducts(data.featured_products?.featured_group_2, "featuredProducts2", 7000);
-        this.renderProducts(data.featured_products?.featured_group_3, "featuredProducts3", 9000);
-        this.renderProducts(data.featured_products?.featured_group_4, "featuredProducts4", 10000);
-        this.renderProducts(data.featured_products?.featured_group_5, "featuredProducts5", 15000);
+        if (screenWidth >= 576) {
+            $("#featuredProducts3").parent().removeClass("d-none");
+            this.renderProducts(data.featured_products?.featured_group_3, "featuredProducts3", 9000);
+        } else {
+            $("#featuredProducts3").parent().addClass("d-none");
+        }
+        if (screenWidth >= 992) {
+            $("#featuredProducts4").parent().removeClass("d-none");
+            $("#featuredProducts5").parent().removeClass("d-none");
+            this.renderProducts(data.featured_products?.featured_group_4, "featuredProducts4", 10000);
+            this.renderProducts(data.featured_products?.featured_group_5, "featuredProducts5", 15000);
+        } else {
+            $("#featuredProducts4").parent().addClass("d-none");
+            $("#featuredProducts5").parent().addClass("d-none");
+        }
 
 
         this.renderTopRated(data.top_rated_products || {});
+        this.renderTopRatedMobile(data.top_rated_products || {});
 
 
         this.renderSmall(data.end_featured_products, "endFeaturedBox");
@@ -233,149 +245,150 @@ class Home {
         }
     }
 
-
     renderTopRated(data) {
         const products = data.products || [];
 
+
         $("#leftProducts").html("");
         $("#rightProducts").html("");
-
 
         const currentWishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
 
 
         products.slice(0, 4).forEach(p => {
-
             const isExist = currentWishlist.some(item => item.slug === p.slug);
-            
-            
             const heartColor = isExist ? '#13564f' : '#212529';
             const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
 
+      
             $("#leftProducts").append(`
                 <div class="col-md-6 p-2">
-                    <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
-                        
-                        <div>
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <strong class="category-link text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
-                                    ${p.category || 'Sell Phone'}
-                                </strong>
-                                
-                           
-                            </div>
-
-                            <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
-                                <a href="/shop/buy/${p.slug || '#'}" class="d-block w-100 h-100">
-                                    <img 
-                                        src="${p.image}" 
-                                        class="img-fluid h-100" 
-                                        alt="${p.name}" 
-                                        style="object-fit: contain; max-width: 100%;"
-                                    >
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <h6 class="fw-bold text-dark mb-2 text-truncate-2-lines" style="font-size: 0.95rem; min-height: 2.4rem; line-height: 1.2;">
-                                <a href="/shop/buy/${p.slug || '#'}" class="text-decoration-none text-dark">
-                                    ${p.name}
-                                </a>
-                            </h6>
-
-                            <div class="d-flex justify-content-between align-items-end pt-1">
-                                <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
-                                
-                                                     <div>
-                               <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
-                                style="color: ${heartColor};"
-                                aria-label="Add to Wishlist" 
-                                onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
-                            <i class="bi ${heartIcon}"></i>
-                        </button>
-                        <a class="btn btn-link p-0 text-dark fs-3" href="/shop/buy/${p.url || '#'}" aria-label="Add to Cart"><i class="bi bi-cart3"></i></a>
-                        </div>
-                            </div>
-                        </div>
-
-                    </div>
+                    ${this.getTopRatedCardTemplate(p, heartColor, heartIcon)}
                 </div>
             `);
         });
 
-        products.slice(4, 8).forEach(p => {
 
+        products.slice(4, 8).forEach(p => {
             const isExist = currentWishlist.some(item => item.slug === p.slug);
             const heartColor = isExist ? '#13564f' : '#212529';
             const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
 
             $("#rightProducts").append(`
                 <div class="col-md-6 p-2">
-                    <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
-                        
-                        <div>
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <strong class="category-link text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
-                                    ${p.category || 'Sell Phone'}
-                                </strong>
-                                
-                            
-                            </div>
-
-                            <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
-                                <a href="/shop/buy/${p.slug || '#'}" class="d-block w-100 h-100">
-                                    <img 
-                                        src="${p.image}" 
-                                        class="img-fluid h-100" 
-                                        alt="${p.name}" 
-                                        style="object-fit: contain; max-width: 100%;"
-                                    >
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <h6 class="fw-bold text-dark mb-2 text-truncate-2-lines" style="font-size: 0.95rem; min-height: 2.4rem; line-height: 1.2;">
-                                <a href="/shop/buy/${p.slug || '#'}" class="text-decoration-none text-dark">
-                                    ${p.name}
-                                </a>
-                            </h6>
-
-                            <div class="d-flex justify-content-between align-items-end pt-1">
-                                <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
-                                
-                                                    <div>
-                               <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
-                                style="color: ${heartColor};"
-                                aria-label="Add to Wishlist" 
-                                onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
-                            <i class="bi ${heartIcon}"></i>
-                        </button>
-                        <a class="btn btn-link p-0 text-dark fs-3" href="/shop/buy/${p.url || '#'}" aria-label="Add to Cart"><i class="bi bi-cart3"></i></a>
-                        </div>
-                            </div>
-                        </div>
-
-                    </div>
+                    ${this.getTopRatedCardTemplate(p, heartColor, heartIcon)}
                 </div>
             `);
         });
 
 
-if (data.banner?.image) {
-    const bannerBox = document.getElementById('centerBanner'); 
-    if (bannerBox) {
-        bannerBox.innerHTML = `
-            <a class="d-block w-100 h-100" href="${data.banner.url || '#'}">
-                <img src="${data.banner.image}" 
-                     class="w-100 rounded" 
-                     alt="Banner" 
-                     style="display: block; height: 100%; min-height: 520px; max-height: 82%; object-fit: contain;">
-            </a>
-        `;
+        if (data.banner?.image) {
+            const bannerBox = document.getElementById('centerBanner'); 
+            if (bannerBox) {
+                bannerBox.innerHTML = `
+                    <a class="d-block w-100 h-100" href="${data.banner.url || '#'}">
+                        <img src="${data.banner.image}" 
+                            class="w-100 rounded" 
+                            alt="Banner" 
+                            style="display: block; height: 100%; min-height: 520px; max-height: 82%; object-fit: contain;">
+                    </a>
+                `;
+            }
+        }
     }
-}
+
+
+    renderTopRatedMobile(data) {
+        const products = data.products || [];
+        const $mobileSlider = $("#mobileProductsSlider");
+
+        if ($mobileSlider.length) {
+            if ($mobileSlider.hasClass('slick-initialized')) {
+                $mobileSlider.slick('unslick'); 
+            }
+            $mobileSlider.html(""); 
+        }
+
+        const currentWishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+
+        if ($mobileSlider.length && products.length > 0) {
+
+            products.slice(0, 8).forEach(p => {
+                const isExist = currentWishlist.some(item => item.slug === p.slug);
+                const heartColor = isExist ? '#13564f' : '#212529';
+                const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
+
+                $mobileSlider.append(`
+                    <div class="px-2 h-100 ">
+                        ${this.getTopRatedCardTemplate(p, heartColor, heartIcon)}
+                    </div>
+                `);
+            });
+
+
+            $mobileSlider.slick({
+                dots: false,
+                arrows: false,
+                infinite: false,
+                speed: 300,
+                slidesToShow: 2, 
+                slidesToScroll: 1,
+                responsive: [
+                    {
+                        breakpoint: 576, 
+                        settings: {
+                            slidesToShow: 1.2, 
+                            slidesToScroll: 1,
+                            dots: true
+                        }
+                    }
+                ]
+            });
+        }
+    }
+
+
+    getTopRatedCardTemplate(p, heartColor, heartIcon) {
+        return `
+            <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <strong class="category-link text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
+                            ${p.category || 'Sell Phone'}
+                        </strong>
+                    </div>
+
+                    <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
+                        <a href="/shop/buy/${p.slug || '#'}" class="d-block w-100 h-100">
+                            <img src="${p.image}" class="img-fluid h-100" alt="${p.name}" style="object-fit: contain; max-width: 100%;">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h6 class="fw-bold text-dark mb-2 text-truncate-2-lines" style="font-size: 0.95rem; min-height: 2.4rem; line-height: 1.2;">
+                        <a href="/shop/buy/${p.slug || '#'}" class="text-decoration-none text-dark">
+                            ${p.name}
+                        </a>
+                    </h6>
+
+                    <div class="d-flex justify-content-between align-items-end pt-1">
+                        <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
+                        <div>
+                            <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                                    style="color: ${heartColor};"
+                                    aria-label="Add to Wishlist" 
+                                    onclick='toggleWishlist(this, ${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+                                <i class="bi ${heartIcon}"></i>
+                            </button>
+                            <a class="btn btn-link p-0 text-dark fs-3 ms-2" href="/shop/buy/${p.url || p.slug || '#'}" aria-label="Add to Cart">
+                                <i class="bi bi-cart3"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     renderSmall(products, id) {

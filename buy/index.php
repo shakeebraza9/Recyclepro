@@ -86,7 +86,7 @@ if (empty($productImages)) {
 $featureList = !empty($product['features']) && is_array($product['features'])
     ? $product['features']
     : [
-        'Premium refurbished condition',
+        'Condition Pristine',
         'Full functionality tested',
         'Free shipping and easy returns',
     ];
@@ -113,11 +113,11 @@ while (count($similarProducts) < 4) {
 }
 ?>
 
-<!-- Added Zoom CSS Styling -->
+
 <style>
 .product-display {
     position: relative;
-    overflow: hidden; /* Restricts the zoomed image within the container boundaries */
+    overflow: hidden; 
     border: 1px solid #eee;
     border-radius: 8px;
     background-color: #fff;
@@ -164,8 +164,9 @@ while (count($similarProducts) < 4) {
 
 <div class="container py-5">
     <div class="product-page">
-        <div class="row gx-3 gy-3 align-items-start">
-            <div class="col-xl-1 col-lg-3">
+        <div class="row gx-4 gy-4 align-items-start">
+            
+            <div class="col-12 col-xl-1 order-2 order-xl-1">
                 <div class="thumb-column">
                     <?php foreach ($productImages as $index => $image): ?>
                         <button type="button" class="thumb-btn<?= $index === 0 ? ' active' : '' ?>" data-image="<?= htmlspecialchars($image, ENT_QUOTES, 'UTF-8') ?>" aria-label="Thumbnail <?= $index + 1 ?>">
@@ -175,21 +176,21 @@ while (count($similarProducts) < 4) {
                 </div>
             </div>
 
-            <div class="col-xl-6 col-lg-6">
-                <!-- Wrapper element listens to cursor movements -->
+            <div class="col-12 col-xl-6 order-1 order-xl-2">
                 <div class="product-display" id="zoomContainer">
                     <img id="mainImage" src="<?= htmlspecialchars($productImages[0], ENT_QUOTES, 'UTF-8') ?>" class="product-main-img zoomable" alt="<?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
 
-            <div class="col-xl-5 col-lg-12">
+
+            <div class="col-12 col-xl-5 order-3 order-xl-3">
                 <div class="product-summary">
                     <div class="d-flex justify-content-between align-items-start gap-3 mb-4 flex-column flex-sm-row">
                         <div>
                             <h1 class="product-title"><?= htmlspecialchars($product['name']) ?></h1>
                             <div class="product-price-line">
                                 <span class="product-price">£<span id="priceBox"><?= htmlspecialchars($displayPrice) ?></span></span>
-                                <span class="product-rating">
+                                <span class="product-rating ms-2">
                                     <?php for ($i = 0; $i < 4; $i++): ?>
                                         <i class="bi bi-star-fill"></i>
                                     <?php endfor; ?>
@@ -238,46 +239,41 @@ while (count($similarProducts) < 4) {
                         <?php endforeach; ?>
                     </ul>
 
-              <div class="d-flex gap-2 gap-sm-3 align-items-center flex-nowrap mb-3 w-100">
-                    <div class="quantity-box flex-shrink-0">
-                        <button type="button" class="qty-btn" id="decreaseQty" aria-label="Decrease quantity">-</button>
-                        <input type="text" id="quantityInput" value="1" readonly aria-label="Quantity">
-                        <button type="button" class="qty-btn" id="increaseQty" aria-label="Increase quantity">+</button>
+                    <div class="d-flex gap-2 gap-sm-3 align-items-center flex-nowrap mb-3 w-100">
+                        <div class="quantity-box flex-shrink-0">
+                            <button type="button" class="qty-btn" id="decreaseQty" aria-label="Decrease quantity">-</button>
+                            <input type="text" id="quantityInput" value="1" readonly aria-label="Quantity">
+                            <button type="button" class="qty-btn" id="increaseQty" aria-label="Increase quantity">+</button>
+                        </div>
+                        <button id="addToCart" class="btn btn-dark btn-lg px-3 px-sm-5 flex-grow-1 text-nowrap" style="background-color: #13564f;">Add to Cart</button>
                     </div>
-                    <button id="addToCart" class="btn btn-dark btn-lg px-3 px-sm-5 flex-grow-1 text-nowrap" style="background-color: #13564f;">Add to Cart</button>
-                </div>
 
                     <button id="buyNow" class="btn btn-outline-dark btn-lg w-100 mb-4">Buy Now</button>
 
                     <div class="product-info-list">
                         <div><i class="bi bi-truck"></i> Free worldwide shipping on all orders over £100</div>
-                        <div><i class="bi bi-shield-check"></i> Delivered in 3-7 Working Days <a href="#">Shipping & Return</a></div>
+                        <div><i class="bi bi-shield-check"></i> Delivered in 3-7 Working Days <a href="<?php echo $config['BASE_URL']; ?>return-policy-warranty">Shipping & Return</a></div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div> </div> <div class="product-details-tabs-container py-5 my-4">
+            <ul class="custom-nav-tabs mb-4" id="productTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-tab-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+                </li>
+                <li class="nav-tab-separator">|</li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-tab-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews</button>
+                </li>
+            </ul>
 
-        <div class="product-details-tabs-container py-5 my-4">
-            <div class="container">
-                <ul class="custom-nav-tabs mb-4" id="productTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-tab-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
-                    </li>
-                    <li class="nav-tab-separator">|</li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-tab-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content pt-2">
-                    <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                        <div class="product-description-content">
-                            <?= !empty($product['description']) ? $product['description'] : 'No description available.' ?>
-                        </div>
+            <div class="tab-content pt-2">
+                <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                    <div class="product-description-content">
+                        <?= !empty($product['description']) ? $product['description'] : 'No description available.' ?>
                     </div>
-                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                        <p class="text-muted m-0">No reviews yet. Be the first to review this product.</p>
-                    </div>
+                </div>
+                <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                    <p class="text-muted m-0">No reviews yet. Be the first to review this product.</p>
                 </div>
             </div>
         </div>
@@ -294,20 +290,21 @@ while (count($similarProducts) < 4) {
                     ?>
                     <div class="col">
                         <a href="<?= htmlspecialchars($similarLink, ENT_QUOTES, 'UTF-8') ?>" class="similar-product-link">
-                        <div class="card position-relative overflow-hidden h-100">
-                            <img src="<?= htmlspecialchars($similar['image'], ENT_QUOTES, 'UTF-8') ?>" class="card-img-top" alt="<?= htmlspecialchars($similar['name'], ENT_QUOTES, 'UTF-8') ?>">
-                            <div class="card-body product-card-body">
-                                <h3 class="card-title h6"><?= htmlspecialchars($similar['name'], ENT_QUOTES, 'UTF-8') ?></h3>
-                                <div class="price-row align-items-center">
-                                    <span class="fw-semibold">£<?= htmlspecialchars($similar['price'], ENT_QUOTES, 'UTF-8') ?></span>
+                            <div class="card position-relative overflow-hidden h-100">
+                                <img src="<?= htmlspecialchars($similar['image'], ENT_QUOTES, 'UTF-8') ?>" class="card-img-top" alt="<?= htmlspecialchars($similar['name'], ENT_QUOTES, 'UTF-8') ?>">
+                                <div class="card-body product-card-body">
+                                    <h3 class="card-title h6"><?= htmlspecialchars($similar['name'], ENT_QUOTES, 'UTF-8') ?></h3>
+                                    <div class="price-row align-items-center">
+                                        <span class="fw-semibold">£<?= htmlspecialchars($similar['price'], ENT_QUOTES, 'UTF-8') ?></span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         </a>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -435,13 +432,13 @@ if (addToCartButton) {
     addToCartButton.addEventListener('click', function () {
         if (window.cartManager && typeof window.cartManager.addItem === 'function') {
             window.cartManager.addItem(getSelectedProductData()).then(() => {
-                alert('Product added to cart!');
+                showToast('Product added to cart!','success');
             }).catch((error) => {
                 console.error('Add to cart failed:', error);
-                alert('Unable to add to cart right now. Please try again.');
+                showToast('Unable to add to cart right now. Please try again.','error');
             });
         } else {
-            alert('Cart is not available right now.');
+            showToast('Cart is not available right now.','error');
         }
     });
 }
