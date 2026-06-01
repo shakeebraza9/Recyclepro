@@ -1773,9 +1773,6 @@ div#featuredProducts .card {
     #featuredProducts {
         margin-inline: 0;
     }
-    #userAccountActions {
-  display: none;
-}
 
     #featuredProducts .slick-slide {
         padding: 0.45rem;
@@ -3148,6 +3145,28 @@ button.btn.btn-account.text-white {
         z-index: 1000;
         display-columns: 4;
     }
+    #submenu-33{
+        left: -60px !important;
+    }
+    #submenu-40{
+        left: -207px !important;
+    }
+    #submenu-52{
+        left: -300px !important;
+    }
+    #submenu-66{
+        left: -411px !important;
+    }
+    #submenu-78{
+        left: -510px !important;
+    }
+    #submenu-93{
+        left: -662px !important;
+    }
+    #submenu-108{
+        left: -780px !important;
+    }
+
 
     .navbar-nav .dropdown:hover > .dropdown-menu {
         display: grid;
@@ -3217,6 +3236,9 @@ button.btn.btn-account.text-white {
         box-shadow: none;
         padding: 0;
         width: auto;
+    }
+    #userAccountActions{
+        display: none !important;
     }
 
     .navbar-nav .dropdown.submenu-open > .dropdown-menu {

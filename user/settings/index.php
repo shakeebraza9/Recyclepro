@@ -19,7 +19,6 @@ include __DIR__ . '/../../includes/header.php';
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-
     .lux-dashboard-grid {
         background: #ffffff;
         border-radius: 28px;
@@ -54,7 +53,6 @@ include __DIR__ . '/../../includes/header.php';
         transition: transform 0.3s ease;
     }
 
-
     .lux-nav-item:hover {
         color: var(--lux-green);
         background-color: rgba(4, 67, 57, 0.03);
@@ -71,7 +69,6 @@ include __DIR__ . '/../../includes/header.php';
         transform: scale(1.1);
         color: var(--lux-emerald);
     }
-
 
     .lux-content-pane {
         padding: 45px 50px;
@@ -92,7 +89,6 @@ include __DIR__ . '/../../includes/header.php';
         font-size: 0.9rem;
         color: var(--lux-text-muted);
     }
-
 
     .lux-form-group {
         position: relative;
@@ -131,7 +127,6 @@ include __DIR__ . '/../../includes/header.php';
         background-color: #ffffff;
     }
 
-
     .settings-panel {
         display: none;
         animation: paneFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -145,7 +140,6 @@ include __DIR__ . '/../../includes/header.php';
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-
 
     .lux-btn-submit {
         background: linear-gradient(135deg, var(--lux-green) 0%, #033029 100%);
@@ -194,6 +188,11 @@ include __DIR__ . '/../../includes/header.php';
                     </div>
 
                     <div class="col-12 col-md-8 col-lg-9 lux-content-pane">
+                        <div id="paneLoader" class="text-center py-5 d-none">
+                            <div class="spinner-border text-teal" style="color: var(--lux-green);" role="status"></div>
+                            <p class="text-muted mt-2">Loading your account configurations...</p>
+                        </div>
+
                         <form id="accountSettingsForm" novalidate autocomplete="off">
                             
                             <div class="settings-panel active" id="personal-panel">
@@ -205,19 +204,19 @@ include __DIR__ . '/../../includes/header.php';
                                 <div class="row g-3">
                                     <div class="col-12 col-sm-6 lux-form-group">
                                         <label class="lux-field-label">First Name <span>*</span></label>
-                                        <input type="text" id="setFirstName" class="form-control lux-input" placeholder="Muhammad" required>
+                                        <input type="text" id="setFirstName" class="form-control lux-input" placeholder="First Name" required>
                                     </div>
                                     <div class="col-12 col-sm-6 lux-form-group">
                                         <label class="lux-field-label">Last Name <span>*</span></label>
-                                        <input type="text" id="setLastName" class="form-control lux-input" placeholder="Shakeeb" required>
+                                        <input type="text" id="setLastName" class="form-control lux-input" placeholder="Last Name" required>
                                     </div>
                                     <div class="col-12 col-sm-6 lux-form-group">
                                         <label class="lux-field-label">Email Address <span>*</span></label>
-                                        <input type="email" id="setEmail" class="form-control lux-input" placeholder="shakeeb@example.com" required>
+                                        <input type="email" id="setEmail" class="form-control lux-input" placeholder="email@example.com" required>
                                     </div>
                                     <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">Phone Number <span>*</span></label>
-                                        <input type="tel" id="setPhone" class="form-control lux-input" placeholder="+44 7123 456789" required>
+                                        <label class="lux-field-label">Phone Number</label>
+                                        <input type="tel" id="setPhone" class="form-control lux-input" placeholder="+44 7123 456789">
                                     </div>
                                 </div>
                             </div>
@@ -230,12 +229,12 @@ include __DIR__ . '/../../includes/header.php';
                                 
                                 <div class="row g-3">
                                     <div class="col-12 col-md-8 lux-form-group">
-                                        <label class="lux-field-label">Address Line <span>*</span></label>
-                                        <input type="text" id="setAddress" class="form-control lux-input" placeholder="123 Luxury Road, Suite B" required>
+                                        <label class="lux-field-label">Address Line</label>
+                                        <input type="text" id="setAddress" class="form-control lux-input" placeholder="123 Luxury Road, Suite B">
                                     </div>
                                     <div class="col-12 col-md-4 lux-form-group">
-                                        <label class="lux-field-label">Postal Code <span>*</span></label>
-                                        <input type="text" id="setPostalCode" class="form-control lux-input" placeholder="E1 6AN" required>
+                                        <label class="lux-field-label">Postal Code</label>
+                                        <input type="text" id="setPostalCode" class="form-control lux-input" placeholder="E1 6AN">
                                     </div>
                                 </div>
                             </div>
@@ -286,8 +285,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitBtn = document.getElementById('submitSettingsBtn');
     const spinner = document.getElementById('btnSpinner');
     const icon = document.getElementById('btnIcon');
+    const paneLoader = document.getElementById('paneLoader');
 
-
+    // Tab Navigation Logic
     navItems.forEach(item => {
         item.addEventListener('click', function () {
             navItems.forEach(nav => nav.classList.remove('active'));
@@ -299,32 +299,157 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // --- STEP 1: LOAD USER PARAMETERS VIA AJAX ---
+    async function fetchUserAccountData() {
+        const accountData = localStorage.getItem('recycleproAccount');
+        if (!accountData) {
+            if (typeof showToast === 'function') showToast("Please login first!", "error");
+            return;
+        }
 
-    form.addEventListener('submit', function (e) {
+        const loggedInUser = JSON.parse(accountData);
+        // User ID parameters pull validation
+        const userId = loggedInUser.wp_user_id || loggedInUser.id || '';
+
+        if (!userId) {
+            if (typeof showToast === 'function') showToast("User ID session missing.", "warning");
+            return;
+        }
+
+        // Form ko hidden karke loader show karenge loading ke waqt
+        form.classList.add('d-none');
+        paneLoader.classList.remove('d-none');
+
+        // const fetchUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/${userId}`;
+        const fetchUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/1`;
+
+        try {
+            const response = await fetch(fetchUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // DOM input allocation with targeted fallback mappings
+                document.getElementById('setFirstName').value = result.user.first_name || '';
+                document.getElementById('setLastName').value = result.user.last_name || '';
+                document.getElementById('setEmail').value = result.user.email || '';
+                
+                // Meta fields verification mapping (if available in your system response payload)
+                if (result.user.phone) document.getElementById('setPhone').value = result.user.phone;
+                if (result.user.address) document.getElementById('setAddress').value = result.user.address;
+                if (result.user.postal_code) document.getElementById('setPostalCode').value = result.user.postal_code;
+            } else {
+                throw new Error(result.message || 'Failed to read database parameters.');
+            }
+        } catch (error) {
+            console.error("AJAX Fetch Exception Error:", error);
+            if (typeof showToast === 'function') showToast("Error loading account data.", "error");
+        } finally {
+            // Restore visibility transitions
+            paneLoader.classList.add('d-none');
+            form.classList.remove('d-none');
+        }
+    }
+
+    // Trigger on load execution context
+    fetchUserAccountData();
+
+
+    // --- STEP 2: POST/UPDATE USER PARAMETERS VIA AJAX ---
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        const accountData = localStorage.getItem('recycleproAccount');
+        if (!accountData) return;
+        const loggedInUser = JSON.parse(accountData);
+        const userId = loggedInUser.wp_user_id || loggedInUser.id || '';
 
         const newPass = document.getElementById('setNewPassword').value;
         const confirmPass = document.getElementById('setConfirmPassword').value;
 
+        // Security Pass matching checks
         if (newPass !== "" && newPass !== confirmPass) {
-            alert("Security Check Alert: Passwords do not match!");
+            if (typeof showToast === 'function') {
+                showToast("Passwords do not match!", "warning");
+            } else {
+                alert("Security Check Alert: Passwords do not match!");
+            }
             return;
         }
 
-
+        // Button Locking Layout state
         submitBtn.disabled = true;
         spinner.classList.remove('d-none');
         icon.classList.add('d-none');
 
-        console.log("Secure dynamic datasets verified. Triggering AJAX execution parameters.");
+        // const updateUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/update/${userId}`;
+        const updateUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/update/1`;
+        
+        // Payload Construction object
+        const payload = {
+            "first_name": document.getElementById('setFirstName').value,
+            "last_name": document.getElementById('setLastName').value,
+            "email": document.getElementById('setEmail').value,
+            "phone": document.getElementById('setPhone').value,
+            "address": document.getElementById('setAddress').value,
+            "postal_code": document.getElementById('setPostalCode').value
+        };
 
+        // If a password transaction injection is requested
+        if (newPass !== "") {
+            payload.password = newPass;
+        }
 
-        setTimeout(() => {
+        try {
+            const response = await fetch(updateUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                if (typeof showToast === 'function') {
+                    showToast("Profile Settings updated successfully!", "success");
+                } else {
+                    alert("Profile Secured! Settings updated successfully across the systems.");
+                }
+                
+                // Optional: LocalStorage profile syncing updates
+                loggedInUser.first_name = payload.first_name;
+                loggedInUser.last_name = payload.last_name;
+                loggedInUser.email = payload.email;
+                localStorage.setItem('recycleproAccount', JSON.stringify(loggedInUser));
+
+                // Clear input structures on successful updates execution
+                document.getElementById('setNewPassword').value = "";
+                document.getElementById('setConfirmPassword').value = "";
+
+            } else {
+                throw new Error(result.message || 'Update request rejected by endpoint backend stack.');
+            }
+
+        } catch (error) {
+            console.error("AJAX Submit Exception Error:", error);
+            if (typeof showToast === 'function') {
+                showToast(error.message || "Failed to update backend records.", "error");
+            } else {
+                alert("Error saving settings data.");
+            }
+        } finally {
+            // UI state restoration releases
             submitBtn.disabled = false;
             spinner.classList.add('d-none');
             icon.classList.remove('d-none');
-            alert("Profile Secured! Settings updated successfully across the systems.");
-        }, 1200);
+        }
     });
 });
 </script>

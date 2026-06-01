@@ -213,12 +213,13 @@ class Home {
                         <div class="d-flex justify-content-between align-items-center mt-auto">
                         <span class="fw-semibold">${p.currencySymbol || '£'}${p.price}</span>
                                 <div class="d-inline-flex align-items-center gap-3">
-                                <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
-                                        style="color: ${heartColor};"
-                                        aria-label="Add to Wishlist" 
-                                        onclick='toggleWishlist(this, ${JSON.stringify(p)})'>
-                                    <i class="bi ${heartIcon}"></i>
-                                </button>
+                            <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
+                                    style="color: ${heartColor};"
+                                    aria-label="Add to Wishlist" 
+                                    data-product='${JSON.stringify(p).replace(/'/g, "&apos;")}'
+                                    onclick="toggleWishlist(this, JSON.parse(this.getAttribute('data-product')))">
+                                <i class="bi ${heartIcon}"></i>
+                            </button>
                                 
                                 <a class="btn btn-link p-0 text-dark fs-4 lh-1 d-inline-flex align-items-center" 
                                 href="/shop/buy/${p.permalink || '#'}" 
@@ -237,8 +238,8 @@ class Home {
             box.slick({
                 slidesToShow: 1, 
                 slidesToScroll: 1,
-                autoplay: true,          // ◄ Autoplay on rahega
-                autoplaySpeed: speed,    // ◄ Har row ki apni speed yahan set hogi
+                autoplay: true,         
+                autoplaySpeed: speed,    
                 arrows: false,
                 dots: false
             });
@@ -375,10 +376,11 @@ class Home {
                     <div class="d-flex justify-content-between align-items-end pt-1">
                         <strong class="fw-bold fs-5 text-dark">£${p.price}</strong>
                         <div>
-                            <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1 wishlist-btn" 
+                            <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
                                     style="color: ${heartColor};"
                                     aria-label="Add to Wishlist" 
-                                    onclick='toggleWishlist(this, ${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+                                    data-product='${JSON.stringify(p).replace(/'/g, "&apos;")}'
+                                    onclick="toggleWishlist(this, JSON.parse(this.getAttribute('data-product')))">
                                 <i class="bi ${heartIcon}"></i>
                             </button>
                             <a class="btn btn-link p-0 text-dark fs-3 ms-2" href="/shop/buy/${p.url || p.slug || '#'}" aria-label="Add to Cart">

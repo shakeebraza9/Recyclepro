@@ -1,16 +1,5 @@
 <?php
-/**
- * IMPORTANT:
- * - Save this file as UTF-8 WITHOUT BOM
- * - Do not add spaces/new lines before <?php
- * - Do not close PHP tag at end of pure PHP files
- */
 
-//ob_start();
-
-//if (session_status() === PHP_SESSION_NONE) {
-  //  session_start();
-//}
 $config = require_once __DIR__ . '/config.php';
 $pageTitle = $pageTitle ?? 'Recycle Pro';
 ?>
@@ -72,7 +61,6 @@ function updateAccountHeader() {
     const mobileWelcomeName = document.getElementById('mobileWelcomeName');
 
     if (account) {
-
         if (guestActions) guestActions.classList.add('d-none');
         if (userActions) userActions.classList.remove('d-none');
         if (welcomeName) welcomeName.textContent = `Welcome ${account.name}`;
@@ -84,7 +72,6 @@ function updateAccountHeader() {
         }
         if (mobileWelcomeName) mobileWelcomeName.textContent = `Hi, ${account.name}`;
     } else {
-
         if (guestActions) guestActions.classList.remove('d-none');
         if (userActions) userActions.classList.add('d-none');
         if (welcomeName) welcomeName.textContent = '';
@@ -116,7 +103,6 @@ async function submitAccountForm(endpoint, payload) {
     return data;
 }
 
-
 async function loadHeaderData() {
     try {
         const response = await fetch(headerAPI);
@@ -131,7 +117,6 @@ async function loadHeaderData() {
 }
 
 function renderHeader(data) {
-
     const bar = document.querySelector('.info-bar');
     if (bar) {
         bar.innerHTML = '';
@@ -212,7 +197,6 @@ function renderHeader(data) {
             menu.appendChild(createMenuItem(m, 0));
         });
 
-
         const mobileSwitchLi = document.createElement('li');
         mobileSwitchLi.className = 'nav-item d-md-none mt-3 pt-3 border-top-mobile'; 
         mobileSwitchLi.innerHTML = `
@@ -254,7 +238,6 @@ function renderHeader(data) {
         }, 150);
     }
 }
-
 
 class CartManager {
     constructor() {
@@ -313,7 +296,6 @@ class CartManager {
 
 const cartManager = new CartManager();
 window.cartManager = cartManager;
-
 
 function setupMobileMenu() {
     const menuToggle = document.getElementById('mobileMenuToggle');
@@ -432,9 +414,7 @@ function setupMobileMenu() {
     syncToggleState();
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-
     loadHeaderData();
     setupMobileMenu();
     updateAccountHeader();
@@ -446,6 +426,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const openAccountForm = document.getElementById('openAccountForm');
     const logoutButton = document.getElementById('logoutButton');
+
+    // --- REMEMBER ME: PAGE LOAD DETECT ---
+    const emailInput = document.getElementById('loginEmail');
+    const rememberCheckbox = document.getElementById('loginRemember');
+
+    if (emailInput && rememberCheckbox) {
+        const savedEmail = localStorage.getItem('remembered_email');
+        if (savedEmail) {
+            emailInput.value = savedEmail;
+            rememberCheckbox.checked = true;
+        }
+    }
 
     logoutButton?.addEventListener('click', clearAccount);
 
@@ -459,31 +451,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-
+    // --- LOGIN FORM SUBMIT LOGIC ---
     loginForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const status = document.getElementById('loginStatus');
         const submitButton = loginForm.querySelector('button[type="submit"]');
         const email = loginForm.email.value.trim();
         const password = loginForm.password.value;
+        const isRememberMeChecked = rememberCheckbox ? rememberCheckbox.checked : false;
 
         if (status) status.textContent = '';
         if (submitButton) submitButton.disabled = true;
 
         try {
             const data = await submitAccountForm('login', { email, password });
+            console.log(data.token);
+            console.log(data.jwt);
+            
             storeAccount({
+                id: data.user.id,
                 name: getAccountDisplayName(data, email),
                 email,
                 token: data.token || data.jwt || ''
             });
+
+            // --- REMEMBER ME STORAGE HANDLING ---
+            if (isRememberMeChecked) {
+                localStorage.setItem('remembered_email', email);
+            } else {
+                localStorage.removeItem('remembered_email');
+            }
+
             if (status) {
                 status.textContent = 'Login successful.';
                 status.className = 'small text-success';
             }
+            
             const modalEl = document.getElementById('accountModal');
             if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-            loginForm.reset();
+
+            // Password Manager integration fix & Reset handling
+            setTimeout(() => {
+                loginForm.reset();
+                if (isRememberMeChecked && emailInput && rememberCheckbox) {
+                    emailInput.value = email;
+                    rememberCheckbox.checked = true;
+                }
+            }, 500);
+
         } catch (error) {
             if (status) {
                 status.textContent = error.message;
@@ -494,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
+    // --- REGISTER FORM SUBMIT LOGIC ---
     openAccountForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const status = document.getElementById('openAccountStatus');
@@ -528,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             storeAccount({
+                id: data?.user?.id,
                 name: data?.name || data?.user?.name || data?.display_name || fullName,
                 email,
                 token: data.token || data.jwt || ''
@@ -540,7 +556,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const modalEl = document.getElementById('accountModal');
             if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-            openAccountForm.reset();
+            
+            setTimeout(() => {
+                openAccountForm.reset();
+            }, 500);
+            
         } catch (error) {
             if (status) {
                 status.textContent = error.message;
@@ -758,19 +778,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="loginPane" role="tabpanel" aria-labelledby="login-tab">
-                        <form id="loginForm" style="max-width: 450px; margin: 0 auto; padding: 10px 0;">
+                        <form id="loginForm" style="max-width: 450px; margin: 0 auto; padding: 10px 0;" autocomplete="on">
                             <div class="mb-3">
-                                <label for="loginEmail" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">Email <span style="color: #dc3545;">*</span></label>
+                                <label for="loginEmail" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">
+                                    Email <span style="color: #dc3545;">*</span>
+                                </label>
                                 <input type="email" class="form-control" id="loginEmail" name="email" placeholder="name@email.com" required 
-                                       style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                    autocomplete="username"
+                                    style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                             </div>
-                            <div class="mb-4">
-                                <label for="loginPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">Password <span style="color: #dc3545;">*</span></label>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">
+                                    Password <span style="color: #dc3545;">*</span>
+                                </label>
                                 <input type="password" class="form-control" id="loginPassword" name="password" placeholder="••••••••" required 
-                                       style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                    autocomplete="current-password"
+                                    style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                             </div>
+
+                            <div class="mb-4 d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input" id="loginRemember" name="remember" style="cursor: pointer; box-shadow: none;">
+                                <label class="form-check-label ms-2 small text-muted" for="loginRemember" style="cursor: pointer; font-weight: 500; user-select: none;">
+                                    Remember Me
+                                </label>
+                            </div>
+
                             <p id="loginStatus" class="small mb-3" style="font-weight: 500;"></p>
-                            <button type="submit" class="btn btn-dark w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #212529; border: none; transition: background 0.2s;">Login</button>
+                            <button type="submit" class="btn btn-dark w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #212529; border: none; transition: background 0.2s;">
+                                Login
+                            </button>
                         </form>
                     </div>
 

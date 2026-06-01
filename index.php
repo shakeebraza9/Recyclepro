@@ -215,7 +215,7 @@ include __DIR__ . '/includes/header.php';
 
 <script src="assets/js/JqueryApiService.js"></script>
 <script src="assets/js/Home.js"></script>
-<script src="assets/js/script.js"></script>
+
 <script>
 const apiService = new JqueryApiService();
 const home = new Home();

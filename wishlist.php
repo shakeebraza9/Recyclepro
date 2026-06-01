@@ -6,20 +6,30 @@ include __DIR__ . '/includes/header.php';
 <div class="container py-5" style="min-height: 60px;">
     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
         <h2 class="fw-bold text-dark m-0">My Wishlist <span id="wishlistCount" class="badge bg-dark rounded-pill fs-6 ms-2">0</span></h2>
-        <button class="btn btn-outline-danger btn-sm rounded-3" onclick="clearFullWishlist()">
+        <button class="btn btn-outline-danger btn-sm rounded-3" id="clearAllBtn" onclick="clearFullWishlist()">
             <i class="bi bi-trash3 me-1"></i> Clear All
         </button>
     </div>
 
     <div id="wishlistContainer" class="row g-4">
-        </div>
+
+    </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Page load hote hi wishlist render karein
+
     renderWishlistPage();
 });
+
+
+function getWishlistSession() {
+    const accountData = localStorage.getItem('recycleproAccount');
+    if (!accountData) return null;
+    
+    const user = JSON.parse(accountData);
+    return user.wp_user_id || user.id || null;
+}
 
 function renderWishlistPage() {
     const container = $("#wishlistContainer");
@@ -27,20 +37,25 @@ function renderWishlistPage() {
     
     if (!container.length) return;
 
-    // LocalStorage se wishlist array nikalen
+
     let wishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
     
-    // Total count update karein
+
     countBadge.text(wishlist.length);
+    if (typeof updateGlobalWishlistCount === 'function') {
+        updateGlobalWishlistCount();
+    }
+
 
     if (wishlist.length === 0) {
+        $("#clearAllBtn").hide();
         container.html(`
             <div class="col-12 text-center py-5">
                 <div class="mb-4">
                     <i class="bi bi-heartbreak text-muted" style="font-size: 4rem;"></i>
                 </div>
-                    <h4 class="fw-bold text-secondary">Your Wishlist Is Empty!</h4>
-                    <p class="text-muted">Continue shopping to save your favorite products.</p>
+                <h4 class="fw-bold text-secondary">Your Wishlist Is Empty!</h4>
+                <p class="text-muted">Continue shopping to save your favorite products.</p>
                 <a href="/shop" class="btn text-white px-4 py-2 rounded-3 mt-2" style="background-color: #13564f;">
                     Continue Shopping
                 </a>
@@ -49,16 +64,16 @@ function renderWishlistPage() {
         return;
     }
 
-
+    $("#clearAllBtn").show();
     container.html("");
     
-    wishlist.forEach((p, index) => {
+    wishlist.forEach((p) => {
         const productLink = `/shop/buy/${p.slug || p.permalink || '#'}`;
+        const cardId = `wishlist-item-${p.id}`;
         
         container.append(`
-            <div class="col-6 col-md-4 col-lg-3 product-card-item" id="wishlist-item-${index}">
+            <div class="col-6 col-md-4 col-lg-3 product-card-item" id="${cardId}">
                 <div class="card h-100 border border-light-subtle rounded-4 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
-                    
                     <div>
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <strong class="text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
@@ -67,7 +82,7 @@ function renderWishlistPage() {
                             
                             <button class="btn btn-link p-0 border-0 bg-transparent fs-5 lh-1" style="color: #13564f;"
                                     aria-label="Remove from Wishlist" 
-                                    onclick="removeFromWishlistPage('${p.slug || p.permalink}', ${index})">
+                                    onclick="removeFromWishlistPage('${p.id}', '${p.name}')">
                                 <i class="bi bi-heart-fill"></i>
                             </button>
                         </div>
@@ -99,40 +114,108 @@ function renderWishlistPage() {
                             </a>
                         </div>
                     </div>
-
                 </div>
             </div>
         `);
     });
 }
 
+async function removeFromWishlistPage(productId, productName) {
+    const customerId = getWishlistSession();
+    if (!customerId) {
+        showToast("Please login to update your wishlist.", "warning");
+        return;
+    }
 
-function removeFromWishlistPage(productKey, index) {
-    let wishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+    const apiUrl = 'https://www.recyclepro.co.uk/rp-dashboard/wp-json/wishlist/v1/status';
     
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "customer_id": String(customerId),
+                "product_id": String(productId),
+                "status": "inactive"
+            })
+        });
 
-    wishlist = wishlist.filter(item => (item.slug !== productKey && item.permalink !== productKey));
-    
-
-    localStorage.setItem('user_wishlist', JSON.stringify(wishlist));
-    
-
-    $(`#wishlist-item-${index}`).fadeOut(300, function() {
-        $(this).remove();
-
-        renderWishlistPage();
-    });
-}
+        const result = await response.json();
 
 
-function clearFullWishlist() {
-    if(confirm("Kya aap poori wishlist delete karna chahte hain?")) {
-        localStorage.removeItem('user_wishlist');
-        renderWishlistPage();
+        if (!response.ok || result.success !== true) {
+            throw new Error(result.message || 'Server rejected request');
+        }
+
+
+        let wishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+        wishlist = wishlist.filter(item => String(item.id) !== String(productId));
+        localStorage.setItem('user_wishlist', JSON.stringify(wishlist));
+
+        const targetCard = $(`#wishlist-item-${productId}`);
+        if (targetCard.length) {
+            targetCard.fadeOut(250, function() {
+                $(this).remove();
+                renderWishlistPage(); 
+            });
+        } else {
+            renderWishlistPage();
+        }
+
+        showToast(`"${productName}" removed from wishlist.`, "warning");
+
+    } catch (error) {
+        console.error("Wishlist runtime deletion failure:", error);
+        showToast("Failed to remove item. Database out of sync.", "error");
     }
 }
 
+async function clearFullWishlist() {
+    let wishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
+    if (!wishlist.length) return;
+
+    if (!confirm("Are you sure you want to clear your entire wishlist?")) {
+        return;
+    }
+
+    const customerId = getWishlistSession();
+    if (!customerId) {
+        showToast("Session expired. Please login again.", "error");
+        return;
+    }
+
+    const apiUrl = 'https://www.recyclepro.co.uk/rp-dashboard/wp-json/wishlist/v1/status';
+    const clearBtn = $("#clearAllBtn");
+    
+
+    clearBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Clearing...');
+
+    try {
+
+        for (const item of wishlist) {
+            await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    "customer_id": String(customerId),
+                    "product_id": String(item.id),
+                    "status": "inactive"
+                })
+            });
+        }
 
 
+        localStorage.removeItem('user_wishlist');
+        renderWishlistPage();
+        showToast("Wishlist cleared completely.", "success");
+
+    } catch (error) {
+        console.error("Global cleanup batch processing failure:", error);
+        showToast("Error processing data clear down on servers.", "error");
+    } finally {
+        clearBtn.prop('disabled', false).html('<i class="bi bi-trash3 me-1"></i> Clear All');
+    }
+}
 </script>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>
