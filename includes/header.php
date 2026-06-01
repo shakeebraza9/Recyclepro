@@ -36,17 +36,94 @@ $pageTitle = $pageTitle ?? 'Recycle Pro';
 const baseAPI = "<?= $config['API_URL'] ?>";
 const BASE_URL = "<?= $config['BASE_URL'] ?>";
 const headerAPI = `${baseAPI}wp-json/wp/v2/header`;
+const accountAPIBase = 'https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2';
+
+// --- Core Helper Functions for Account Storage & UI States ---
+function getStoredAccount() {
+    try {
+        return JSON.parse(localStorage.getItem('recycleproAccount') || 'null');
+    } catch (error) {
+        return null;
+    }
+}
+
+function storeAccount(account) {
+    localStorage.setItem('recycleproAccount', JSON.stringify(account));
+    updateAccountHeader();
+}
+
+function clearAccount() {
+    localStorage.removeItem('recycleproAccount');
+    updateAccountHeader();
+}
+
+function getAccountDisplayName(data, fallbackEmail = '') {
+    return data?.name || data?.user?.name || data?.display_name || fallbackEmail.split('@')[0] || 'Customer';
+}
+
+function updateAccountHeader() {
+    const account = getStoredAccount();
+    const guestActions = document.getElementById('guestAccountActions');
+    const userActions = document.getElementById('userAccountActions');
+    const welcomeName = document.getElementById('welcomeName');
+
+    const mobileGuestActions = document.getElementById('mobileGuestActions');
+    const mobileUserActions = document.getElementById('mobileUserActions');
+    const mobileWelcomeName = document.getElementById('mobileWelcomeName');
+
+    if (account) {
+
+        if (guestActions) guestActions.classList.add('d-none');
+        if (userActions) userActions.classList.remove('d-none');
+        if (welcomeName) welcomeName.textContent = `Welcome ${account.name}`;
+
+        if (mobileGuestActions) mobileGuestActions.classList.add('d-none');
+        if (mobileUserActions) {
+            mobileUserActions.classList.remove('d-none');
+            mobileUserActions.classList.add('d-flex');
+        }
+        if (mobileWelcomeName) mobileWelcomeName.textContent = `Hi, ${account.name}`;
+    } else {
+
+        if (guestActions) guestActions.classList.remove('d-none');
+        if (userActions) userActions.classList.add('d-none');
+        if (welcomeName) welcomeName.textContent = '';
+
+        if (mobileGuestActions) mobileGuestActions.classList.remove('d-none');
+        if (mobileUserActions) {
+            mobileUserActions.classList.add('d-none');
+            mobileUserActions.classList.remove('d-flex');
+        }
+        if (mobileWelcomeName) mobileWelcomeName.textContent = 'Account';
+    }
+}
+
+async function submitAccountForm(endpoint, payload) {
+    const response = await fetch(`${accountAPIBase}/${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || data.success === false) {
+        throw new Error(data.message || 'Account request failed. Please try again.');
+    }
+
+    return data;
+}
+
 
 async function loadHeaderData() {
     try {
         const response = await fetch(headerAPI);
-
         if (!response.ok) {
             throw new Error('Failed to load header data');
         }
-
         const header = await response.json();
-
         renderHeader(header.header || {});
     } catch (err) {
         console.error('Header API Error:', err);
@@ -55,12 +132,9 @@ async function loadHeaderData() {
 
 function renderHeader(data) {
 
-    // Top Bar
     const bar = document.querySelector('.info-bar');
-
     if (bar) {
         bar.innerHTML = '';
-
         Object.values(data.header_top_bar || {}).forEach(v => {
             const span = document.createElement('span');
             span.innerHTML = v || '';
@@ -68,12 +142,9 @@ function renderHeader(data) {
         });
     }
 
-    // Menu
     const menu = document.getElementById('menu');
-
     if (menu) {
         menu.innerHTML = '';
-
         let menuItemCounter = 0;
 
         const createMenuItem = (item, depth = 0) => {
@@ -82,12 +153,7 @@ function renderHeader(data) {
             const itemId = menuItemCounter++;
             const submenuId = `submenu-${itemId}`;
 
-            if (depth === 0) {
-                li.className = 'nav-item';
-            } else {
-                li.className = '';
-            }
-
+            li.className = depth === 0 ? 'nav-item' : '';
             if (hasSub) {
                 li.classList.add('dropdown');
             }
@@ -99,13 +165,11 @@ function renderHeader(data) {
                     : 'dropdown-item';
 
             let cleanUrl = (item.url || '#').replace(/^https?:\/\/[^\/]+\/shop\/?/i, '');
-
             if (cleanUrl.startsWith('/shop/')) {
                 cleanUrl = cleanUrl.replace(/^\/shop\//i, '');
             } else if (cleanUrl.startsWith('shop/')) {
                 cleanUrl = cleanUrl.replace(/^shop\//i, '');
             }
-
             if (cleanUrl.startsWith('/')) {
                 cleanUrl = cleanUrl.substring(1);
             }
@@ -144,17 +208,14 @@ function renderHeader(data) {
             return li;
         };
 
-        // 1. Pehle API wale saare menu items add karo
         (data.menu || []).forEach((m) => {
             menu.appendChild(createMenuItem(m, 0));
         });
 
-        // 2. MOBILE ENHANCEMENT: Shop/Sell aur Account Buttons dono ko aakhir me add karo
+
         const mobileSwitchLi = document.createElement('li');
         mobileSwitchLi.className = 'nav-item d-md-none mt-3 pt-3 border-top-mobile'; 
         mobileSwitchLi.innerHTML = `
-
-
             <div id="mobileGuestActions" class="px-3 d-flex flex-column gap-2">
                 <button type="button" class="btn btn-login-mobile w-100 py-2" data-bs-toggle="modal" data-bs-target="#accountModal" data-account-tab="login">
                     Login
@@ -164,22 +225,95 @@ function renderHeader(data) {
                 </button>
             </div>
 
-            <div id="mobileUserActions" class="px-3 d-none flex-column gap-2 text-center">
-                <span id="mobileWelcomeName" class="fw-semibold text-dark mb-1 d-block"></span>
-                <button type="button" class="btn btn-sm btn-danger w-100 py-2" id="mobileLogoutButton">
-                    Logout
+            <div id="mobileUserActions" class="px-3 d-none flex-column gap-2">
+                <div class="text-center mb-2">
+                    <i class="bi bi-person-circle fs-3 text-secondary mb-1 d-block"></i>
+                    <span id="mobileWelcomeName" class="fw-bold text-dark fs-6">Account</span>
+                </div>
+                
+                <a class="btn btn-light w-100 py-2 text-start d-flex align-items-center gap-2" href="${BASE_URL}user/settings/" style="border: 1px solid #e2e8f0; font-weight: 500;">
+                    <i class="bi bi-gear-fill text-secondary"></i>
+                    <span>Settings</span>
+                </a>
+                
+                <a class="btn btn-light w-100 py-2 text-start d-flex align-items-center gap-2 mb-2" href="${BASE_URL}user/orders/" style="border: 1px solid #e2e8f0; font-weight: 500;">
+                    <i class="bi bi-bag-check-fill text-secondary"></i>
+                    <span>Your Orders</span>
+                </a>
+                
+                <button type="button" class="btn btn-danger w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="mobileLogoutButton">
+                    <i class="bi bi-box-arrow-right"></i> Logout
                 </button>
             </div>
         `;
         menu.appendChild(mobileSwitchLi);
 
-        // Mobile logout trigger attach karein
         setTimeout(() => {
             document.getElementById('mobileLogoutButton')?.addEventListener('click', clearAccount);
+            updateAccountHeader();
         }, 150);
     }
 }
-document.addEventListener('DOMContentLoaded', loadHeaderData);
+
+
+class CartManager {
+    constructor() {
+        this.items = [];
+        this.count = 0;
+        this.total = 0;
+    }
+
+    request(action, payload = {}) {
+        return fetch('/shop/cart.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ action, ...payload })
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.items = data.items || [];
+            this.count = Number(data.count || 0);
+            this.total = Number(data.total || 0);
+
+            this.updateCartDisplay();
+            document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+            return data;
+        });
+    }
+
+    load() { return this.request('get'); }
+
+    addItem(product) {
+        return this.request('add', {
+            product_id: product.product_id || product.id || product.ID || '',
+            name: product.name || product.title || '',
+            price: product.price || 0,
+            image: product.image || '',
+            permalink: product.permalink || product.url || ''
+        });
+    }
+
+    updateQuantity(index, quantity) { return this.request('update', { index, qty: quantity }); }
+    removeItem(index) { return this.request('remove', { index }); }
+    clearCart() { return this.request('clear'); }
+    getItems() { return this.items; }
+    getTotalItems() { return this.count; }
+    getTotalPrice() { return this.total; }
+
+    updateCartDisplay() {
+        const cartCountElements = document.querySelectorAll('.cart-count');
+        cartCountElements.forEach((element) => {
+            element.textContent = this.count;
+            element.style.display = this.count > 0 ? 'inline-block' : 'none';
+        });
+    }
+}
+
+const cartManager = new CartManager();
+window.cartManager = cartManager;
+
 
 function setupMobileMenu() {
     const menuToggle = document.getElementById('mobileMenuToggle');
@@ -187,34 +321,31 @@ function setupMobileMenu() {
     const menuNav = document.getElementById('mainMenuNav');
     const menu = document.getElementById('menu');
 
-    if (!menuToggle || !menuOverlay || !menuNav || !menu) {
-        return;
-    }
+    if (!menuToggle || !menuOverlay || !menuNav || !menu) return;
 
     const icon = menuToggle.querySelector('i');
+    
     const setMenuState = (isOpen) => {
         menuNav.classList.toggle('menu-open', isOpen);
         document.body.classList.toggle('mobile-menu-open', isOpen);
         menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         menuToggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-
         if (icon) {
             icon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-list';
         }
     };
 
     const isDrawerLayout = () => window.matchMedia('(max-width: 991.98px)').matches;
+    
     const setSubmenuState = (item, isOpen) => {
         const toggle = item.querySelector(':scope > .submenu-toggle');
         const toggleIcon = toggle?.querySelector('i');
-
         item.classList.toggle('submenu-open', isOpen);
 
         if (toggle) {
             toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             toggle.setAttribute('aria-label', `${isOpen ? 'Collapse' : 'Expand'} ${item.querySelector(':scope > .nav-link')?.textContent.trim() || 'submenu'}`);
         }
-
         if (toggleIcon) {
             toggleIcon.className = isOpen ? 'bi bi-dash-lg' : 'bi bi-plus-lg';
         }
@@ -228,10 +359,8 @@ function setupMobileMenu() {
 
     const setDesktopToggleState = () => {
         const isExpanded = !menuNav.classList.contains('desktop-menu-compact');
-
         menuToggle.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
         menuToggle.setAttribute('aria-label', isExpanded ? 'Collapse menu' : 'Open menu');
-
         if (icon) {
             icon.className = isExpanded ? 'bi bi-x-lg' : 'bi bi-list';
         }
@@ -249,10 +378,7 @@ function setupMobileMenu() {
         if (isDrawerLayout()) {
             const willOpen = !menuNav.classList.contains('menu-open');
             setMenuState(willOpen);
-
-            if (!willOpen) {
-                closeSubmenus();
-            }
+            if (!willOpen) closeSubmenus();
         } else {
             menuNav.classList.toggle('desktop-menu-compact');
             menuToggle.classList.toggle('is-compact');
@@ -276,7 +402,6 @@ function setupMobileMenu() {
         }
 
         const link = event.target.closest('a');
-
         if (isDrawerLayout() && link?.classList.contains('dropdown-toggle') && parentItem) {
             event.preventDefault();
             setSubmenuState(parentItem, !parentItem.classList.contains('submenu-open'));
@@ -301,211 +426,22 @@ function setupMobileMenu() {
             setMenuState(false);
             closeSubmenus();
         }
-
         syncToggleState();
     });
 
     syncToggleState();
 }
 
-document.addEventListener('DOMContentLoaded', setupMobileMenu);
-
-class CartManager {
-
-    constructor() {
-        this.items = [];
-        this.count = 0;
-        this.total = 0;
-    }
-
-    request(action, payload = {}) {
-
-        return fetch('/shop/cart.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                action,
-                ...payload
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-
-            this.items = data.items || [];
-            this.count = Number(data.count || 0);
-            this.total = Number(data.total || 0);
-
-            this.updateCartDisplay();
-
-            document.dispatchEvent(
-                new CustomEvent('cart:updated', {
-                    detail: data
-                })
-            );
-
-            return data;
-        });
-    }
-
-    load() {
-        return this.request('get');
-    }
-
-    addItem(product) {
-
-        return this.request('add', {
-
-            product_id:
-                product.product_id ||
-                product.id ||
-                product.ID ||
-                '',
-
-            name:
-                product.name ||
-                product.title ||
-                '',
-
-            price:
-                product.price ||
-                0,
-
-            image:
-                product.image ||
-                '',
-
-            permalink:
-                product.permalink ||
-                product.url ||
-                ''
-        });
-    }
-
-    updateQuantity(index, quantity) {
-
-        return this.request('update', {
-            index,
-            qty: quantity
-        });
-    }
-
-    removeItem(index) {
-
-        return this.request('remove', {
-            index
-        });
-    }
-
-    clearCart() {
-        return this.request('clear');
-    }
-
-    getItems() {
-        return this.items;
-    }
-
-    getTotalItems() {
-        return this.count;
-    }
-
-    getTotalPrice() {
-        return this.total;
-    }
-
-    updateCartDisplay() {
-
-        const cartCountElements =
-            document.querySelectorAll('.cart-count');
-
-        cartCountElements.forEach((element) => {
-
-            element.textContent = this.count;
-
-            element.style.display =
-                this.count > 0
-                    ? 'inline-block'
-                    : 'none';
-        });
-    }
-}
-
-const cartManager = new CartManager();
-
-window.cartManager = cartManager;
-
-const accountAPIBase = 'https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2';
-
-function getStoredAccount() {
-    try {
-        return JSON.parse(localStorage.getItem('recycleproAccount') || 'null');
-    } catch (error) {
-        return null;
-    }
-}
-
-function storeAccount(account) {
-    localStorage.setItem('recycleproAccount', JSON.stringify(account));
-    updateAccountHeader();
-}
-
-function clearAccount() {
-    localStorage.removeItem('recycleproAccount');
-    updateAccountHeader();
-}
-
-function getAccountDisplayName(data, fallbackEmail = '') {
-    return data?.name || data?.user?.name || data?.display_name || fallbackEmail.split('@')[0] || 'Customer';
-}
-
-function updateAccountHeader() {
-    const account = getStoredAccount();
-    const guestActions = document.getElementById('guestAccountActions');
-    const userActions = document.getElementById('userAccountActions');
-    const welcomeName = document.getElementById('welcomeName');
-
-    if (!guestActions || !userActions || !welcomeName) {
-        return;
-    }
-
-    if (account) {
-        guestActions.classList.add('d-none');
-        userActions.classList.remove('d-none');
-        welcomeName.textContent = `Welcome ${account.name}`;
-    } else {
-        guestActions.classList.remove('d-none');
-        userActions.classList.add('d-none');
-        welcomeName.textContent = '';
-    }
-}
-
-async function submitAccountForm(endpoint, payload) {
-    const response = await fetch(`${accountAPIBase}/${endpoint}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok || data.success === false) {
-        throw new Error(data.message || 'Account request failed. Please try again.');
-    }
-
-    return data;
-}
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    cartManager.load()
-        .catch(err => {
-            console.error('Cart API Error:', err);
-        });
-
+    loadHeaderData();
+    setupMobileMenu();
     updateAccountHeader();
+    
+    cartManager.load().catch(err => {
+        console.error('Cart API Error:', err);
+    });
 
     const loginForm = document.getElementById('loginForm');
     const openAccountForm = document.getElementById('openAccountForm');
@@ -517,12 +453,12 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const tabId = button.dataset.accountTab === 'open-account' ? 'open-account-tab' : 'login-tab';
             const tabButton = document.getElementById(tabId);
-
             if (tabButton && window.bootstrap) {
                 bootstrap.Tab.getOrCreateInstance(tabButton).show();
             }
         });
     });
+
 
     loginForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -531,8 +467,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = loginForm.email.value.trim();
         const password = loginForm.password.value;
 
-        status.textContent = '';
-        submitButton.disabled = true;
+        if (status) status.textContent = '';
+        if (submitButton) submitButton.disabled = true;
 
         try {
             const data = await submitAccountForm('login', { email, password });
@@ -541,89 +477,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 email,
                 token: data.token || data.jwt || ''
             });
-            status.textContent = 'Login successful.';
-            status.className = 'small text-success';
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('accountModal')).hide();
+            if (status) {
+                status.textContent = 'Login successful.';
+                status.className = 'small text-success';
+            }
+            const modalEl = document.getElementById('accountModal');
+            if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             loginForm.reset();
         } catch (error) {
-            status.textContent = error.message;
-            status.className = 'small text-danger';
+            if (status) {
+                status.textContent = error.message;
+                status.className = 'small text-danger';
+            }
         } finally {
-            submitButton.disabled = false;
+            if (submitButton) submitButton.disabled = false;
         }
     });
 
-openAccountForm?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const status = document.getElementById('openAccountStatus');
-    const submitButton = openAccountForm.querySelector('button[type="submit"]');
-    
 
-    const firstName = document.getElementById('accountFirstName').value.trim();
-    const lastName = document.getElementById('accountLastName').value.trim();
-    const email = document.getElementById('accountEmail').value.trim();
-    const phone = document.getElementById('accountPhone').value.trim();
-    const address = document.getElementById('accountAddress').value.trim();
-    const postalCode = document.getElementById('accountPostalCode').value.trim();
-    const password = document.getElementById('accountPassword').value;
-    const confirmPassword = document.getElementById('accountConfirmPassword').value;
-
-    status.textContent = '';
-
-
-    if (password !== confirmPassword) {
-        status.textContent = 'Passwords do not match!';
-        status.className = 'small text-danger';
-        return; 
-    }
-
-    submitButton.disabled = true;
-
-    try {
-
-        const fullName = `${firstName} ${lastName}`.trim();
-
-        const data = await submitAccountForm('open-account', { 
-            name: fullName, 
-            firstName,
-            lastName,
-            email, 
-            phone,
-            address,
-            postalCode,
-            password 
-        });
-
-        storeAccount({
-            name: data?.name || data?.user?.name || data?.display_name || fullName,
-            email,
-            token: data.token || data.jwt || ''
-        });
-
-        status.textContent = 'Account created successfully.';
-        status.className = 'small text-success';
+    openAccountForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const status = document.getElementById('openAccountStatus');
+        const submitButton = openAccountForm.querySelector('button[type="submit"]');
         
+        const firstName = document.getElementById('accountFirstName').value.trim();
+        const lastName = document.getElementById('accountLastName').value.trim();
+        const email = document.getElementById('accountEmail').value.trim();
+        const phone = document.getElementById('accountPhone').value.trim();
+        const address = document.getElementById('accountAddress').value.trim();
+        const postalCode = document.getElementById('accountPostalCode').value.trim();
+        const password = document.getElementById('accountPassword').value;
+        const confirmPassword = document.getElementById('accountConfirmPassword').value;
 
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('accountModal')).hide();
-        openAccountForm.reset();
-    } catch (error) {
-        status.textContent = error.message;
-        status.className = 'small text-danger';
-    } finally {
-        submitButton.disabled = false;
-    }
+        if (status) status.textContent = '';
+
+        if (password !== confirmPassword) {
+            if (status) {
+                status.textContent = 'Passwords do not match!';
+                status.className = 'small text-danger';
+            }
+            return; 
+        }
+
+        if (submitButton) submitButton.disabled = true;
+
+        try {
+            const fullName = `${firstName} ${lastName}`.trim();
+            const data = await submitAccountForm('open-account', { 
+                name: fullName, firstName, lastName, email, phone, address, postalCode, password 
+            });
+
+            storeAccount({
+                name: data?.name || data?.user?.name || data?.display_name || fullName,
+                email,
+                token: data.token || data.jwt || ''
+            });
+
+            if (status) {
+                status.textContent = 'Account created successfully.';
+                status.className = 'small text-success';
+            }
+            
+            const modalEl = document.getElementById('accountModal');
+            if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            openAccountForm.reset();
+        } catch (error) {
+            if (status) {
+                status.textContent = error.message;
+                status.className = 'small text-danger';
+            }
+        } finally {
+            if (submitButton) submitButton.disabled = false;
+        }
+    });
 });
-});
-
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    updateHeaderWishlistCount();
-});
-
-
-
 </script>
 </head>
 
@@ -634,7 +561,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         <div class="header-layout">
 
-            <!-- Logo -->
             <div class="header-brand">
                 <a href="/shop/" class="header-logo-link">
                     <img
@@ -655,7 +581,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </button>
             </div>
 
-            <!-- Navigation -->
+
             <div class="header-switch-links">
 
                 <a class="v-nav-link" href="/shop/">
@@ -739,10 +665,44 @@ document.addEventListener("DOMContentLoaded", function () {
                     </button>
                 </span>
 
-                <span id="userAccountActions" class="d-none account-welcome">
-                    <span id="welcomeName" class="me-2 fw-semibold"></span>
-                    <button type="button" class="btn btn-sm btn-outline-light" id="logoutButton">Logout</button>
-                </span>
+            <div id="userAccountActions" class="d-none dropdown account-welcome-dropdown">
+                    <button class="btn dropdown-toggle d-inline-flex align-items-center gap-2 text-white border-0 px-3 py-1.5" 
+                            type="button" 
+                            id="desktopUserDropdown" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false"
+                            style="background: transparent; font-weight: 500; font-size: 0.95rem;">
+                        <i class="bi bi-person-circle fs-5 text-white-50"></i>
+                        <span id="welcomeName" class="fw-semibold text-white">Account</span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 desktop-premium-dropdown-menu" 
+                        aria-labelledby="desktopUserDropdown">
+                        
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2.5" href="<?php echo $config['BASE_URL']; ?>user/settings/">
+                                <i class="bi bi-gear-fill text-secondary"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2.5" href="<?php echo $config['BASE_URL']; ?>user/orders/">
+                                <i class="bi bi-bag-check-fill text-secondary"></i>
+                                <span>Your Orders</span>
+                            </a>
+                        </li>
+                        
+                        <li><hr class="dropdown-divider my-2" style="border-color: #f1f3f5;"></li>
+                        
+                        <li>
+                            <button type="button" class="dropdown-item text-danger d-flex align-items-center gap-2 py-2.5 fw-semibold" id="logoutButton">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </button>
+                        </li>
+                    </ul>
+            </div>
 
             </div>
 

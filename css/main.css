@@ -1176,7 +1176,7 @@ div#centerBanner a {
     }
 
     .main-menu-navbar.menu-open + .mobile-menu-overlay {
-        display: block;
+        /* display: block; */
         opacity: 1;
         pointer-events: auto;
     }
@@ -1773,6 +1773,9 @@ div#featuredProducts .card {
     #featuredProducts {
         margin-inline: 0;
     }
+    #userAccountActions {
+  display: none;
+}
 
     #featuredProducts .slick-slide {
         padding: 0.45rem;
@@ -3391,7 +3394,7 @@ button.btn.btn-account.text-white {
     .tp-grid-container { grid-template-columns: 1fr !important; gap: 20px !important; }
 }
 
-/* Custom Toast Styles */
+
 .toast {
     opacity: 0;
     transform: translateY(-20px);
@@ -3403,7 +3406,7 @@ button.btn.btn-account.text-white {
     transform: translateY(0);
 }
 
-/* Toast Color Schemes */
+
 .toast-success-bg {
     background: linear-gradient(135deg, #13564f, #1a746b) !important;
 }
@@ -3421,33 +3424,33 @@ button.btn.btn-account.text-white {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;         /* Rectangle Width */
-    height: 32px;        /* Rectangle Height */
-    background: #ffffff; /* Card background */
-    border: 1px solid #e2e8f0; /* Soft gray border */
-    border-radius: 6px;  /* Smooth modern corners */
-    padding: 4px;        /* Side spacing for logo inside the box */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); /* Very subtle premium shadow */
+    width: 48px;     
+    height: 32px;       
+    background: #ffffff; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px;  
+    padding: 4px;    
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); 
     transition: all 0.2s ease-in-out;
 }
 
-/* Hover effect for global premium feel */
+
 .payment-card-box:hover {
     border-color: #cbd5e1;
     transform: translateY(-2px);
 }
 
-/* Image scaling handler inside the rectangle */
+
 .payment-card-box img {
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain; /* Logos standard stretch resolution filter */
+    object-fit: contain; 
 }
 
-/* --- Desktop View (Default Layout) --- */
+
 .thumb-column {
     display: flex;
-    flex-direction: column; /* Desktop par side pe vertical list */
+    flex-direction: column; 
     gap: 10px;
     width: 100%;
 }
@@ -3458,7 +3461,7 @@ button.btn.btn-account.text-white {
     border-radius: 8px;
     padding: 4px;
     cursor: pointer;
-    aspect-ratio: 1 / 1; /* Symmetrical square shape */
+    aspect-ratio: 1 / 1; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3473,28 +3476,78 @@ button.btn.btn-account.text-white {
 }
 
 .thumb-btn.active {
-    border-color: #13564f; /* Active high-light border color */
+    border-color: #13564f; 
     box-shadow: 0 0 0 2px rgba(19, 86, 79, 0.2);
 }
 
-/* --- Mobile & Tablet Screen Fix --- */
+
 @media (max-width: 1199px) {
     .thumb-column {
-        flex-direction: row;     /* Mobile par side se hat kar rows (horizontal) mein convert ho jaye */
-        justify-content: center; /* Center alignment */
-        overflow-x: auto;        /* Agar zyada images hon toh swipable scroll ho jaye */
+        flex-direction: row;     
+        justify-content: center; 
+        overflow-x: auto;        
         white-space: nowrap;
         padding: 10px 0;
         -webkit-overflow-scrolling: touch;
     }
 
     .thumb-column::-webkit-scrollbar {
-        display: none; /* Mobile par scrollbar chupaane ke liye */
+        display: none; 
     }
 
     .thumb-btn {
-        width: 65px;  /* Mobile par buttons ka balanced size */
         height: 65px;
-        flex-shrink: 0; /* Box size squeeze hone se rokega */
+        flex-shrink: 0; 
     }
 }
+
+
+
+    #userAccountActions.d-inline-block {
+        display: inline-block !important;
+    }
+
+
+    .desktop-premium-dropdown-menu {
+        min-width: 210px;
+        border-radius: 16px !important;
+        padding: 8px !important;
+        background-color: #ffffff;
+        box-shadow: 0 12px 36px #13564f !important; 
+        border: 1px solid #edf2f1 !important;
+        transform: translateY(5px);
+    }
+
+    .desktop-premium-dropdown-menu .dropdown-item {
+        border-radius: 10px;
+        font-size: 0.9rem;
+        color: #13564f;
+        font-weight: 500;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+
+    .desktop-premium-dropdown-menu .dropdown-item:hover,
+    .desktop-premium-dropdown-menu .dropdown-item:focus {
+        background-color: #f2f7f6 !important;
+        color: #13564f !important;
+    }
+
+
+    .desktop-premium-dropdown-menu .dropdown-item.text-danger:hover {
+        background-color: #fff1f2 !important;
+        color: #e11d48 !important;
+    }
+
+   
+    .account-welcome-dropdown .dropdown-toggle::after {
+        display: inline-block;
+        margin-left: 0.4em;
+        vertical-align: 0.255em;
+        content: "";
+        border-top: 0.3em solid;
+        border-right: 0.3em solid transparent;
+        border-bottom: 0;
+        border-left: 0.3em solid transparent;
+        color: rgba(255, 255, 255, 0.7);
+    }

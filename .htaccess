@@ -46,4 +46,7 @@
     RewriteRule ^([a-z0-9-]+)/?$ page.php?slug=$1 [QSA,L]
 
 
+    RewriteRule ^user/settings/?$ user/settings/index.php [QSA,L]
+    RewriteRule ^user/orders/?$ user/order/index.php [QSA,L]
+
 </IfModule>

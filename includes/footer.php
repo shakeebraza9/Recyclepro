@@ -61,10 +61,21 @@ $baseAPI = $config['API_URL'] ?? '';
             <div class="col-12 col-md-3 text-center text-md-end social-container">
                 <span class="me-2 text-white-50 small">Follow Us:</span>
                 <div class="d-inline-flex gap-2 social-icons">
-                    <a href="#" class="text-white footer-icon"><i class="bi bi-facebook"></i></a>
-                    <a href="#" class="text-white footer-icon"><i class="bi bi-twitter-x"></i></a>
-                    <a href="#" class="text-white footer-icon"><i class="bi bi-tiktok"></i></a>
-                    <a href="#" class="text-white footer-icon"><i class="bi bi-youtube"></i></a>
+                    <a href="https://www.facebook.com/RecycleProUK" target="_blank" class="text-white footer-icon">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+
+                    <a href="https://www.instagram.com/recycleprouk/?hl=en" target="_blank" class="text-white footer-icon">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+
+                    <a href="https://uk.pinterest.com/recyclepro/" target="_blank" class="text-white footer-icon">
+                        <i class="bi bi-pinterest"></i>
+                    </a>
+
+                    <a href="https://www.youtube.com/channel/UCyM1xzNK8YzVFNYmFEIBH5A" target="_blank" class="text-white footer-icon">
+                        <i class="bi bi-youtube"></i>
+                    </a>
                 </div>
             </div>
         </div>
