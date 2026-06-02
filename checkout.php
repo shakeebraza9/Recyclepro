@@ -120,7 +120,7 @@ include __DIR__ . '/includes/header.php';
                             </div>
                             <div class="col-md-6">
                                 <label for="shipping_country" class="form-label">Country <span>*</span></label>
-                                <select class="form-select" id="shipping_country" name="shipping_country" required>
+                                <select class="form-select" disabled id="shipping_country" name="shipping_country" required>
                                     <option value="United Kingdom" selected>United Kingdom</option>
                       
                                 </select>
@@ -168,12 +168,10 @@ include __DIR__ . '/includes/header.php';
                                 <input type="text" class="form-control billing-field" id="billing_postcode" name="billing_postcode">
                             </div>
                             <div class="col-md-6">
-                                <label for="billing_country" class="form-label">Country</label>
-                                <select class="form-select billing-field" id="billing_country" name="billing_country">
+                                <label for="billing_country"  class="form-label">Country</label>
+                                <select class="form-select billing-field" id="billing_country" disabled name="billing_country">
                                     <option value="United Kingdom" selected>United Kingdom</option>
-                                    <option value="Ireland">Ireland</option>
-                                    <option value="United States">United States</option>
-                                    <option value="Other">Other</option>
+                             
                                 </select>
                             </div>
                         </div>
@@ -229,7 +227,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="d-flex align-items-center justify-content-between w-100">
                     <div class="d-flex align-items-center gap-3">
                         <div class="custom-radio-circle"></div>
-                        <span class="fw-semibold">PayPal Checkout</span>
+                        <span class="fw-semibold">PayPal</span>
                     </div>
                     <span class="payment-icon"><i class="bi bi-paypal fs-4"></i></span>
                 </div>
@@ -241,7 +239,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="d-flex align-items-center justify-content-between w-100">
                     <div class="d-flex align-items-center gap-3">
                         <div class="custom-radio-circle"></div>
-                        <span class="fw-semibold">Credit Card / Stripe</span>
+                        <span class="fw-semibold">Credit Card </span>
                     </div>
                     <span class="payment-icon"><i class="bi bi-credit-card-2-front fs-4"></i></span>
                 </div>

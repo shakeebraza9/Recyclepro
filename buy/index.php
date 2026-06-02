@@ -252,7 +252,7 @@ while (count($similarProducts) < 4) {
 
                     <div class="product-info-list">
                         <div><i class="bi bi-truck"></i> Free worldwide shipping on all orders over £100</div>
-                        <div><i class="bi bi-shield-check"></i> Delivered in 3-7 Working Days <a href="<?php echo $config['BASE_URL']; ?>return-policy-warranty">Shipping & Return</a></div>
+                        <div><i class="bi bi-shield-check"></i> Delivered in 2-5 Working Days <a href="<?php echo $config['BASE_URL']; ?>return-policy-warranty">Shipping & Return</a></div>
                     </div>
                 </div>
             </div> </div> <div class="product-details-tabs-container py-5 my-4">

@@ -218,13 +218,10 @@ function renderHeader(data) {
                 
                 <a class="btn btn-light w-100 py-2 text-start d-flex align-items-center gap-2" href="${BASE_URL}user/settings/" style="border: 1px solid #e2e8f0; font-weight: 500;">
                     <i class="bi bi-gear-fill text-secondary"></i>
-                    <span>Settings</span>
+                    <span>Your Account</span>
                 </a>
                 
-                <a class="btn btn-light w-100 py-2 text-start d-flex align-items-center gap-2 mb-2" href="${BASE_URL}user/orders/" style="border: 1px solid #e2e8f0; font-weight: 500;">
-                    <i class="bi bi-bag-check-fill text-secondary"></i>
-                    <span>Your Orders</span>
-                </a>
+
                 
                 <button type="button" class="btn btn-danger w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="mobileLogoutButton">
                     <i class="bi bi-box-arrow-right"></i> Logout
@@ -510,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- REGISTER FORM SUBMIT LOGIC ---
+   
     openAccountForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const status = document.getElementById('openAccountStatus');
@@ -531,6 +528,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (status) {
                 status.textContent = 'Passwords do not match!';
                 status.className = 'small text-danger';
+                showToast('Passwords do not match!', 'error');
+            }
+            return; 
+        }
+
+    const cleanPostal = postalCode.replace(/\s+/g, '');
+        
+        const strictAlphanumericRegex = /^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9]+$/;
+
+        if (!cleanPostal || !strictAlphanumericRegex.test(cleanPostal)) {
+            if (status) {
+                status.textContent = 'Postal code must contain Alphanumeric characters !';
+                status.className = 'small text-danger';
+                showToast('Postal code must contain Alphanumeric characters !', 'error');
+            }
+            return; 
+        }
+
+        const phoneRegex = /^[0-9]+$/;
+        if (!phone || !phoneRegex.test(phone)) {
+            if (status) {
+                status.textContent = 'Phone number must contain numbers only!';
+                status.className = 'small text-danger';
+                showToast('Phone number must contain numbers only!', 'error');
             }
             return; 
         }
@@ -571,6 +592,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (submitButton) submitButton.disabled = false;
         }
     });
+
+
 });
 </script>
 </head>
@@ -703,16 +726,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         <li>
                             <a class="dropdown-item d-flex align-items-center gap-2 py-2.5" href="<?php echo $config['BASE_URL']; ?>user/settings/">
                                 <i class="bi bi-gear-fill text-secondary"></i>
-                                <span>Settings</span>
+                                <span>Your Account</span>
                             </a>
                         </li>
                         
-                        <li>
+                        <!-- <li>
                             <a class="dropdown-item d-flex align-items-center gap-2 py-2.5" href="<?php echo $config['BASE_URL']; ?>user/orders/">
                                 <i class="bi bi-bag-check-fill text-secondary"></i>
                                 <span>Your Orders</span>
                             </a>
-                        </li>
+                        </li> -->
                         
                         <li><hr class="dropdown-divider my-2" style="border-color: #f1f3f5;"></li>
                         
@@ -834,9 +857,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="accountPhone" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Phone Number <span style="color: #dc3545;">*</span></label>
+                                   <label for="accountPhone" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Phone Number <span style="color: #dc3545;">*</span></label>
+                                        
                                     <input type="tel" class="form-control" id="accountPhone" name="phone" placeholder="Enter Phone Number" required 
-                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"       
+                                    style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
 
                                 <div class="col-md-6">
