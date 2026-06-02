@@ -3089,7 +3089,10 @@ button.btn.btn-account.text-white {
     color: #076258;
     font-size: 3rem;
 }
-
+.hero_section {
+  border: 1px solid;
+  border-radius: 23px;
+}
 
 .featured-products-section-row a {
     color: #333;

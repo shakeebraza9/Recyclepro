@@ -14,7 +14,7 @@ include __DIR__ . '/includes/header.php';
     <div class="container" style="max-width: 100%;">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10">
-                <div class="content-scroll-wrapper">
+                <div class="content-scroll-wrapper hero_section">
                     <div id="pageContent" class="custom-scroll-content p-3 p-md-4">
                     <!-- <div id="pageContent" class="custom-scroll-content p-3 p-md-4" 
                          style="max-height: 300px; overflow-y: auto;"> -->
