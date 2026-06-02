@@ -3,7 +3,7 @@ $pageTitle = 'Checkout';
 include __DIR__ . '/includes/header.php';
 ?>
 <style>
-    /* --- Custom Radio Container Elements --- */
+
 .payment-card-option {
     border: 2px solid #e2e8f0;
     border-radius: 10px;
@@ -18,13 +18,13 @@ include __DIR__ . '/includes/header.php';
     background-color: #f8fafc;
 }
 
-/* Card Selection Trigger CSS Class */
+
 .payment-card-option.selected {
     border-color: #13564f;
     background-color: rgba(19, 86, 79, 0.03);
 }
 
-/* Checkbox Dot Circles styling */
+
 .custom-radio-circle {
     width: 18px;
     height: 18px;
