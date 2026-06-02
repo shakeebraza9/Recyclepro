@@ -27,7 +27,7 @@ const BASE_URL = "<?= $config['BASE_URL'] ?>";
 const headerAPI = `${baseAPI}wp-json/wp/v2/header`;
 const accountAPIBase = 'https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2';
 
-// --- Core Helper Functions for Account Storage & UI States ---
+
 function getStoredAccount() {
     try {
         return JSON.parse(localStorage.getItem('recycleproAccount') || 'null');
@@ -137,6 +137,7 @@ function renderHeader(data) {
             const hasSub = Array.isArray(item.sub) && item.sub.length > 0;
             const itemId = menuItemCounter++;
             const submenuId = `submenu-${itemId}`;
+            const cleanClassName = item.name ? item.name.toLowerCase().replace(/\s+/g, '-') : 'item';
 
             li.className = depth === 0 ? 'nav-item' : '';
             if (hasSub) {
@@ -178,7 +179,7 @@ function renderHeader(data) {
                     >
                         <i class="bi bi-plus-lg"></i>
                     </button>
-                    <ul class="dropdown-menu" id="${submenuId}">
+                    <ul class="dropdown-menu ${cleanClassName}" id="${submenuId}">
                 `;
 
                 item.sub.forEach(subItem => {

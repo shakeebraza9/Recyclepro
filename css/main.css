@@ -3145,28 +3145,28 @@ button.btn.btn-account.text-white {
         z-index: 1000;
         display-columns: 4;
     }
-    #submenu-33{
+
+    .game-console{
         left: -60px !important;
     }
-    #submenu-40{
+    .laptops{
         left: -207px !important;
     }
-    #submenu-52{
+    .speakers{
         left: -300px !important;
     }
-    #submenu-66{
+    .tablets{
         left: -411px !important;
     }
-    #submenu-78{
+    .smart-watches{
         left: -510px !important;
     }
-    #submenu-93{
+    .earbuds{
         left: -662px !important;
     }
-    #submenu-108{
+    .headphones{
         left: -780px !important;
     }
-
 
     .navbar-nav .dropdown:hover > .dropdown-menu {
         display: grid;
