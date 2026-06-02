@@ -611,6 +611,9 @@ $(document).ready(function() {
         const $container = $('#products-container');
         $container.empty();
 
+
+        $('#dynamic-product-schema').remove();
+
         if (filteredProducts.length === 0) {
             $container.html('<div class="text-center w-100 py-5 text-muted"><h5>No products match your filters.</h5></div>');
             $('#pagination-container').remove();
@@ -623,68 +626,107 @@ $(document).ready(function() {
         const endIndex = startIndex + itemsPerPage;
         const currentSliceGroup = filteredProducts.slice(startIndex, endIndex);
 
-        currentSliceGroup.forEach(p => {
+
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "numberOfItems": currentSliceGroup.length,
+            "itemListElement": []
+        };
+
+        currentSliceGroup.forEach((p, index) => {
             const fallbackImg = p.image || 'https://via.placeholder.com/120x150?text=No+Image';
             const priceLabel = p.price ? `£${parseFloat(p.price).toFixed(2)}` : 'Contact Price';
+            const productUrl = `${BASE_URL}buy/${p.slug || '#'}`;
             
             let dynamicGradeBadge = "Condition - Pristine";
+            let rawGradeValue = "Pristine"; 
+            
             if (p.product_attributes && Array.isArray(p.product_attributes)) {
                 const searchGradeKey = p.product_attributes.find(item => item.name.toLowerCase() === 'grade');
                 if (searchGradeKey) {
                     let gradeVal = '';
                     if (searchGradeKey.values && searchGradeKey.values.length > 0) gradeVal = searchGradeKey.values[0];
                     else if (searchGradeKey.options && searchGradeKey.options.length > 0) gradeVal = searchGradeKey.options[0];
-                    if (gradeVal) dynamicGradeBadge = `Condition - ${gradeVal}`;
+                    if (gradeVal) {
+                        dynamicGradeBadge = `Condition - ${gradeVal}`;
+                        rawGradeValue = gradeVal;
+                    }
                 }
             }
 
+
+            const itemSchema = {
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                    "@type": "Product",
+                    "name": p.name || 'Device Catalog Item',
+                    "image": fallbackImg,
+                    "url": productUrl,
+                    "description": p.description || `${p.name || 'Device'} available in condition ${rawGradeValue}.`,
+                    "brand": {
+                        "@type": "Brand",
+                        "name": p.brand || "BKRecyclePro" 
+                    }
+                }
+            };
+
+
+            if (p.price) {
+                itemSchema.item.offers = {
+                    "@type": "Offer",
+                    "url": productUrl,
+                    "priceCurrency": "GBP",
+                    "price": parseFloat(p.price).toFixed(2),
+                    "itemCondition": rawGradeValue.toLowerCase().includes('new') ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
+                    "availability": "https://schema.org/InStock"
+                };
+            }
+
+            const heartColor = p.is_wishlisted ? '#dc3545' : '#6c757d'; 
+            const heartIcon = p.is_wishlisted ? 'bi-heart-fill' : 'bi-heart';
+            schemaData.itemListElement.push(itemSchema);
+
             const itemNodeHtml = `
-                <div class="col">
-                    <div class="product-card d-flex flex-column h-100">
-                      
+            <div class="col">
+                    <div class="product-card d-flex flex-column h-100 position-relative">
+                        
+                        <div class="position-absolute" style="top: 15px; right: 15px; z-index: 10;">
+                            <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
+                                    style="color: ${heartColor};"
+                                    aria-label="Add to Wishlist" 
+                                    data-product='${JSON.stringify(p).replace(/'/g, "&apos;")}'
+                                    onclick="toggleWishlist(this, JSON.parse(this.getAttribute('data-product')))">
+                                <i class="bi ${heartIcon}"></i>
+                            </button>
+                        </div>
+
                         <div class="p-3 text-center flex-grow-1 d-flex flex-column justify-content-between">
                             <div class="my-3">
-                            <a href="${BASE_URL}buy/${p.slug || '#'}">
-                                <img src="${fallbackImg}" alt="${p.name}" class="img-fluid" style="max-height: 150px; object-fit: contain;">
-                            </a>
-                                </div>
-                        <div>
-                            <h3 class="product-title text-start mb-1">${p.name || 'Device Catalog Item'}</h3>
-                            
-                            <div class="text-start product-meta mb-2">
-                                ${dynamicGradeBadge} <i class="bi bi-info-circle" style="font-size: 10px;"></i>
+                                <a href="${productUrl}">
+                                    <img src="${fallbackImg}" alt="${p.name}" class="img-fluid" style="max-height: 150px; object-fit: contain;">
+                                </a>
                             </div>
-
-                            <div class="text-start product-colors mb-3">
-                                <span class="d-block text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; uppercase; letter-spacing: 0.5px;">
-                                    Color: <span id="selected-color-name-${p.slug || 'item'}" style="color: #212529; font-weight: 700;">Default</span>
-                                </span>
-                                
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <button type="button" 
-                                            class="color-circle-btn active" 
-                                            onclick="selectProductColor(this, 'Bronze Gold', '${p.slug || 'item'}')"
-                                            style="width: 24px; height: 24px; border-radius: 50%; background-color: #bfa17f; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #212529; cursor: pointer; transition: all 0.2s ease; padding: 0;">
-                                    </button>
-
-                                    <button type="button" 
-                                            class="color-circle-btn" 
-                                            onclick="selectProductColor(this, 'Titanium Black', '${p.slug || 'item'}')"
-                                            style="width: 24px; height: 24px; border-radius: 50%; background-color: #232426; border: 2px solid #ffffff; box-shadow: 0 0 0 1px #dee2e6; cursor: pointer; transition: all 0.2s ease; padding: 0;">
-                                    </button>
-
-                                    <button type="button" 
-                                            class="color-circle-btn" 
-                                            onclick="selectProductColor(this, 'Titanium White', '${p.slug || 'item'}')"
-                                            style="width: 24px; height: 24px; border-radius: 50%; background-color: #e3e4e5; border: 2px solid #ffffff; box-shadow: 0 0 0 1px #dee2e6; cursor: pointer; transition: all 0.2s ease; padding: 0;">
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="text-start product-price mb-2">${priceLabel}</div>
-                        </div>
                             <div>
-                                <a href="${BASE_URL}buy/${p.slug || '#'}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
+                                <h3 class="product-title text-start mb-1">${p.name || 'Device Catalog Item'}</h3>
+                                
+                                <div class="text-start product-meta mb-2">
+                                    ${dynamicGradeBadge} <i class="bi bi-info-circle" style="font-size: 10px;"></i>
+                                </div>
+                                
+                                <div class="text-start product-colors mb-3">
+                                    <span class="d-block text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        Color: <span id="selected-color-name-${p.slug || 'item'}" style="color: #212529; font-weight: 700;">Default</span>
+                                    </span>
+                                    
+                          
+                                </div>
+                                
+                                <div class="text-start product-price mb-2">${priceLabel}</div>
+                            </div>
+                            <div>
+                                <a href="${productUrl}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
                             </div>
                         </div>
                     </div>
@@ -693,13 +735,38 @@ $(document).ready(function() {
             $container.append(itemNodeHtml);
         });
 
+
+        const $script = $('<script>')
+            .attr('id', 'dynamic-product-schema')
+            .attr('type', 'application/ld+json')
+            .text(JSON.stringify(schemaData));
+        $('head').append($script);
+
         buildPaginationNodes(totalPages);
     }
-
     function buildPaginationNodes(totalPages) {
         $('#pagination-container').remove();
-        if (totalPages <= 1) return;
+        $('head link[rel="next"], head link[rel="prev"], head link[rel="canonical"]').remove();
+        const currentBaseUrl = window.location.origin + window.location.pathname;
+        const canonicalUrl = currentPage === 1 ? currentBaseUrl : `${currentBaseUrl}?page=${currentPage}`;
+        $('head').append(`<link rel="canonical" href="${canonicalUrl}" />`);
 
+        if (totalPages > 1) {
+            if (currentPage > 1) {
+                const prevPageNum = currentPage - 1;
+                const prevUrl = prevPageNum === 1 ? currentBaseUrl : `${currentBaseUrl}?page=${prevPageNum}`;
+                $('head').append(`<link rel="prev" href="${prevUrl}" />`);
+            }
+
+            if (currentPage < totalPages) {
+                const nextPageNum = currentPage + 1;
+                const nextUrl = `${currentBaseUrl}?page=${nextPageNum}`;
+                $('head').append(`<link rel="next" href="${nextUrl}" />`);
+            }
+        }
+
+        
+        if (totalPages <= 1) return;
         let pagNodeHtml = `
             <div id="pagination-container" class="col-12 d-flex justify-content-center mt-4">
                 <nav aria-label="Catalog navigation">
@@ -729,7 +796,6 @@ $(document).ready(function() {
 
         $('#products-container').after(pagNodeHtml);
     }
-
     function buildDynamicAttributeFilters(productsList) {
         const $attributeContainers = $('.attribute-filters-container');
         $attributeContainers.empty();
