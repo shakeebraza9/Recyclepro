@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 class RecyclePro_WooCommerce_Order_API {
-    private $stripe_secret_key = 'sk_test_rFDO0lKEZrzu6RSFX7Syw4iS00UPjCMTGk';
+    private $stripe_secret_key = '';
     private $stripe_webhook_secret = '';
     private $currency = 'gbp';
 

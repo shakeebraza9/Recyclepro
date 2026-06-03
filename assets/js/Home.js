@@ -172,63 +172,91 @@ class Home {
             const heartColor = isExist ? '#13564f' : '#212529';
             const heartIcon = isExist ? 'bi-heart-fill' : 'bi-heart';
 
+            const uniqueCardId = p.id || Math.random().toString(36).substr(2, 9);
+
             box.append(`
-                <div class="product-item-wrap py-1">
-                    <div class="card h-100 product-card border-light shadow-sm rounded-4 position-relative p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="text-uppercase text-muted small fw-semibold tracking-wider">${p.category || ''}</span>
-                        <div class="d-flex flex-column gap-2 align-items-center">
-                 
-                        <button class="btn btn-link p-0 text-dark border-0 bg-transparent fs-5 toggle-direction-btn" 
-                                aria-label="Toggle Slider Direction"
-                                onclick="
-                                    (() => {
-                                        const $slider = $('#${id}');
-                                        const current = $slider.slick('slickCurrentSlide'); // Current active index (0, 1, 2...)
-                                        const total = $slider.slick('getSlick').slideCount; // Total slides in this slider
-                                        
-                                        // Agar user aakhri slide par khada hai, to backward (prev) le jao
-                                        if (current === total - 1) {
-                                            $slider.slick('slickPrev');
-                                        } else {
-                                            // Start mein ho ya mid mein ho, to hamesha forward (next) karo
-                                            $slider.slick('slickNext');
-                                        }
-                                    })();
-                                ">
-                            <i class="bi bi-arrow-left-right"></i>
-                        </button>
-                        </div>
-                    </div>
-                    <div class="position-relative text-center my-3">
-                        ${p.isNew ? `<span class="badge position-absolute start-0 bottom-0 px-3 py-2 rounded-3 text-uppercase fw-bold text-white" style="background-color: #f26500;">New</span>` : ''}
-                        <a class="d-block featured-product-image-link" href="/shop/buy/${p.permalink || '#'}">
-                        <img src="${p.image}" class="img-fluid object-fit-contain" alt="${p.name}" style="max-height: 220px; width: 100%;">
-                        </a>
-                    </div>
-                    <div class="card-body p-0 mt-3 d-flex flex-column justify-content-end">
-                        <h5 class="card-title fw-bold text-dark mb-3" style="font-size: 1rem;">
-                        <a href="/shop/buy/${p.permalink || '#'}" class="text-decoration-none text-dark hover-primary">${p.name || 'Electric Hand Blender, 150 Watts'}</a>
-                        </h5>
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <span class="fw-semibold">${p.currencySymbol || '£'}${p.price}</span>
-                                <div class="d-inline-flex align-items-center gap-3">
-                            <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
-                                    style="color: ${heartColor};"
-                                    aria-label="Add to Wishlist" 
-                                    data-product='${JSON.stringify(p).replace(/'/g, "&apos;")}'
-                                    onclick="toggleWishlist(this, JSON.parse(this.getAttribute('data-product')))">
-                                <i class="bi ${heartIcon}"></i>
+                <div class="product-item-wrap py-2" style="width: 100%;">
+                    <div class="card h-100 product-card border-0 position-relative" 
+                        data-card-id="${uniqueCardId}"
+                        style="transition: all 0.3s ease; height: 100%; background: #ffffff; border-radius: 16px; padding: 20px;"
+                        onmouseenter="this.querySelector('.custom-overlay').style.opacity='1'; this.querySelector('.custom-overlay').style.visibility='visible'; this.querySelector('.custom-overlay').style.transform='translateY(0)';"
+                        onmouseleave="this.querySelector('.custom-overlay').style.opacity='0'; this.querySelector('.custom-overlay').style.visibility='hidden'; this.querySelector('.custom-overlay').style.transform='translateY(10px)';"
+                    >
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3" style="width: 100%;">
+                            <span class="text-uppercase fw-bold text-dark tracking-wider" style="font-size: 11px; letter-spacing: 0.5px; opacity: 0.8;">
+                                ${p.category || 'Category'}
+                            </span>
+                            <button class="btn btn-link p-0 text-dark border-0 bg-transparent toggle-direction-btn d-flex align-items-center" 
+                                    style="font-size: 14px;"
+                                    aria-label="Toggle Slider Direction"
+                                    onclick="
+                                        (() => {
+                                            const $slider = $('#${id}');
+                                            const current = $slider.slick('slickCurrentSlide');
+                                            const total = $slider.slick('getSlick').slideCount;
+                                            if (current === total - 1) {
+                                                $slider.slick('slickPrev');
+                                            } else {
+                                                $slider.slick('slickNext');
+                                            }
+                                        })();
+                                    ">
+                                <i class="bi bi-arrow-left-right"></i>
                             </button>
+                        </div>
+                        
+                        <div class="position-relative text-center overflow-hidden" 
+                            style="height: 220px; background-color: #ffffff; border: 1px solid #f1f3f5; border-radius: 12px; padding: 15px; display: d-flex; align-items: center; justify-content: center;">
+                            
+                            ${p.isNew ? `<span class="badge position-absolute start-0 bottom-0 px-3 py-2 rounded-3 text-uppercase fw-bold text-white" style="background-color: #f26500; z-index: 3; margin: 10px; font-size: 10px;">New</span>` : ''}
+                            
+                            <a class="d-block w-100 h-100 featured-product-image-link" href="/shop/buy/${p.permalink || '#'}">
+                                <img src="${p.image}" class="w-100 h-100" alt="${p.name}" style="object-fit: contain;">
+                            </a>
+
+                            <div class="custom-overlay d-flex align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
+                                style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px;">
                                 
-                                <a class="btn btn-link p-0 text-dark fs-4 lh-1 d-inline-flex align-items-center" 
-                                href="/shop/buy/${p.permalink || '#'}" 
-                                aria-label="Add to Cart">
-                                    <i class="bi bi-cart3"></i>
+                                <a href="/shop/buy/${p.permalink || '#'}" class="btn btn-primary btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 12px; background-color: #13564f; border-color: #13564f;">
+                                    <i class="bi bi-bag-check me-1"></i> Shop
+                                </a>
+                                <a href="/shop/buy/${p.permalink || '#'}" class="btn btn-danger btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 12px; background-color: #f26500; border-color: #f26500;">
+                                    <i class="bi bi-tags me-1"></i> Sale
                                 </a>
                             </div>
                         </div>
-                    </div>
+                        
+                        <div class="card-body p-0 mt-3 d-flex flex-column justify-content-between" style="flex-grow: 1;">
+                            <h5 class="card-title fw-bold text-dark mb-2" style="font-size: 14px; line-height: 1.4; min-height: 40px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                <a href="/shop/buy/${p.permalink || '#'}" class="text-decoration-none text-dark style-title-link" style="transition: color 0.2s;">
+                                    ${p.name || 'Product Title Placeholder'}
+                                </a>
+                            </h5>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-2" style="width: 100%;">
+                                <span class="fw-bold text-dark" style="font-size: 15px;">
+                                    ${p.currencySymbol || '£'}${p.price}
+                                </span>
+                                <div class="d-inline-flex align-items-center gap-3">
+                                    <button class="btn btn-link p-0 border-0 bg-transparent lh-1 wishlist-btn d-flex align-items-center" 
+                                            style="color: ${heartColor}; font-size: 18px;"
+                                            aria-label="Add to Wishlist" 
+                                            data-product='${JSON.stringify(p).replace(/'/g, "&apos;")}'
+                                            onclick="toggleWishlist(this, JSON.parse(this.getAttribute('data-product')))">
+                                        <i class="bi ${heartIcon}"></i>
+                                    </button>
+                                    
+                                    <a class="btn btn-link p-0 text-dark lh-1 d-flex align-items-center" 
+                                    href="/shop/buy/${p.permalink || '#'}" 
+                                    style="font-size: 18px;"
+                                    aria-label="Add to Cart">
+                                        <i class="bi bi-cart3"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             `);
@@ -254,7 +282,7 @@ class Home {
         $("#rightProducts").html("");
 
         const currentWishlist = JSON.parse(localStorage.getItem('user_wishlist')) || [];
-
+        console.log( products);
 
         products.slice(0, 4).forEach(p => {
             const isExist = currentWishlist.some(item => item.slug === p.slug);
@@ -350,8 +378,16 @@ class Home {
 
 
     getTopRatedCardTemplate(p, heartColor, heartIcon) {
+
+        const uniqueCardId = p.id || Math.random().toString(36).substr(2, 9);
+
         return `
-            <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" style="min-height: 380px;">
+            <div class="card h-100 border border-light-subtle rounded-3 p-3 d-flex flex-column justify-content-between shadow-sm bg-white" 
+                data-card-id="${uniqueCardId}"
+                style="min-height: 380px; transition: all 0.3s ease;"
+                onmouseenter="this.querySelector('.custom-overlay').style.opacity='1'; this.querySelector('.custom-overlay').style.visibility='visible'; this.querySelector('.custom-overlay').style.transform='translateY(0)';"
+                onmouseleave="this.querySelector('.custom-overlay').style.opacity='0'; this.querySelector('.custom-overlay').style.visibility='hidden'; this.querySelector('.custom-overlay').style.transform='translateY(10px)';"
+            >
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong class="category-link text-uppercase text-muted d-block small fw-semibold tracking-wider" style="font-size: 0.75rem; font-family: monospace;">
@@ -359,10 +395,23 @@ class Home {
                         </strong>
                     </div>
 
-                    <div class="text-center d-flex align-items-center justify-content-center my-2" style="height: 180px; overflow: hidden;">
+                    <div class="position-relative text-center d-flex align-items-center justify-content-center my-2 overflow-hidden" 
+                        style="height: 180px; background-color: #ffffff; border: 1px solid #f1f3f5; border-radius: 12px; padding: 10px;">
+                        
                         <a href="/shop/buy/${p.slug || '#'}" class="d-block w-100 h-100">
                             <img src="${p.image}" class="img-fluid h-100" alt="${p.name}" style="object-fit: contain; max-width: 100%;">
                         </a>
+
+                        <div class="custom-overlay d-flex align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
+                            style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px;">
+                            
+                            <a href="/shop/buy/${p.slug || '#'}" class="btn btn-primary btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 11px; background-color: #13564f; border-color: #13564f;">
+                                <i class="bi bi-bag-check me-1"></i> Shop
+                            </a>
+                            <a href="/shop/buy/${p.slug || '#'}" class="btn btn-danger btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 11px; background-color: #f26500; border-color: #f26500;">
+                                <i class="bi bi-tags me-1"></i> Sale
+                            </a>
+                        </div>
                     </div>
                 </div>
 

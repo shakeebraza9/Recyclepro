@@ -4,17 +4,19 @@ include __DIR__ . '/includes/header.php';
 
 // Get parameters from URL
 $session_id = $_GET['session_id'] ?? null;
-$order_id = $_GET['order_id'] ?? null;
+$order_id = intval($_GET['order_id'] ?? 0);
+$payment_method = $_GET['payment_method'] ?? 'stripe'; // 'stripe' or 'paypal'
+$payment_status = $_GET['status'] ?? null;
 
 // Verify we have required parameters
-if (!$session_id || !$order_id) {
+if (!$order_id) {
     ?>
     <div class="container my-5">
         <div class="row">
             <div class="col-md-8 mx-auto">
                 <div class="alert alert-danger">
                     <h4>Invalid Request</h4>
-                    <p>Missing session ID or order ID. Please try again or contact support.</p>
+                    <p>Missing order ID. Please try again or contact support.</p>
                     <a href="/shop/checkout/" class="btn btn-primary">Return to Checkout</a>
                 </div>
             </div>
@@ -38,6 +40,7 @@ $order_total = 0;
 $order_items = [];
 $billing_email = '';
 $billing_name = '';
+$transaction_id = '';
 
 if ($order_data && isset($order_data['success']) && $order_data['success']) {
     $order_verified = true;
@@ -46,7 +49,11 @@ if ($order_data && isset($order_data['success']) && $order_data['success']) {
     $order_items = $order_data['items'] ?? [];
     $billing_email = $order_data['billing_email'] ?? '';
     $billing_name = ($order_data['billing_first_name'] ?? '') . ' ' . ($order_data['billing_last_name'] ?? '');
+    $transaction_id = $order_data['transaction_id'] ?? '';
 }
+
+// Determine if payment was successful
+$payment_success = ($payment_status === 'completed' || ($order_status !== 'pending' && $order_status !== 'failed'));
 
 ?>
 
@@ -193,17 +200,39 @@ if ($order_data && isset($order_data['success']) && $order_data['success']) {
                 </div>
 
                 <!-- Status Badge -->
-                <span class="status-badge status-pending">
-                    Payment Received
+                <span class="status-badge <?php echo $order_status === 'completed' ? 'status-completed' : ($order_status === 'processing' ? 'status-processing' : 'status-pending'); ?>">
+                    <?php 
+                    $status_map = [
+                        'pending' => 'Payment Pending',
+                        'processing' => 'Processing',
+                        'completed' => 'Order Confirmed',
+                        'cancelled' => 'Cancelled',
+                        'failed' => 'Failed'
+                    ];
+                    echo $status_map[$order_status] ?? ucfirst($order_status);
+                    ?>
                 </span>
 
-                <!-- Session ID (for reference) -->
+                <!-- Session ID (for Stripe) or Payment Method (for PayPal) -->
+                <?php if ($payment_method === 'stripe' && $session_id): ?>
                 <div class="session-id">
                     <small>Session ID: <?php echo htmlspecialchars($session_id); ?></small>
                 </div>
+                <?php elseif ($payment_method === 'paypal'): ?>
+                <div class="session-id">
+                    <small>Payment Method: PayPal</small>
+                    <?php if ($transaction_id): ?>
+                    <br><small>Transaction ID: <?php echo htmlspecialchars(substr($transaction_id, 0, 20)); ?>...</small>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
 
                 <!-- Order Summary -->
                 <div class="order-summary">
+                    <div class="order-summary-item">
+                        <strong>Customer Email:</strong>
+                        <span><?php echo htmlspecialchars($billing_email); ?></span>
+                    </div>
                     <div class="order-summary-item">
                         <strong>Order Date:</strong>
                         <span><?php echo date('F j, Y \a\t g:i A'); ?></span>
@@ -221,6 +250,12 @@ if ($order_data && isset($order_data['success']) && $order_data['success']) {
                             ];
                             echo $status_map[$order_status] ?? ucfirst($order_status);
                             ?>
+                        </span>
+                    </div>
+                    <div class="order-summary-item">
+                        <strong>Payment Method:</strong>
+                        <span style="text-transform: capitalize;">
+                            <?php echo $payment_method === 'paypal' ? 'PayPal' : 'Credit Card (Stripe)'; ?>
                         </span>
                     </div>
                     
@@ -243,15 +278,23 @@ if ($order_data && isset($order_data['success']) && $order_data['success']) {
                 </div>
 
                 <!-- Next Steps -->
+                <?php if ($order_status !== 'failed' && $order_status !== 'cancelled'): ?>
                 <div class="next-steps">
                     <h5>What Happens Next?</h5>
                     <ol>
-                        <li><strong>Order Confirmation Email:</strong> We'll send you a detailed receipt to your email address</li>
-                        <li><strong>Processing:</strong> Our team will begin preparing your order for shipment</li>
+                        <li><strong>Order Confirmation Email:</strong> We'll send you a detailed receipt to <?php echo htmlspecialchars($billing_email); ?></li>
+                        <li><strong>Payment Verification:</strong> Our system is verifying your <?php echo $payment_method === 'paypal' ? 'PayPal' : 'card'; ?> payment</li>
+                        <li><strong>Processing:</strong> Once verified, our team will begin preparing your order for shipment</li>
                         <li><strong>Shipping Updates:</strong> You'll receive tracking information once your items ship</li>
                         <li><strong>Delivery:</strong> Your items will be delivered to your specified address</li>
                     </ol>
                 </div>
+                <?php else: ?>
+                <div class="alert alert-danger" style="margin-top: 20px;">
+                    <h5>Payment Issue</h5>
+                    <p>There was a problem processing your payment. Please contact our support team or try again.</p>
+                </div>
+                <?php endif; ?>
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">

@@ -394,9 +394,9 @@ checkoutForm.addEventListener('submit', async (event) => {
     }
 
     const selectedPayment = paymentMethod.value;
-    const submitButton = selectedPayment === 'stripe'
-        ? stripePanel.querySelector('button[type="submit"]')
-        : paypalPanel.querySelector('button[type="submit"]');
+    const paypalButton = paypalPanel.querySelector('button[type="submit"]');
+    const stripeButton = stripePanel.querySelector('button[type="submit"]');
+    const submitButton = selectedPayment === 'stripe' ? stripeButton : paypalButton;
 
     if (!selectedPayment) {
         alert('Please select a payment method.');
@@ -497,7 +497,7 @@ checkoutForm.addEventListener('submit', async (event) => {
                 throw new Error(stripeData.message || 'Failed to create Stripe checkout session');
             }
         } 
-        // For PayPal, process normally or redirect
+        // For PayPal, create PayPal order and redirect to PayPal
         else if (selectedPayment === 'paypal') {
             const res = await fetch('/shop/includes/paypal-payment.php', {
                 method: 'POST',
@@ -509,13 +509,15 @@ checkoutForm.addEventListener('submit', async (event) => {
 
             const data = await res.json();
 
-            if (data.success) {
-                alert('Order placed successfully!');
-                console.log(data);
-                cartManager.clear();
-                window.location.href = 'https://www.recyclepro.co.uk/shop/order-confirmation/?order_id=' + data.order_id;
+            if (data.success && data.approval_link) {
+                if (submitButton) {
+                    submitButton.innerHTML = 'Redirecting to PayPal...';
+                }
+                
+                // Redirect to PayPal approval page
+                window.location.href = data.approval_link;
             } else {
-                alert('Order failed: ' + (data.message || 'Unknown Error'));
+                throw new Error(data.message || 'Failed to create PayPal order');
             }
         }
 

@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-function sendMail($to, $subject, $body)
+function sendMail($to, $subject, $body, $attachment = null)
 {
     try {
 
@@ -25,6 +25,10 @@ function sendMail($to, $subject, $body)
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body    = $body;
+
+        if ($attachment && file_exists($attachment)) {
+            $mail->addAttachment($attachment);
+        }
 
         $mail->send();
 

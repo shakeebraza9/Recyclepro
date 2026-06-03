@@ -1,5 +1,5 @@
 <?php
-$config = require_once dirname(__DIR__) . '/config.php';
+$config = require_once __DIR__ . '/../config.php';
 $baseAPI = $config['API_URL'] ?? '';
 ?>
 <footer class="bg-dark text-white py-5 mt-auto">
@@ -285,6 +285,118 @@ $.ajax({
         console.error("Failed to load header data");
     }
 });
+
+$(document).ready(function() {
+    $(document).on('click', '.toggle-password', function() {
+        var passwordInput = $(this).closest('.input-group').find('.password-input');
+        var icon = $(this).find('i');
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    });
+});
+
+document.getElementById('triggerForgotModal').addEventListener('click', function() {
+
+    var loginModalEl = document.getElementById('accountModal');
+    var loginModal = bootstrap.Modal.getInstance(loginModalEl);
+    if (loginModal) {
+        loginModal.hide();
+    }
+    
+
+    var forgotModalEl = document.getElementById('forgotPasswordModal');
+    var forgotModal = new bootstrap.Modal(forgotModalEl);
+    forgotModal.show();
+});
+
+
+$(document).ready(function() {
+    $('#forgotPasswordForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var emailInput = $('#forgotEmail').val();
+        var $submitBtn = $('#forgotSubmitBtn');
+        var $statusBox = $('#forgotStatus');
+        var $btnText = $submitBtn.find('.btn-text');
+        var $spinner = $submitBtn.find('.spinner-border');
+
+
+        $submitBtn.prop('disabled', true);
+        $btnText.text('Verifying User...');
+        $spinner.removeClass('d-none');
+        $statusBox.hide().removeClass('alert-danger alert-success');
+
+
+        $.ajax({
+            url: `${baseAPI}wp-json/wp/v2/forgot-password`, 
+            method: 'POST',
+            data: { email: emailInput },
+            dataType: 'json',
+            success: function(response) {
+                
+                if (response.success) {
+                    $btnText.text('Sending Email...');
+                    
+                    $.ajax({
+                        url: `${BASE_URL}forgetmail`, 
+                        method: 'POST',
+                        data: {
+                            token: response.token,
+                            link: BASE_URL,
+                            user_id: response.user_id,
+                            email: response.email,
+                            message: response.message
+                        },
+                        success: function(mailResponse) {
+
+                            $spinner.addClass('d-none');
+                            $statusBox.addClass('alert-success')
+                                      .html('<i class="bi bi-check-circle-fill me-2"></i> Mail sent successfully! Redirecting to home...')
+                                      .fadeIn();
+                            
+                            $('.input-wrapper').hide();
+                            $('.form-instruction').hide();
+                            $submitBtn.hide();
+                            // setTimeout(function() {
+                            //     window.location.href = '/shop/'; 
+                            // }, 2000);
+                        },
+                        error: function() {
+                            resetButton();
+                            $statusBox.addClass('alert-danger')
+                                      .html('<i class="bi bi-exclamation-triangle-fill me-2"></i> Verification done, but failed to execute forgetmail.php.')
+                                      .fadeIn();
+                        }
+                    });
+
+                } else {
+                    resetButton();
+                    $statusBox.addClass('alert-danger')
+                              .html('<i class="bi bi-exclamation-triangle-fill me-2"></i> ' + (response.message || 'User not found.'))
+                              .fadeIn();
+                }
+            },
+            error: function() {
+                resetButton();
+                $statusBox.addClass('alert-danger')
+                          .html('<i class="bi bi-exclamation-triangle-fill me-2"></i> Connection failed with Verification Server.')
+                          .fadeIn();
+            }
+        });
+
+        function resetButton() {
+            $submitBtn.prop('disabled', false);
+            $btnText.text('Send Reset Link');
+            $spinner.addClass('d-none');
+        }
+    });
+});
+
 </script>
 </body>
 </html>

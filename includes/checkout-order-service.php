@@ -4,7 +4,7 @@
  */
 
 class RecyclePro_Checkout_Order_Service {
-    private $stripe_secret_key = 'sk_test_rFDO0lKEZrzu6RSFX7Syw4iS00UPjCMTGk';
+    private $stripe_secret_key = '';
     private $stripe_webhook_secret = '';
     private $currency = 'gbp';
 
@@ -358,5 +358,94 @@ class RecyclePro_Checkout_Order_Service {
         }
 
         return false;
+    }
+
+    /**
+     * Create a WooCommerce order for PayPal checkout
+     */
+    public function create_paypal_order(array $data) {
+        if (!function_exists('wc_create_order')) {
+            throw new Exception('WooCommerce is not available');
+        }
+
+        $this->validate_order_payload($data);
+
+        $order = wc_create_order();
+
+        foreach ($data['items'] as $item) {
+            $product_id = absint($item['product_id'] ?? 0);
+            $quantity = max(1, absint($item['qty'] ?? 1));
+            $product = wc_get_product($product_id);
+
+            if (!$product) {
+                throw new Exception('Product ID ' . $product_id . ' not found');
+            }
+
+            $order->add_product($product, $quantity);
+        }
+
+        $this->set_order_addresses($order, $data);
+        $order->set_payment_method('paypal');
+        $order->set_payment_method_title('PayPal');
+        $order->calculate_totals();
+        $order->set_status('pending');
+        $order->add_order_note('Order created before PayPal Checkout. Awaiting payment completion.');
+        $order->save();
+
+        return [
+            'success' => true,
+            'message' => 'PayPal order created and set to pending payment',
+            'order_id' => $order->get_id(),
+            'status' => $order->get_status(),
+            'total' => (float) $order->get_total(),
+        ];
+    }
+
+    /**
+     * Complete PayPal payment and update order status
+     */
+    public function complete_paypal_order($order_id, $paypal_transaction_id) {
+        $order_id = absint($order_id);
+        if (!$order_id) {
+            throw new Exception('Order ID is required');
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            throw new Exception('Order not found');
+        }
+
+        if (!$order->has_status(['pending', 'failed', 'on-hold'])) {
+            return [
+                'success' => true,
+                'message' => 'Order is not in a state that needs payment confirmation',
+                'order_id' => $order_id,
+                'status' => $order->get_status()
+            ];
+        }
+
+        // Set transaction ID from PayPal
+        if ($paypal_transaction_id) {
+            $order->set_transaction_id($paypal_transaction_id);
+        }
+
+        // Mark order as paid
+        $order->payment_complete($paypal_transaction_id);
+        $order->add_order_note('PayPal payment confirmed. Transaction ID: ' . $paypal_transaction_id);
+
+        // Auto-complete if no processing is needed
+        if ($order->get_status() === 'processing' && !$order->needs_processing()) {
+            $order->update_status('completed', 'Order completed automatically because no processing is required.');
+        }
+
+        $order->save();
+
+        return [
+            'success' => true,
+            'message' => 'Order payment confirmed and status updated',
+            'order_id' => $order_id,
+            'status' => $order->get_status(),
+            'transaction_id' => $paypal_transaction_id
+        ];
     }
 }

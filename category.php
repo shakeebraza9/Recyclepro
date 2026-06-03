@@ -687,10 +687,15 @@ $(document).ready(function() {
             const heartColor = p.is_wishlisted ? '#dc3545' : '#6c757d'; 
             const heartIcon = p.is_wishlisted ? 'bi-heart-fill' : 'bi-heart';
             schemaData.itemListElement.push(itemSchema);
-
+        const uniqueCardId = p.id || Math.random().toString(36).substr(2, 9);
             const itemNodeHtml = `
-            <div class="col">
-                    <div class="product-card d-flex flex-column h-100 position-relative">
+                <div class="col">
+                    <div class="product-card d-flex flex-column h-100 position-relative" 
+                        data-card-id="${uniqueCardId}"
+                        style="transition: all 0.3s ease; background: #ffffff; border: 1px solid #edf2f7; border-radius: 16px; overflow: hidden;"
+                        onmouseenter="this.querySelector('.custom-overlay').style.opacity='1'; this.querySelector('.custom-overlay').style.visibility='visible'; this.querySelector('.custom-overlay').style.transform='translateY(0)';"
+                        onmouseleave="this.querySelector('.custom-overlay').style.opacity='0'; this.querySelector('.custom-overlay').style.visibility='hidden'; this.querySelector('.custom-overlay').style.transform='translateY(10px)';"
+                    >
                         
                         <div class="position-absolute" style="top: 15px; right: 15px; z-index: 10;">
                             <button class="btn btn-link p-0 border-0 bg-transparent fs-4 lh-1 wishlist-btn d-inline-flex align-items-center" 
@@ -703,13 +708,28 @@ $(document).ready(function() {
                         </div>
 
                         <div class="p-3 text-center flex-grow-1 d-flex flex-column justify-content-between">
-                            <div class="my-3">
-                                <a href="${productUrl}">
-                                    <img src="${fallbackImg}" alt="${p.name}" class="img-fluid" style="max-height: 150px; object-fit: contain;">
+                            
+                            <div class="my-3 position-relative overflow-hidden d-flex align-items-center justify-content-center" 
+                                style="height: 170px; background-color: #ffffff; border: 1px solid #f1f3f5; border-radius: 12px; padding: 10px;">
+                                
+                                <a href="${productUrl}" class="d-block w-100 h-100">
+                                    <img src="${fallbackImg}" alt="${p.name}" class="img-fluid h-100" style="object-fit: contain; max-width: 100%;">
                                 </a>
+
+                                <div class="custom-overlay d-flex align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
+                                    style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px;">
+                                    
+                                    <a href="${productUrl}" class="btn btn-primary btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 11px; background-color: #13564f; border-color: #13564f;">
+                                        <i class="bi bi-bag-check me-1"></i> Shop
+                                    </a>
+                                    <a href="${productUrl}" class="btn btn-danger btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 11px; background-color: #f26500; border-color: #f26500;">
+                                        <i class="bi bi-tags me-1"></i> Sale
+                                    </a>
+                                </div>
                             </div>
+
                             <div>
-                                <h3 class="product-title text-start mb-1">${p.name || 'Device Catalog Item'}</h3>
+                                <h3 class="product-title text-start mb-1" style="font-size: 1rem; font-weight: 700;">${p.name || 'Device Catalog Item'}</h3>
                                 
                                 <div class="text-start product-meta mb-2">
                                     ${dynamicGradeBadge} <i class="bi bi-info-circle" style="font-size: 10px;"></i>
@@ -719,16 +739,16 @@ $(document).ready(function() {
                                     <span class="d-block text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                         Color: <span id="selected-color-name-${p.slug || 'item'}" style="color: #212529; font-weight: 700;">Default</span>
                                     </span>
-                                    
-                          
                                 </div>
                                 
                                 <div class="text-start product-price mb-2">${priceLabel}</div>
                             </div>
-                            <div>
-                                <a href="${productUrl}" class="btn btn-view-product w-100 py-2 mb-2">View product</a>
+
+                            <div class="mt-2">
+                                <a href="${productUrl}" class="btn btn-view-product w-100 py-2 mb-2" style="border-radius: 8px; font-weight: 600;">View product</a>
                             </div>
                         </div>
+
                     </div>
                 </div>
             `;

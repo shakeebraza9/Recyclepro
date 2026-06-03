@@ -45,6 +45,11 @@
     # =========================
     RewriteRule ^order-confirmation/?$ order-confirmation.php [QSA,L]
 
+    RewriteRule ^order-successful/?$ includes/thanks.php [QSA,L]
+    RewriteRule ^reset-password/?$ includes/reset-password.php [QSA,L]
+    RewriteRule ^forgetmail/?$ mail/forgetmail.php [QSA,L]
+
+
     # =========================
     # 6. WordPress content pages
     # /about-us
