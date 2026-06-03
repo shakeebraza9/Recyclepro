@@ -98,6 +98,14 @@ include __DIR__ . '/includes/header.php';
                                 <label for="shipping_last_name" class="form-label">Last name <span>*</span></label>
                                 <input type="text" class="form-control" id="shipping_last_name" name="shipping_last_name" required>
                             </div>
+                            <div class="col-md-6">
+                                <label for="billing_email" class="form-label">Email <span>*</span></label>
+                                <input type="email" class="form-control" id="billing_email" name="billing_email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="billing_phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="billing_phone" name="billing_phone">
+                            </div>
                             <div class="col-12">
                                 <label for="shipping_company" class="form-label">Company name</label>
                                 <input type="text" class="form-control" id="shipping_company" name="shipping_company">
@@ -121,7 +129,7 @@ include __DIR__ . '/includes/header.php';
                             <div class="col-md-6">
                                 <label for="shipping_country" class="form-label">Country <span>*</span></label>
                                 <select class="form-select" disabled id="shipping_country" name="shipping_country" required>
-                                    <option value="United Kingdom" selected>United Kingdom</option>
+                                    <option value="GB" selected>United Kingdom</option>
                       
                                 </select>
                             </div>
@@ -170,7 +178,7 @@ include __DIR__ . '/includes/header.php';
                             <div class="col-md-6">
                                 <label for="billing_country"  class="form-label">Country</label>
                                 <select class="form-select billing-field" id="billing_country" disabled name="billing_country">
-                                    <option value="United Kingdom" selected>United Kingdom</option>
+                                    <option value="GB" selected>United Kingdom</option>
                              
                                 </select>
                             </div>
@@ -257,41 +265,11 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <div id="stripePanel" class="payment-panel stripe-panel d-none">
-        <div class="mb-3">
-            <label for="stripe_card_number" class="form-label">Card Number</label>
-            <div class="card-input-wrap">
-                <input type="text" class="form-control stripe-field" id="stripe_card_number" name="stripe_card_number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234">
-                <div class="card-brands">
-                    <span class="badge bg-light text-dark border">MC</span>
-                    <span class="badge bg-light text-dark border">VISA</span>
-                    <span class="badge bg-light text-dark border">AMEX</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="stripe_expiry" class="form-label">Expiration Date</label>
-                <input type="text" class="form-control stripe-field" id="stripe_expiry" name="stripe_expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / YY">
-            </div>
-            <div class="col-md-6">
-                <label for="stripe_cvc" class="form-label">Security Code</label>
-                <input type="text" class="form-control stripe-field" id="stripe_cvc" name="stripe_cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC">
-            </div>
-        </div>
-
-        <div class="mt-3">
-            <label for="stripe_country" class="form-label">Country</label>
-            <select class="form-select stripe-field" id="stripe_country" name="stripe_country">
-                <option value="Pakistan" selected>Pakistan</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="Ireland">Ireland</option>
-                <option value="United States">United States</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-success mt-4 px-4 py-2" style="background-color: #13564f; border: none;">Pay Now</button>
+        <button type="submit" class="stripe-checkout-btn btn w-100 mt-2" style="background-color: #635bff; border: none; color: white; padding: 12px 20px; font-weight: 600; border-radius: 6px;">
+            <i class="bi bi-credit-card-2-front me-2"></i>
+            <strong>Stripe Checkout</strong>
+        </button>
+        <p class="text-muted mt-2 small">Fast, secure payments powered by Stripe</p>
     </div>
 </div>
                         </div>
@@ -319,7 +297,8 @@ const billingFields = document.querySelectorAll('.billing-field');
 const paymentMethod = document.getElementById('payment_method');
 const paypalPanel = document.getElementById('paypalPanel');
 const stripePanel = document.getElementById('stripePanel');
-const stripeFields = document.querySelectorAll('.stripe-field');
+const stripeFields = [];  // No longer using stripe form fields
+const checkoutApiUrl = '/shop/includes/checkout-api.php';
 
 // Global variable cart items hold karne ke liye
 let globalCartItems = [];
@@ -346,9 +325,6 @@ function updatePaymentPanel() {
 
     paypalPanel.classList.toggle('d-none', !isPaypal);
     stripePanel.classList.toggle('d-none', !isStripe);
-    stripeFields.forEach((field) => {
-        field.required = isStripe;
-    });
 }
 
 function loadCheckoutCart() {
@@ -417,58 +393,156 @@ checkoutForm.addEventListener('submit', async (event) => {
         return;
     }
 
+    const selectedPayment = paymentMethod.value;
+    const submitButton = selectedPayment === 'stripe'
+        ? stripePanel.querySelector('button[type="submit"]')
+        : paypalPanel.querySelector('button[type="submit"]');
+
+    if (!selectedPayment) {
+        alert('Please select a payment method.');
+        return;
+    }
+
     const payload = {
-        shipping_first_name: document.getElementById('shipping_first_name').value,
-        shipping_last_name: document.getElementById('shipping_last_name').value,
-        shipping_company: document.getElementById('shipping_company').value,
-        shipping_street: document.getElementById('shipping_street').value,
-        shipping_city: document.getElementById('shipping_city').value,
-        shipping_state: document.getElementById('shipping_state').value,
-        shipping_postcode: document.getElementById('shipping_postcode').value,
+        payment_method: selectedPayment,
+        shipping_first_name: document.getElementById('shipping_first_name').value.trim(),
+        shipping_last_name: document.getElementById('shipping_last_name').value.trim(),
+        shipping_company: document.getElementById('shipping_company').value.trim(),
+        shipping_street: document.getElementById('shipping_street').value.trim(),
+        shipping_city: document.getElementById('shipping_city').value.trim(),
+        shipping_state: document.getElementById('shipping_state').value.trim(),
+        shipping_postcode: document.getElementById('shipping_postcode').value.trim(),
         shipping_country: document.getElementById('shipping_country').value,
-        
         billing_different: billingDifferent.checked ? 1 : 0,
-        billing_first_name: billingDifferent.checked ? document.getElementById('billing_first_name').value : document.getElementById('shipping_first_name').value,
-        billing_last_name: billingDifferent.checked ? document.getElementById('billing_last_name').value : document.getElementById('shipping_last_name').value,
-        billing_company: billingDifferent.checked ? document.getElementById('billing_company').value : document.getElementById('shipping_company').value,
-        billing_street: billingDifferent.checked ? document.getElementById('billing_street').value : document.getElementById('shipping_street').value,
-        billing_city: billingDifferent.checked ? document.getElementById('billing_city').value : document.getElementById('shipping_city').value,
-        billing_state: billingDifferent.checked ? document.getElementById('billing_state').value : document.getElementById('shipping_state').value,
-        billing_postcode: billingDifferent.checked ? document.getElementById('billing_postcode').value : document.getElementById('shipping_postcode').value,
+        billing_first_name: (billingDifferent.checked ? document.getElementById('billing_first_name').value : document.getElementById('shipping_first_name').value).trim(),
+        billing_last_name: (billingDifferent.checked ? document.getElementById('billing_last_name').value : document.getElementById('shipping_last_name').value).trim(),
+        billing_company: (billingDifferent.checked ? document.getElementById('billing_company').value : document.getElementById('shipping_company').value).trim(),
+        billing_street: (billingDifferent.checked ? document.getElementById('billing_street').value : document.getElementById('shipping_street').value).trim(),
+        billing_city: (billingDifferent.checked ? document.getElementById('billing_city').value : document.getElementById('shipping_city').value).trim(),
+        billing_state: (billingDifferent.checked ? document.getElementById('billing_state').value : document.getElementById('shipping_state').value).trim(),
+        billing_postcode: (billingDifferent.checked ? document.getElementById('billing_postcode').value : document.getElementById('shipping_postcode').value).trim(),
         billing_country: billingDifferent.checked ? document.getElementById('billing_country').value : document.getElementById('shipping_country').value,
-        
-        payment_method: paymentMethod.value,
-        items: globalCartItems, // Ab items yahan se pakke pass honge!
-        total: globalCartTotal
+        billing_email: document.getElementById('billing_email').value.trim(),
+        billing_phone: document.getElementById('billing_phone').value.trim(),
+        items: globalCartItems.map((item) => ({
+            product_id: item.product_id || item.id,
+            qty: Number(item.qty || 1)
+        })),
+        total: globalCartTotal,
+        shipping: {
+            first_name: document.getElementById('shipping_first_name').value.trim(),
+            last_name: document.getElementById('shipping_last_name').value.trim(),
+            company: document.getElementById('shipping_company').value.trim(),
+            address: document.getElementById('shipping_street').value.trim(),
+            city: document.getElementById('shipping_city').value.trim(),
+            state: document.getElementById('shipping_state').value.trim(),
+            postcode: document.getElementById('shipping_postcode').value.trim(),
+            country: document.getElementById('shipping_country').value
+        },
+        billing: {
+            first_name: (billingDifferent.checked ? document.getElementById('billing_first_name').value : document.getElementById('shipping_first_name').value).trim(),
+            last_name: (billingDifferent.checked ? document.getElementById('billing_last_name').value : document.getElementById('shipping_last_name').value).trim(),
+            company: (billingDifferent.checked ? document.getElementById('billing_company').value : document.getElementById('shipping_company').value).trim(),
+            address: (billingDifferent.checked ? document.getElementById('billing_street').value : document.getElementById('shipping_street').value).trim(),
+            city: (billingDifferent.checked ? document.getElementById('billing_city').value : document.getElementById('shipping_city').value).trim(),
+            state: (billingDifferent.checked ? document.getElementById('billing_state').value : document.getElementById('shipping_state').value).trim(),
+            postcode: (billingDifferent.checked ? document.getElementById('billing_postcode').value : document.getElementById('shipping_postcode').value).trim(),
+            country: billingDifferent.checked ? document.getElementById('billing_country').value : document.getElementById('shipping_country').value,
+            email: document.getElementById('billing_email').value.trim(),
+            phone: document.getElementById('billing_phone').value.trim()
+        }
     };
 
     try {
-        const res = await fetch('http://localhost:8080/bkrecyclepro/wp-json/wp/v2/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.dataset.originalText = submitButton.innerHTML;
+            submitButton.innerHTML = 'Creating order...';
+        }
 
-        const data = await res.json();
+        // For Stripe, redirect to Stripe Checkout
+        if (selectedPayment === 'stripe') {
+            const orderRes = await fetch(`${checkoutApiUrl}?action=create_order`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
 
-        if (data.success) {
-            alert('Order placed successfully!');
-            console.log(data);
-        } else {
-            alert('Order failed: ' + (data.message || 'Unknown Error'));
+            const orderData = await orderRes.json();
+
+            if (!orderRes.ok || !orderData.success || !orderData.order_id) {
+                throw new Error(orderData.message || 'Failed to create WooCommerce order');
+            }
+
+            if (submitButton) {
+                submitButton.innerHTML = 'Redirecting to Stripe...';
+            }
+
+            const stripeRes = await fetch(`${checkoutApiUrl}?action=stripe_checkout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ order_id: orderData.order_id })
+            });
+
+            const stripeData = await stripeRes.json();
+
+            if (stripeRes.ok && stripeData.success && stripeData.checkout_url) {
+                window.location.href = stripeData.checkout_url;
+                return;
+            } else {
+                throw new Error(stripeData.message || 'Failed to create Stripe checkout session');
+            }
+        } 
+        // For PayPal, process normally or redirect
+        else if (selectedPayment === 'paypal') {
+            const res = await fetch('/shop/includes/paypal-payment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert('Order placed successfully!');
+                console.log(data);
+                cartManager.clear();
+                window.location.href = 'https://www.recyclepro.co.uk/shop/order-confirmation/?order_id=' + data.order_id;
+            } else {
+                alert('Order failed: ' + (data.message || 'Unknown Error'));
+            }
         }
 
     } catch (error) {
         console.error(error);
-        alert('API error');
+        alert('API error: ' + error.message);
+    } finally {
+        if (submitButton && !document.location.href.includes('checkout.stripe.com')) {
+            submitButton.disabled = false;
+            if (submitButton.dataset.originalText) {
+                submitButton.innerHTML = submitButton.dataset.originalText;
+            }
+        }
     }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
     const paymentCards = document.querySelectorAll('.payment-card-option');
     const hiddenSelect = document.getElementById('payment_method');
+
+    // Set Stripe as default selected payment method
+    const stripeCard = document.querySelector('.payment-card-option[data-target="stripe"]');
+    if (stripeCard) {
+        stripeCard.classList.add('selected');
+        hiddenSelect.value = 'stripe';
+        updatePaymentPanel();
+    }
 
     paymentCards.forEach(card => {
         card.addEventListener('click', () => {
@@ -486,6 +560,17 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePaymentPanel();
         });
     });
+});
+</script>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+let stripe = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Stripe
+    stripe = Stripe('pk_test_HfujjRKczwxJUwv5AAUl8aW400vLww7gX5');
 });
 </script>
 
