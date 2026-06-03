@@ -1,19 +1,13 @@
 <?php
-
-// 1. Necessary Dependencies Include
 require '../vendor/autoload.php';
 require_once '../includes/smtp.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-/* ==========================================================================
-   STEP 1: STATIC INVOICE PDF GENERATION (Dompdf)
-   ========================================================================== */
-
 $invoice_no = 'INV-1001';
 
-// Direct Static HTML Template for PDF
+
 $invoice_html = '
 <!DOCTYPE html>
 <html>
@@ -90,10 +84,6 @@ if (!file_exists($dir_path)) {
 $pdf_file_path = $dir_path . $invoice_no . '.pdf';
 file_put_contents($pdf_file_path, $dompdf->output());
 
-
-/* ==========================================================================
-   STEP 2: STATIC EMAIL TEMPLATE BODY
-   ========================================================================== */
 
 $email_body = '
 <div style="background-color: #f4f6f8; padding: 30px 15px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif;">
@@ -219,9 +209,6 @@ $email_body = '
 ';
 
 
-/* ==========================================================================
-   STEP 3: EXECUTE MAIL WITH ATTACHMENT
-   ========================================================================== */
 
 $response = sendMail(
     'arsalan.ahmed@knizaam.com',

@@ -776,60 +776,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content account-modal" style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content account-modal" style="border: none; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); overflow: hidden;">
             
-            <div class="modal-header" style="background-color: #ffffff; border-bottom: 1px solid #f1f1f1; padding: 20px 24px;">
-                <h5 class="modal-title" id="accountModalLabel" style="font-weight: 700; color: #212529; letter-spacing: -0.5px;">Your Account</h5>
+            <div class="modal-header" style="background-color: #ffffff; border-bottom: 1px solid #f1f3f5; padding: 20px 24px;">
+                <h5 class="modal-title" id="accountModalLabel" style="font-weight: 700; color: #212529; letter-spacing: -0.5px;">Welcome Back</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="box-shadow: none;"></button>
             </div>
 
             <div class="modal-body" style="padding: 24px;">
-                <ul class="nav nav-pills account-tabs mb-4" id="accountTabs" role="tablist" style="background: #f8f9fa; padding: 6px; border-radius: 30px; display: inline-flex;">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#loginPane" type="button" role="tab" aria-controls="loginPane" aria-selected="true" 
-                                style="border-radius: 25px; font-weight: 600; padding: 8px 24px; transition: all 0.3s ease;">
-                            Login
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="open-account-tab" data-bs-toggle="pill" data-bs-target="#openAccountPane" type="button" role="tab" aria-controls="openAccountPane" aria-selected="false"
-                                style="border-radius: 25px; font-weight: 600; padding: 8px 24px; transition: all 0.3s ease;">
-                            Create Account
-                        </button>
-                    </li>
-                </ul>
+                
+                <div class="text-center mb-4">
+                    <ul class="nav nav-pills account-tabs" id="accountTabs" role="tablist" style="background: #f1f3f5; padding: 5px; border-radius: 30px; display: inline-flex;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#loginPane" type="button" role="tab" aria-controls="loginPane" aria-selected="true" 
+                                    style="border-radius: 25px; font-weight: 600; padding: 8px 28px; transition: all 0.3s ease;">
+                                Login
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="open-account-tab" data-bs-toggle="pill" data-bs-target="#openAccountPane" type="button" role="tab" aria-controls="openAccountPane" aria-selected="false"
+                                    style="border-radius: 25px; font-weight: 600; padding: 8px 28px; transition: all 0.3s ease;">
+                                Create Account
+                            </button>
+                        </li>
+                    </ul>
+                </div>
 
-                <div class="tab-content">
+                <div class="tab-content" id="accountTabsContent">
+                    
                     <div class="tab-pane fade show active" id="loginPane" role="tabpanel" aria-labelledby="login-tab">
-                        <form id="loginForm" style="max-width: 450px; margin: 0 auto; padding: 10px 0;" autocomplete="on">
+                        <form id="loginForm" autocomplete="on">
                             <div class="mb-3">
-                                <label for="loginEmail" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">
-                                    Email <span style="color: #dc3545;">*</span>
+                                <label for="loginEmail" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">
+                                    Email Address <span style="color: #dc3545;">*</span>
                                 </label>
                                 <input type="email" class="form-control" id="loginEmail" name="email" placeholder="name@email.com" required 
                                     autocomplete="username"
                                     style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                             </div>
+                            
                             <div class="mb-3">
-                                <label for="loginPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057;">
+                                <label for="loginPassword" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">
                                     Password <span style="color: #dc3545;">*</span>
                                 </label>
-                                <input type="password" class="form-control" id="loginPassword" name="password" placeholder="••••••••" required 
-                                    autocomplete="current-password"
-                                    style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                <div class="input-group">
+                                    <input type="password" class="form-control password-input" id="loginPassword" name="password" placeholder="••••••••" required 
+                                        autocomplete="current-password"
+                                        style="padding: 11px 16px; border-radius: 8px 0 0 8px; border: 1px solid #dee2e6; border-right: none; font-size: 0.95rem; box-shadow: none;">
+                                    <span class="input-group-text toggle-password" style="background: #ffffff; border: 1px solid #dee2e6; border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; padding: 11px 16px; color: #6c757d;">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="mb-4 d-flex align-items-center">
-                                <input type="checkbox" class="form-check-input" id="loginRemember" name="remember" style="cursor: pointer; box-shadow: none;">
-                                <label class="form-check-label ms-2 small text-muted" for="loginRemember" style="cursor: pointer; font-weight: 500; user-select: none;">
-                                    Remember Me
-                                </label>
+                            <div class="mb-4 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <input type="checkbox" class="form-check-input" id="loginRemember" name="remember" style="cursor: pointer; box-shadow: none;">
+                                    <label class="form-check-label ms-2 small text-muted" for="loginRemember" style="cursor: pointer; font-weight: 500; user-select: none;">
+                                        Remember Me
+                                    </label>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" id="triggerForgotModal" class="small text-decoration-none" style="color: #13564f; font-weight: 600;">
+                                        Forgot Password?
+                                    </a>
+                                </div>
                             </div>
 
                             <p id="loginStatus" class="small mb-3" style="font-weight: 500;"></p>
-                            <button type="submit" class="btn btn-dark w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #212529; border: none; transition: background 0.2s;">
-                                Login
+                            
+                            <button type="submit" class="btn text-white w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #13564f; border: none; transition: background 0.2s;">
+                                Sign In
                             </button>
                         </form>
                     </div>
@@ -837,73 +855,114 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="tab-pane fade" id="openAccountPane" role="tabpanel" aria-labelledby="open-account-tab">
                         <form id="openAccountForm">
                             <div class="row g-3">
-                                
                                 <div class="col-md-6">
-                                    <label for="accountFirstName" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">First Name <span style="color: #dc3545;">*</span></label>
-                                    <input type="text" class="form-control" id="accountFirstName" name="firstName" placeholder="Enter First Name" required 
+                                    <label for="accountFirstName" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">First Name <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountFirstName" name="firstName" placeholder="John" required 
                                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
-
                                 <div class="col-md-6">
-                                    <label for="accountLastName" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Last Name <span style="color: #dc3545;">*</span></label>
-                                    <input type="text" class="form-control" id="accountLastName" name="lastName" placeholder="Enter Last Name" required 
+                                    <label for="accountLastName" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Last Name <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountLastName" name="lastName" placeholder="Doe" required 
                                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
-
                                 <div class="col-md-6">
-                                    <label for="accountEmail" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Email <span style="color: #dc3545;">*</span></label>
-                                    <input type="email" class="form-control" id="accountEmail" name="email" placeholder="Enter Email" required 
+                                    <label for="accountEmail" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Email <span style="color: #dc3545;">*</span></label>
+                                    <input type="email" class="form-control" id="accountEmail" name="email" placeholder="john@example.com" required 
                                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
-
                                 <div class="col-md-6">
-                                   <label for="accountPhone" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Phone Number <span style="color: #dc3545;">*</span></label>
-                                        
-                                    <input type="tel" class="form-control" id="accountPhone" name="phone" placeholder="Enter Phone Number" required 
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"       
-                                    style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="accountAddress" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Address Line <span style="color: #dc3545;">*</span></label>
-                                    <input type="text" class="form-control" id="accountAddress" name="address" placeholder="Enter Address Line" required 
+                                    <label for="accountPhone" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Phone Number <span style="color: #dc3545;">*</span></label>
+                                    <input type="tel" class="form-control" id="accountPhone" name="phone" placeholder="03XXXXXXXXX" required 
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"      
                                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
-
-                                <div class="col-md-6">
-                                    <label for="accountPostalCode" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Postal Code <span style="color: #dc3545;">*</span></label>
-                                    <input type="text" class="form-control" id="accountPostalCode" name="postalCode" placeholder="postcode" required 
+                                <div class="col-12">
+                                    <label for="accountAddress" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Address Line <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountAddress" name="address" placeholder="Street address, P.O. box, company name" required 
                                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
-
-                                <div class="col-md-6">
-                                    <label for="accountPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Password <span style="color: #dc3545;">*</span></label>
-                                    <input type="password" class="form-control" id="accountPassword" name="password" placeholder="Enter Password..." required 
+                                <div class="col-12">
+                                    <label for="accountPostalCode" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Postal Code <span style="color: #dc3545;">*</span></label>
+                                    <input type="text" class="form-control" id="accountPostalCode" name="postalCode" placeholder="e.g. 75210" required 
                                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
                                 </div>
-
                                 <div class="col-md-6">
-                                    <label for="accountConfirmPassword" class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #495057; margin-bottom: 6px;">Confirm Password <span style="color: #dc3545;">*</span></label>
-                                    <input type="password" class="form-control" id="accountConfirmPassword" name="confirmPassword" placeholder="Enter Confirm Password" required 
-                                           style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                                    <label for="accountPassword" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Password <span style="color: #dc3545;">*</span></label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control password-input" id="accountPassword" name="password" placeholder="Min 8 chars" required 
+                                             style="padding: 11px 16px; border-radius: 8px 0 0 8px; border: 1px solid #dee2e6; border-right: none; font-size: 0.95rem; box-shadow: none;">
+                                        <span class="input-group-text toggle-password" style="background: #ffffff; border: 1px solid #dee2e6; border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; padding: 11px 16px; color: #6c757d;">
+                                            <i class="bi bi-eye"></i>
+                                        </span>
+                                    </div>
                                 </div>
-
+                                <div class="col-md-6">
+                                    <label for="accountConfirmPassword" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">Confirm Password <span style="color: #dc3545;">*</span></label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control password-input" id="accountConfirmPassword" name="confirmPassword" placeholder="Repeat password" required 
+                                             style="padding: 11px 16px; border-radius: 8px 0 0 8px; border: 1px solid #dee2e6; border-right: none; font-size: 0.95rem; box-shadow: none;">
+                                        <span class="input-group-text toggle-password" style="background: #ffffff; border: 1px solid #dee2e6; border-left: none; border-radius: 0 8px 8px 0; cursor: pointer; padding: 11px 16px; color: #6c757d;">
+                                            <i class="bi bi-eye"></i>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-
+                            
                             <p id="openAccountStatus" class="small mt-3 mb-2" style="font-weight: 500;"></p>
                             
                             <div class="mt-4">
-                                <button type="submit" class="btn btn-dark w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #212529; border: none; transition: background 0.2s;">Create Account</button>
+                                <button type="submit" class="btn text-white w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #13564f; border: none; transition: background 0.2s;">
+                                    Register Account
+                                </button>
                             </div>
                         </form>
                     </div>
-                </div>
+
+                </div> </div> </div>
+    </div>
+</div>
+
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.2); overflow: hidden;">
+            
+            <div class="modal-header" style="background-color: #ffffff; border-bottom: 1px solid #f1f3f5; padding: 20px 24px;">
+                <h5 class="modal-title" id="forgotPasswordModalLabel" style="font-weight: 700; color: #212529; letter-spacing: -0.5px;">Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="box-shadow: none;"></button>
+            </div>
+            
+            <div class="modal-body" style="padding: 24px;">
+                <p class="text-muted small mb-4 form-instruction" style="line-height: 1.5;">
+                    Enter your registered email address below. We will send you instructions to reset your password.
+                </p>
+                
+                <form id="forgotPasswordForm">
+                    <div class="mb-4 input-wrapper">
+                        <label for="forgotEmail" class="form-label" style="font-weight: 600; font-size: 0.88rem; color: #495057;">
+                            Email Address <span style="color: #dc3545;">*</span>
+                        </label>
+                        <input type="email" class="form-control" id="forgotEmail" name="email" placeholder="name@email.com" required 
+                            style="padding: 11px 16px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 0.95rem; box-shadow: none;">
+                    </div>
+                    
+                    <div id="forgotStatus" class="alert small mb-3" style="display: none; border-radius: 8px; font-weight: 500;"></div>
+                    
+                    <button type="submit" id="forgotSubmitBtn" class="btn text-white w-100" style="padding: 12px; border-radius: 8px; font-weight: 600; background-color: #13564f; border: none; transition: background 0.2s;">
+                        <span class="btn-text">Send Reset Link</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="modal-footer justify-content-center" style="background: #f8f9fa; border-top: 1px solid #f1f3f5; padding: 15px;">
+                <a href="javascript:void(0)" class="small text-decoration-none" style="color: #13564f; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#accountModal" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Login
+                </a>
             </div>
 
         </div>
     </div>
 </div>
-
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500;">
     <div id="liveToast" class="toast align-items-center text-white border-0 shadow rounded-3" role="alert" aria-live="assertive" aria-atomic="true" style="transition: all 0.3s ease;">
         <div class="d-flex">
