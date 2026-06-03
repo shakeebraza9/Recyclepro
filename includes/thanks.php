@@ -321,14 +321,14 @@ body {
 </style>
 <body>
 
-
+<!-- 
     <header class="header">
         <div class="container">
             <a href="/shop/" class="header-logo-link">
                 <img class="logo-img img-fluid" src="/shop/img/rplogo.png" alt="Recycle Pro Logo">
             </a>
         </div>
-    </header>
+    </header> -->
 
     <main class="main-content">
         <div class="card-container">
@@ -373,7 +373,7 @@ body {
                 </div>
                 <div class="info-block">
                     <span class="info-label">SUPPORT</span>
-                    <p class="info-value"><a href="mailto:orders@recyclepro.co.uk">orders@recyclepro.co.uk</a></p>
+                    <p class="info-value"><a href="mailto:orders@recyclepro.co.uk">Order@recyclepro.co.uk</a></p>
                 </div>
             </div>
 
@@ -385,10 +385,10 @@ body {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <a href="/shop/" class="footer-logo-link">
+                    <!-- <a href="/shop/" class="footer-logo-link">
                         <img class="logo-img img-fluid" src="/shop/img/rplogo.png" alt="Recycle Pro Logo">
-                    </a>
-                    <span class="copyright">&copy; <?php echo date('Y'); ?> RecyclePro. All rights reserved.</span>
+                    </a> -->
+                    <span class="copyright">&copy; 2020 RecyclePro. All rights reserved.</span>
                 </div>
                 <div class="footer-links">
                     <a href="<?php echo $config['BASE_URL']; ?>/returns-policy" class="footer-link">Returns Policy</a>

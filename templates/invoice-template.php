@@ -304,12 +304,12 @@ $status = $status ?? 'PAID';
 </table>
 
 <div class="footer-note">
-    <div class="note-title">Technical Warranty Note</div>
-    <div class="note-text">
+    <!-- <div class="note-title">Technical Warranty Note</div> -->
+    <!-- <div class="note-text">
         All hardware components are covered by a 12-month standard limited warranty. Serial 
         numbers for recorded units are tracked in our centralized database for automated support 
         verification. Please retain this invoice as proof of purchase for all technical service requests.
-    </div>
+    </div> -->
 </div>
 
 </body>
