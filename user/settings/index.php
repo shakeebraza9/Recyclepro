@@ -616,8 +616,8 @@ document.addEventListener("DOMContentLoaded", function () {
         form.classList.add('d-none');
         paneLoader.classList.remove('d-none');
 
-        // const fetchUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/${userId}`;
-        const fetchUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/1`;
+        const fetchUrl = `https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/user/${userId}`;
+        // const fetchUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/1`;
 
         try {
             const response = await fetch(fetchUrl, {
@@ -683,8 +683,8 @@ document.addEventListener("DOMContentLoaded", function () {
         spinner.classList.remove('d-none');
         icon.classList.add('d-none');
 
-        // const updateUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/update/${userId}`;
-        const updateUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/update/1`;
+           const updateUrl = `https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/user/update/${userId}`;
+        // const updateUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/update/1`;
         
         // Payload Construction object
         const payload = {
