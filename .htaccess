@@ -40,6 +40,12 @@
     RewriteRule ^checkout/?$ checkout.php [QSA,L]
 
     # =========================
+    # 5.5. Order Confirmation page
+    # /order-confirmation
+    # =========================
+    RewriteRule ^order-confirmation/?$ order-confirmation.php [QSA,L]
+
+    # =========================
     # 6. WordPress content pages
     # /about-us
     # =========================

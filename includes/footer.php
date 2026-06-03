@@ -1,5 +1,5 @@
 <?php
-$config = require_once __DIR__ . '/config.php';
+$config = require_once dirname(__DIR__) . '/config.php';
 $baseAPI = $config['API_URL'] ?? '';
 ?>
 <footer class="bg-dark text-white py-5 mt-auto">

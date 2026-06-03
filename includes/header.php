@@ -1,6 +1,6 @@
 <?php
 
-$config = require_once __DIR__ . '/config.php';
+$config = require_once dirname(__DIR__) . '/config.php';
 $pageTitle = $pageTitle ?? 'Recycle Pro';
 ?>
 <!DOCTYPE html>
