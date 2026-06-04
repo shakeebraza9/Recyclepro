@@ -3,740 +3,670 @@ $pageTitle = 'Account Settings';
 include __DIR__ . '/../../includes/header.php';
 ?>
 <style>
-    :root {
-        --lux-green: #044339;
-        --lux-emerald: #0b6e5f;
-        --lux-bg: #f4f6f6;
-        --lux-border: #e2e8f0;
-        --lux-text-dark: #0f172a;
-        --lux-text-muted: #64748b;
-    }
-    .settings-portal-section {
-        padding: 80px 0 120px 0;
-        background-color: var(--lux-bg);
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-    .lux-dashboard-grid {
-        background: #ffffff;
-        border-radius: 28px;
-        border: 1px solid rgba(4, 67, 57, 0.05);
-        box-shadow: 0 20px 50px rgba(4, 67, 57, 0.03);
-        overflow: hidden;
-    }
-    .lux-sidebar-nav {
-        background-color: #fafbfb;
-        border-right: 1px solid var(--lux-border);
-        padding: 40px 24px;
-    }
-    .lux-nav-item {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px 18px;
-        color: var(--lux-text-muted);
-        font-weight: 600;
-        font-size: 0.95rem;
-        border-radius: 14px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        margin-bottom: 8px;
-        border: 1px solid transparent;
-    }
-    .lux-nav-item i {
-        font-size: 1.2rem;
-        transition: transform 0.3s ease;
-    }
-    .lux-nav-item:hover {
-        color: var(--lux-green);
-        background-color: rgba(4, 67, 57, 0.03);
-    }
-    .lux-nav-item.active {
-        color: var(--lux-green);
-        background-color: #ffffff;
-        border-color: rgba(4, 67, 57, 0.08);
-        box-shadow: 0 4px 12px rgba(4, 67, 57, 0.04);
-    }
-    .lux-nav-item.active i {
-        transform: scale(1.1);
-        color: var(--lux-emerald);
-    }
-    .lux-content-pane {
-        padding: 45px 50px;
-    }
-    .pane-header {
-        margin-bottom: 35px;
-    }
-    .pane-header h2 {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: var(--lux-text-dark);
-        letter-spacing: -0.5px;
-    }
-    .pane-header p {
-        font-size: 0.9rem;
-        color: var(--lux-text-muted);
-    }
-    .lux-form-group {
-        position: relative;
-        margin-bottom: 24px;
-    }
-    .lux-field-label {
-        font-size: 0.82rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #475569;
-        margin-bottom: 8px;
-        display: block;
-    }
-    .lux-field-label span {
-        color: #f43f5e;
-    }
-    .lux-input {
-        height: 52px;
-        border-radius: 14px !important;
-        border: 1px solid #cbd5e1;
-        background-color: #ffffff;
-        padding: 12px 18px;
-        font-size: 0.95rem;
-        color: var(--lux-text-dark);
-        font-weight: 500;
-        transition: all 0.25s ease;
-    }
-    .lux-input:focus {
-        border-color: var(--lux-green) !important;
-        box-shadow: 0 0 0 4px rgba(4, 67, 57, 0.06) !important;
-        background-color: #ffffff;
-    }
 
-    /* FIX 1: settings-panel — all panels use this class */
-    .settings-panel {
-        display: none;
-        animation: paneFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .settings-panel.active {
-        display: block;
-    }
-    @keyframes paneFadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
+:root {
+    --g0: #044339;
+    --g1: #0b6e5f;
+    --g-light: rgba(4,67,57,.06);
+    --bg-page: #f4f6f6;
+    --bg-card: #ffffff;
+    --bg-sidebar: #fafbfb;
+    --border: #e2e8f0;
+    --border-soft: rgba(4,67,57,.07);
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --shadow-card: 0 20px 50px rgba(4,67,57,.03);
+    --shadow-btn: 0 10px 25px rgba(4,67,57,.18);
+    --shadow-btn-hover: 0 14px 30px rgba(4,67,57,.28);
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+}
 
-    /* FIX 2: spin animation for processing icon */
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-    }
-    .spin {
-        display: inline-block;
-        animation: spin 1.2s linear infinite;
-    }
+.rp-settings { padding: 72px 0 120px; background: var(--bg-page); font-family: var(--font); }
+.rp-shell {
+    display: flex;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
 
-    .lux-btn-submit {
-        background: linear-gradient(135deg, var(--lux-green) 0%, #033029 100%);
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 0.95rem;
-        letter-spacing: -0.2px;
-        padding: 14px 36px;
-        border-radius: 16px;
-        border: none;
-        box-shadow: 0 10px 25px rgba(4, 67, 57, 0.18);
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .lux-btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 30px rgba(4, 67, 57, 0.28);
-        color: #ffffff;
-    }
-    .lux-btn-submit:active {
-        transform: translateY(0);
-    }
 
-    /* Orders styles */
-    .stat-counter-card {
-        background: #ffffff;
-        border: 1px solid rgba(4, 67, 57, 0.06);
-        border-radius: 18px;
-        padding: 20px 24px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
-    }
-    .stat-icon-wrapper {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        flex-shrink: 0;
-    }
-    .lux-master-orders-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 24px;
-        padding: 40px;
-        box-shadow: 0 15px 40px rgba(4, 67, 57, 0.02);
-    }
-    .orders-navigation-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 16px;
-        border-bottom: 1px solid var(--lux-border);
-        padding-bottom: 20px;
-        margin-bottom: 35px;
-    }
-    .filter-pill {
-        background: none;
-        border: none;
-        padding: 8px 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--lux-text-muted);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .filter-pill.active {
-        background-color: var(--lux-green);
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(4, 67, 57, 0.15);
-    }
-    .standalone-order-row {
-        background: #ffffff;
-        border: 1px solid var(--lux-border);
-        border-radius: 20px;
-        padding: 24px;
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
-    }
-    .standalone-order-row:hover {
-        border-color: #cbd5e1;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
-    }
-    .meta-top-strip {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 18px;
-    }
-    .order-reference-id {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--lux-text-dark);
-    }
-    .order-reference-id span {
-        color: var(--lux-text-muted);
-        font-weight: 400;
-        font-size: 0.88rem;
-    }
-    .status-badge {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        padding: 6px 14px;
-        border-radius: 100px;
-        letter-spacing: 0.5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .status-processing { background-color: #fffbeb; color: #b45309; }
-    .status-delivered  { background-color: #f0fdf4; color: #166534; }
-    .order-media-block {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-    .order-media-icon-box {
-        width: 64px;
-        height: 64px;
-        background-color: #f8fafc;
-        border: 1px solid #f1f5f9;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--lux-text-muted);
-        font-size: 1.4rem;
-        flex-shrink: 0;
-    }
-    .product-title-specs h4 {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--lux-text-dark);
-        margin: 0 0 6px 0;
-    }
-    .spec-chip {
-        font-size: 0.75rem;
-        background-color: #f1f5f9;
-        color: #475569;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-right: 6px;
-    }
-    .row-price-value {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: var(--lux-green);
-    }
-    .lux-btn-action-outline {
-        border: 1px solid var(--lux-border);
-        background: #ffffff;
-        color: #475569;
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 8px 16px;
-        border-radius: 10px;
-        transition: all 0.2s ease;
-    }
-    .lux-btn-action-outline:hover {
-        background-color: #f8fafc;
-        border-color: #cbd5e1;
-        color: var(--lux-text-dark);
-    }
+.rp-sidebar {
+    width: 260px; flex-shrink: 0;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    padding: 36px 20px;
+}
+.rp-nav-item {
+    display: flex; align-items: center; gap: 13px;
+    padding: 13px 16px;
+    color: var(--text-muted);
+    font-weight: 600; font-size: .93rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .25s ease;
+    margin-bottom: 6px;
+    user-select: none;
+}
+.rp-nav-item i { font-size: 1.15rem; transition: transform .25s ease; }
+.rp-nav-item:hover { color: var(--g0); background: var(--g-light); }
+.rp-nav-item.active {
+    color: var(--g0); background: var(--bg-card);
+    border-color: var(--border-soft);
+    box-shadow: 0 4px 12px rgba(4,67,57,.05);
+}
+.rp-nav-item.active i { transform: scale(1.12); color: var(--g1); }
 
-    @media (max-width: 768px) {
-        .lux-content-pane { padding: 30px 20px; }
-        .lux-master-orders-card { padding: 20px; }
-        .responsive-center-align { text-align: left !important; margin-top: 15px; }
-        .action-buttons-wrapper { justify-content: flex-start !important; margin-top: 15px; }
-        .orders-navigation-row { flex-direction: column; align-items: flex-start; }
+
+.rp-content { flex: 1; min-width: 0; padding: 44px 48px; }
+.pane-title { font-size: 1.55rem; font-weight: 800; color: var(--text-dark); letter-spacing: -.4px; margin: 0 0 4px; }
+.pane-sub   { font-size: .88rem; color: var(--text-muted); margin: 0 0 30px; }
+
+
+.rp-panel { display: none; }
+.rp-panel.active { display: block; animation: fadeUp .4s cubic-bezier(.16,1,.3,1) forwards; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+
+.field-label {
+    display: block; font-size: .8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: #475569; margin-bottom: 7px;
+}
+.field-label span { color: #f43f5e; }
+.rp-input {
+    width: 100%; height: 50px;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid #cbd5e1;
+    background: var(--bg-card);
+    padding: 0 16px;
+    font-size: .93rem; color: var(--text-dark); font-weight: 500;
+    transition: border-color .2s, box-shadow .2s;
+    box-sizing: border-box;
+}
+.rp-input:focus { outline: none; border-color: var(--g0) !important; box-shadow: 0 0 0 3px rgba(4,67,57,.07) !important; }
+
+
+.rp-btn-save {
+    background: linear-gradient(135deg, var(--g0) 0%, #033029 100%);
+    color: #fff; font-weight: 700; font-size: .93rem;
+    padding: 13px 34px; border-radius: 16px; border: none;
+    box-shadow: var(--shadow-btn);
+    transition: all .25s ease; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.rp-btn-save:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-btn-hover); color: #fff; }
+.rp-btn-save:active:not(:disabled) { transform: translateY(0); }
+.rp-btn-save:disabled { opacity: .7; cursor: not-allowed; }
+.btn-outline-rp {
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: #475569; font-size: .83rem; font-weight: 600;
+    padding: 8px 15px; border-radius: 10px;
+    transition: all .2s ease; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-outline-rp:hover { background: #f8fafc; border-color: #cbd5e1; color: var(--text-dark); }
+
+
+#paneLoader {
+    display: none; text-align: center;
+    padding: 80px 0; color: var(--text-muted); font-size: .9rem;
+}
+#paneLoader .spinner-border { color: var(--g0); width: 2.2rem; height: 2.2rem; }
+
+
+.rp-form-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 28px; margin-top: 28px;
+    border-top: 1px solid #f1f5f9;
+}
+.enc-note { font-size: .83rem; color: var(--text-muted); font-weight: 500; }
+
+
+.stat-card {
+    background: var(--bg-card); border: 1px solid var(--border-soft);
+    border-radius: 18px; padding: 18px 22px;
+    display: flex; align-items: center; gap: 14px;
+}
+.stat-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; flex-shrink: 0;
+}
+
+
+.orders-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 36px; margin-top: 4px;
+}
+.orders-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; flex-wrap: wrap; gap: 14px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px; margin-bottom: 30px;
+}
+.filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-pill {
+    background: none; border: none; padding: 7px 18px;
+    font-size: .87rem; font-weight: 600; color: var(--text-muted);
+    border-radius: 12px; cursor: pointer; transition: all .2s ease;
+}
+.filter-pill.active { background: var(--g0); color: #fff; box-shadow: 0 4px 12px rgba(4,67,57,.15); }
+
+
+.order-row {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 22px; margin-bottom: 16px;
+    transition: box-shadow .25s ease, border-color .25s ease;
+}
+.order-row:last-child { margin-bottom: 0; }
+.order-row:hover { border-color: #cbd5e1; box-shadow: 0 6px 20px rgba(0,0,0,.03); }
+.order-meta-row {
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+}
+.order-ref { font-size: 1rem; font-weight: 800; color: var(--text-dark); }
+.order-ref small { font-weight: 400; color: var(--text-muted); font-size: .86rem; margin-left: 8px; }
+.badge--base {
+    font-size: .74rem; font-weight: 700; text-transform: uppercase;
+    padding: 5px 13px; border-radius: 100px; letter-spacing: .4px;
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.badge--processing { background:#fffbeb; color:#b45309; }
+.badge--delivered  { background:#f0fdf4; color:#166534; }
+.order-product { display: flex; align-items: center; gap: 14px; }
+.product-icon-box {
+    width: 60px; height: 60px; background: #f8fafc;
+    border: 1px solid #f1f5f9; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 1.35rem; flex-shrink: 0;
+}
+.product-name { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin: 0 0 6px; }
+.spec-chip {
+    font-size: .73rem; background: #f1f5f9; color: #475569;
+    padding: 3px 9px; border-radius: 7px; font-weight: 600; margin-right: 5px;
+}
+.order-price { font-size: 1.2rem; font-weight: 800; color: var(--g0); }
+
+
+.orders-loading { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+.orders-loading .spinner-border { color: var(--g0); }
+.empty-orders { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+.empty-orders i { font-size: 2.4rem; display: block; margin-bottom: 10px; }
+
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 1.1s linear infinite; }
+
+
+@media (max-width: 991px) {
+    .rp-shell { flex-direction: column; }
+    .rp-sidebar {
+        width: 100%; border-right: none; border-bottom: 1px solid var(--border);
+        padding: 16px; display: flex; flex-wrap: wrap; gap: 6px;
     }
+    .rp-nav-item { margin-bottom: 0; flex: 1; min-width: 130px; justify-content: center; }
+    .rp-content { padding: 28px 20px; }
+    .orders-card { padding: 20px 16px; }
+}
+@media (max-width: 575px) {
+    .rp-form-footer { flex-direction: column; gap: 14px; align-items: flex-start; }
+    .enc-note { display: none; }
+}
 </style>
 
-<main class="settings-portal-section">
-    <div class="container" style="max-width: 100% !important;">
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-11">
+<main class="rp-settings">
+<div class="container" style="max-width:1200px;">
+<div class="rp-shell">
 
-                <div class="row g-0 lux-dashboard-grid">
 
-                    <!-- SIDEBAR -->
-                    <div class="col-12 col-md-4 col-lg-3 lux-sidebar-nav">
-                        <div class="lux-nav-item active" data-target="personal-panel">
-                            <i class="bi bi-person-vcard-fill"></i>
-                            <span>Personal Info</span>
+    <nav class="rp-sidebar" aria-label="Settings navigation">
+        <div class="rp-nav-item active" data-target="personal-panel" role="button" tabindex="0">
+            <i class="bi bi-person-vcard-fill"></i><span>Personal Info</span>
+        </div>
+        <div class="rp-nav-item" data-target="shipping-panel" role="button" tabindex="0">
+            <i class="bi bi-truck"></i><span>Shipping Address</span>
+        </div>
+        <div class="rp-nav-item" data-target="security-panel" role="button" tabindex="0">
+            <i class="bi bi-shield-lock-fill"></i><span>Security &amp; Password</span>
+        </div>
+        <div class="rp-nav-item" data-target="order-panel" role="button" tabindex="0">
+            <i class="bi bi-box-seam-fill"></i><span>Order History</span>
+        </div>
+    </nav>
+
+  
+    <div class="rp-content">
+
+
+        <div id="paneLoader">
+            <div class="spinner-border" role="status" aria-label="Loading"></div>
+            <p class="mt-2 mb-0">Loading your account&hellip;</p>
+        </div>
+
+        <form id="settingsForm" novalidate autocomplete="off" style="display:none;">
+
+
+            <div class="rp-panel active" id="personal-panel">
+                <h2 class="pane-title">Personal Information</h2>
+                <p class="pane-sub">Update your name, email, and contact number.</p>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="field-label" for="setFirstName">First Name <span>*</span></label>
+                        <input type="text" id="setFirstName" class="rp-input" placeholder="First Name" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="field-label" for="setLastName">Last Name <span>*</span></label>
+                        <input type="text" id="setLastName" class="rp-input" placeholder="Last Name" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="field-label" for="setEmail">Email Address <span>*</span></label>
+                        <input type="email" id="setEmail" class="rp-input" placeholder="email@example.com" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="field-label" for="setPhone">Phone Number</label>
+                        <input type="tel" id="setPhone" class="rp-input" placeholder="+44 7123 456789">
+                    </div>
+                </div>
+            </div>
+
+  
+            <div class="rp-panel" id="shipping-panel">
+                <h2 class="pane-title">Shipping Destination</h2>
+                <p class="pane-sub">Set your default shipping address for faster checkout.</p>
+                <div class="row g-3">
+                    <div class="col-12 col-md-8">
+                        <label class="field-label" for="setAddress">Address Line</label>
+                        <input type="text" id="setAddress" class="rp-input" placeholder="123 Luxury Road, Suite B">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="field-label" for="setPostalCode">Postal Code</label>
+                        <input type="text" id="setPostalCode" class="rp-input" placeholder="E1 6AN">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="rp-panel" id="security-panel">
+                <h2 class="pane-title">Security &amp; Password</h2>
+                <p class="pane-sub">Leave blank if you don't want to change your password.</p>
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="field-label" for="setNewPassword">New Password</label>
+                        <input type="password" id="setNewPassword" class="rp-input" placeholder="••••••••">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="field-label" for="setConfirmPassword">Confirm Password</label>
+                        <input type="password" id="setConfirmPassword" class="rp-input" placeholder="••••••••">
+                    </div>
+                </div>
+            </div>
+
+   
+            <div class="rp-panel" id="order-panel">
+
+    
+                <div class="row g-3 mb-4" id="orderStatRow">
+                    <div class="col-12 col-sm-6 col-md-5">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:var(--g-light); color:var(--g0);">
+                                <i class="bi bi-box-seam-fill"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted fw-medium">Total Placed</div>
+                                <div class="fw-bold" id="statTotal" style="font-size:1.25rem; color:var(--text-dark);">--</div>
+                            </div>
                         </div>
-                        <div class="lux-nav-item" data-target="shipping-panel">
-                            <i class="bi bi-truck"></i>
-                            <span>Shipping Address</span>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-5">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:#fffbeb; color:#b45309;">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted fw-medium">Active Transit</div>
+                                <div class="fw-bold" id="statActive" style="font-size:1.25rem; color:var(--text-dark);">--</div>
+                            </div>
                         </div>
-                        <div class="lux-nav-item" data-target="security-panel">
-                            <i class="bi bi-shield-lock-fill"></i>
-                            <span>Security &amp; Pass</span>
+                    </div>
+                </div>
+
+
+                <div class="orders-card">
+                    <div class="orders-header">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="font-size:1.3rem; color:var(--text-dark);">Order History</h3>
+                            <p class="text-muted small mb-0">View, track, and manage all your orders.</p>
                         </div>
-                        <!-- FIX 3: data-target matches id="order-panel" exactly -->
-                        <div class="lux-nav-item" data-target="order-panel">
-                            <i class="bi bi-box-seam-fill"></i>
-                            <span>Order Details</span>
+                        <div class="filter-pills" role="group" aria-label="Filter orders">
+                            <button type="button" class="filter-pill active" data-filter="all">All</button>
+                            <button type="button" class="filter-pill" data-filter="ongoing">Ongoing</button>
+                            <button type="button" class="filter-pill" data-filter="completed">Completed</button>
                         </div>
                     </div>
 
-                    <!-- CONTENT PANE -->
-                    <div class="col-12 col-md-8 col-lg-9 lux-content-pane">
 
-                        <!-- Loader -->
-                        <div id="paneLoader" class="text-center py-5 d-none">
-                            <div class="spinner-border" style="color: var(--lux-green);" role="status"></div>
-                            <p class="text-muted mt-2">Loading your account configurations...</p>
+                    <div id="orderListContainer">
+                        <div class="orders-loading">
+                            <div class="spinner-border mb-2" role="status"></div>
+                            <p class="mb-0">Loading orders&hellip;</p>
                         </div>
+                    </div>
+                </div>
 
-                        <form id="accountSettingsForm" novalidate autocomplete="off">
-
-                            <!-- ── Personal Info Panel ── -->
-                            <div class="settings-panel active" id="personal-panel">
-                                <div class="pane-header">
-                                    <h2>Personal Information</h2>
-                                    <p class="text-muted">Update your primary identity settings and platform notification contacts.</p>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">First Name <span>*</span></label>
-                                        <input type="text" id="setFirstName" class="form-control lux-input" placeholder="First Name" required>
-                                    </div>
-                                    <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">Last Name <span>*</span></label>
-                                        <input type="text" id="setLastName" class="form-control lux-input" placeholder="Last Name" required>
-                                    </div>
-                                    <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">Email Address <span>*</span></label>
-                                        <input type="email" id="setEmail" class="form-control lux-input" placeholder="email@example.com" required>
-                                    </div>
-                                    <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">Phone Number</label>
-                                        <input type="tel" id="setPhone" class="form-control lux-input" placeholder="+44 7123 456789">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ── Shipping Panel ── -->
-                            <div class="settings-panel" id="shipping-panel">
-                                <div class="pane-header">
-                                    <h2>Shipping Destination</h2>
-                                    <p class="text-muted">Configure default shipping and billing drop-off points for faster order checkouts.</p>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-8 lux-form-group">
-                                        <label class="lux-field-label">Address Line</label>
-                                        <input type="text" id="setAddress" class="form-control lux-input" placeholder="123 Luxury Road, Suite B">
-                                    </div>
-                                    <div class="col-12 col-md-4 lux-form-group">
-                                        <label class="lux-field-label">Postal Code</label>
-                                        <input type="text" id="setPostalCode" class="form-control lux-input" placeholder="E1 6AN">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ── Security Panel ── -->
-                            <div class="settings-panel" id="security-panel">
-                                <div class="pane-header">
-                                    <h2>Security &amp; Password</h2>
-                                    <p class="text-muted">Keep your account encrypted. Leave password blank if you don't wish to change it.</p>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">New Password</label>
-                                        <input type="password" id="setNewPassword" class="form-control lux-input" placeholder="••••••••">
-                                    </div>
-                                    <div class="col-12 col-sm-6 lux-form-group">
-                                        <label class="lux-field-label">Confirm New Password</label>
-                                        <input type="password" id="setConfirmPassword" class="form-control lux-input" placeholder="••••••••">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ── Order Panel ──
-                                 FIX 4: class="settings-panel" (was "order-panel") so tab switching works
-                                 FIX 3: id="order-panel" matches data-target above
-                            -->
-                            <div class="settings-panel" id="order-panel">
-                                <div class="container-fluid px-0">
-
-                                    <!-- Stat Counters -->
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-12 col-sm-6 col-md-4">
-                                            <div class="stat-counter-card">
-                                                <div class="stat-icon-wrapper" style="background-color: rgba(4,67,57,0.05); color: var(--lux-green);">
-                                                    <i class="bi bi-box-seam-fill"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="text-muted small fw-medium">Total Placed</div>
-                                                    <h3 class="mb-0 fw-bold" style="font-size:1.3rem; color:var(--lux-text-dark);">02 Orders</h3>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4">
-                                            <div class="stat-counter-card">
-                                                <div class="stat-icon-wrapper" style="background-color:#fffbeb; color:#b45309;">
-                                                    <i class="bi bi-clock-history"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="text-muted small fw-medium">Active Transit</div>
-                                                    <h3 class="mb-0 fw-bold" style="font-size:1.3rem; color:var(--lux-text-dark);">01 Active</h3>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Orders Card -->
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="lux-master-orders-card">
-
-                                                <div class="orders-navigation-row">
-                                                    <div>
-                                                        <h3 class="fw-bold mb-1" style="font-size:1.35rem; color:var(--lux-text-dark);">Order History</h3>
-                                                        <p class="text-muted small mb-0">Manage statements, parameters, and live logistical streams.</p>
-                                                    </div>
-                                                    <!-- FIX 5: filter pills are now wired via JS below -->
-                                                    <div class="d-flex gap-2 flex-wrap">
-                                                        <button type="button" class="filter-pill active" data-filter="all">All Logs</button>
-                                                        <button type="button" class="filter-pill" data-filter="ongoing">Ongoing</button>
-                                                        <button type="button" class="filter-pill" data-filter="completed">Completed</button>
-                                                    </div>
-                                                </div>
-
-                                                <div id="standaloneListingContainer">
-
-                                                    <!-- Order 1 — Ongoing -->
-                                                    <div class="standalone-order-row" data-order-type="ongoing">
-                                                        <div class="meta-top-strip">
-                                                            <div class="order-reference-id">#RP-94820 <span class="ms-2">Ordered on May 28, 2026</span></div>
-                                                            <span class="status-badge status-processing">
-                                                                <i class="bi bi-arrow-repeat spin"></i> Processing
-                                                            </span>
-                                                        </div>
-                                                        <div class="row align-items-center">
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="order-media-block">
-                                                                    <div class="order-media-icon-box"><i class="bi bi-phone"></i></div>
-                                                                    <div class="product-title-specs">
-                                                                        <h4>iPhone 13 Pro Max</h4>
-                                                                        <span class="spec-chip">Grade A Mint</span>
-                                                                        <span class="spec-chip">256GB</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-6 col-md-2 responsive-center-align" style="text-align:center;">
-                                                                <div class="text-muted small">Amount</div>
-                                                                <div class="row-price-value">£549.00</div>
-                                                            </div>
-                                                            <div class="col-6 col-md-4 text-end action-buttons-wrapper d-flex gap-2 justify-content-end">
-                                                                <button type="button" class="btn lux-btn-action-outline"><i class="bi bi-geo-alt"></i> Track</button>
-                                                                <button type="button" class="btn lux-btn-action-outline" onclick="window.open('https://localhost/shop/templates/view.php','_blank');">
-                                                                    <i class="bi bi-receipt"></i> Invoice
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Order 2 — Completed -->
-                                                    <div class="standalone-order-row" data-order-type="completed">
-                                                        <div class="meta-top-strip">
-                                                            <div class="order-reference-id">#RP-81204 <span class="ms-2">Ordered on April 14, 2026</span></div>
-                                                            <span class="status-badge status-delivered">
-                                                                <i class="bi bi-check2-circle"></i> Delivered
-                                                            </span>
-                                                        </div>
-                                                        <div class="row align-items-center">
-                                                            <div class="col-12 col-md-6">
-                                                                <div class="order-media-block">
-                                                                    <div class="order-media-icon-box"><i class="bi bi-laptop"></i></div>
-                                                                    <div class="product-title-specs">
-                                                                        <h4>MacBook Air M1</h4>
-                                                                        <span class="spec-chip">Grade B Good</span>
-                                                                        <span class="spec-chip">8GB RAM</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-6 col-md-2 responsive-center-align" style="text-align:center;">
-                                                                <div class="text-muted small">Amount</div>
-                                                                <div class="row-price-value">£610.00</div>
-                                                            </div>
-                                                            <div class="col-6 col-md-4 text-end action-buttons-wrapper d-flex gap-2 justify-content-end">
-                                                                <button type="button" class="btn lux-btn-action-outline"><i class="bi bi-arrow-counterclockwise"></i> Reorder</button>
-                                                                <button type="button" class="btn lux-btn-action-outline" onclick="window.open('https://localhost/shop/templates/view.php','_blank');">
-                                                                    <i class="bi bi-receipt"></i> Invoice
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div><!-- /standaloneListingContainer -->
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <!-- /order-panel -->
-
-                            <!-- FIX 6: id="formFooter" so JS can hide it on Order tab -->
-                            <div class="d-flex align-items-center justify-content-between pt-4 mt-4 border-top"
-                                 id="formFooter" style="border-color:#f1f5f9 !important;">
-                                <span class="text-muted d-none d-sm-inline" style="font-size:0.85rem; font-weight:500;">
-                                    <i class="bi bi-shield-check text-success"></i> End-to-end data encryption enabled.
-                                </span>
-                                <button type="submit" class="btn lux-btn-submit d-inline-flex align-items-center gap-2" id="submitSettingsBtn">
-                                    <span class="spinner-border spinner-border-sm d-none" id="btnSpinner" role="status" aria-hidden="true"></span>
-                                    <i class="bi bi-check2-all" id="btnIcon"></i> Save Account Updates
-                                </button>
-                            </div>
-
-                        </form>
-                    </div><!-- /lux-content-pane -->
-                </div><!-- /lux-dashboard-grid -->
             </div>
-        </div>
+
+
+            <div class="rp-form-footer" id="formFooter">
+                <span class="enc-note">
+                    <i class="bi bi-shield-check text-success"></i>
+                    End-to-end data encryption enabled.
+                </span>
+                <button type="submit" class="rp-btn-save" id="submitBtn">
+                    <span class="spinner-border spinner-border-sm d-none" id="btnSpinner" role="status" aria-hidden="true"></span>
+                    <i class="bi bi-check2-all" id="btnIcon"></i>
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
     </div>
+</div>
+</div>
 </main>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+(function () {
+    'use strict';
 
-    const navItems   = document.querySelectorAll('.lux-nav-item');
-    const panels     = document.querySelectorAll('.settings-panel');
-    const form       = document.getElementById('accountSettingsForm');
-    const submitBtn  = document.getElementById('submitSettingsBtn');
-    const spinner    = document.getElementById('btnSpinner');
-    const icon       = document.getElementById('btnIcon');
+
+    const BASE = `${baseAPI}wp-json/wp/v2`;
+
+
+    const navItems   = document.querySelectorAll('.rp-nav-item');
+    const panels     = document.querySelectorAll('.rp-panel');
+    const form       = document.getElementById('settingsForm');
+    const submitBtn  = document.getElementById('submitBtn');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnIcon    = document.getElementById('btnIcon');
     const paneLoader = document.getElementById('paneLoader');
-    const formFooter = document.getElementById('formFooter');   // FIX 6
+    const formFooter = document.getElementById('formFooter');
+    const orderList  = document.getElementById('orderListContainer');
+    const statTotal  = document.getElementById('statTotal');
+    const statActive = document.getElementById('statActive');
 
-    // ── Tab Navigation ────────────────────────────────────────────────────────
+
+    function getSession() {
+        try { return JSON.parse(localStorage.getItem('recycleproAccount')) || null; }
+        catch { return null; }
+    }
+    function getUserId() {
+        const s = getSession();
+        return s ? (s.wp_user_id || s.id || '') : '';
+    }
+    function saveSession(patch) {
+        const s = getSession();
+        if (s) localStorage.setItem('recycleproAccount', JSON.stringify(Object.assign(s, patch)));
+    }
+
+
+    const toast = (msg, type = 'info') =>
+        typeof showToast === 'function' ? showToast(msg, type) : console.info(`[${type}] ${msg}`);
+
+
     navItems.forEach(item => {
-        item.addEventListener('click', function () {
-            navItems.forEach(nav => nav.classList.remove('active'));
-            panels.forEach(panel => panel.classList.remove('active'));
+        const activate = () => {
+            navItems.forEach(n => n.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            item.classList.add('active');
 
-            this.classList.add('active');
+            const target = item.dataset.target;
+            const panel  = document.getElementById(target);
+            if (panel) panel.classList.add('active');
 
-            const targetId = this.getAttribute('data-target');   // FIX 3 (lowercase match)
-            const targetEl = document.getElementById(targetId);
-            if (targetEl) targetEl.classList.add('active');
 
-            // FIX 6: hide Save button when Order Details tab is open
-            if (targetId === 'order-panel') {
-                formFooter.classList.add('d-none');
-            } else {
-                formFooter.classList.remove('d-none');
+            formFooter.style.display = (target === 'order-panel') ? 'none' : '';
+
+
+            if (target === 'order-panel' && !orderList.dataset.loaded) {
+                loadOrders();
             }
+        };
+        item.addEventListener('click', activate);
+        item.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
         });
     });
 
-    // ── Order Filter Pills ────────────────────────────────────────────────────
-    // FIX 5: wire up All / Ongoing / Completed filter buttons
-    const filterPills = document.querySelectorAll('.filter-pill');
-    const orderRows   = document.querySelectorAll('.standalone-order-row');
 
-    filterPills.forEach(pill => {
-        pill.addEventListener('click', function () {
-            filterPills.forEach(p => p.classList.remove('active'));
-            this.classList.add('active');
-
-            const filter = this.getAttribute('data-filter');
-
-            orderRows.forEach(row => {
-                const type = row.getAttribute('data-order-type'); // "ongoing" | "completed"
-                if (filter === 'all') {
-                    row.style.display = '';
-                } else if (filter === type) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            const filter = pill.dataset.filter;
+            document.querySelectorAll('.order-row').forEach(row => {
+                row.style.display = (filter === 'all' || row.dataset.orderType === filter) ? '' : 'none';
             });
         });
     });
 
-    // ── STEP 1: Load user data via AJAX ──────────────────────────────────────
-    async function fetchUserAccountData() {
-        const accountData = localStorage.getItem('recycleproAccount');
-        if (!accountData) {
-            if (typeof showToast === 'function') showToast("Please login first!", "error");
-            return;
-        }
 
-        const loggedInUser = JSON.parse(accountData);
-        const userId = loggedInUser.wp_user_id || loggedInUser.id || '';
+    function productIcon(name) {
+        const n = (name || '').toLowerCase();
+        if (n.includes('macbook') || n.includes('laptop')) return 'bi-laptop';
+        if (n.includes('ipad')   || n.includes('tablet'))  return 'bi-tablet';
+        return 'bi-phone';
+    }
+
+
+    function renderOrderRow(order) {
+        const status  = (order.status || '').toLowerCase();
+        const isDone  = ['completed', 'delivered'].includes(status);
+        const filter  = isDone ? 'completed' : 'ongoing';
+        const badge   = isDone ? 'badge--delivered' : 'badge--processing';
+        const bIcon   = isDone ? 'bi-check2-circle' : 'bi-arrow-repeat';
+        const spin    = isDone ? '' : 'spin';
+        const stText  = isDone ? 'Delivered' : status.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const aIcon   = isDone ? 'bi-arrow-counterclockwise' : 'bi-geo-alt';
+        const aText   = isDone ? 'Reorder' : 'Track';
+
+        const item     = (order.items && order.items[0]) || {};
+        const product  = item.name     || 'Unknown Device';
+        const qty      = item.quantity || 1;
+        const currency = order.currency || 'GBP';
+        const symbol   = currency === 'GBP' ? '£' : '$';
+        const total    = parseFloat(order.total || 0).toFixed(2);
+        const date     = order.date_created
+            ? new Date(order.date_created).toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' })
+            : '';
+        const ordNum   = order.order_number || order.order_id || '';
+        const icon     = productIcon(product);
+        const invoiceUrl = `${BASE_URL}templates/view.php?order_id=${encodeURIComponent(order.order_id || '')}`;
+
+        return `
+        <div class="order-row" data-order-type="${filter}">
+            <div class="order-meta-row">
+                <div class="order-ref">
+                    #RP-${escHtml(String(ordNum))}
+                    <small>Ordered on ${date}</small>
+                </div>
+                <span class="badge--base ${badge}">
+                    <i class="bi ${bIcon} ${spin}"></i> ${escHtml(stText)}
+                </span>
+            </div>
+            <div class="row align-items-center gy-3">
+                <div class="col-12 col-md-6">
+                    <div class="order-product">
+                        <div class="product-icon-box"><i class="bi ${icon}"></i></div>
+                        <div>
+                            <p class="product-name">${escHtml(product)}</p>
+                            <span class="spec-chip">Qty: ${qty}</span>
+                            <span class="spec-chip">${escHtml(currency)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 text-center">
+                    <div class="small text-muted mb-1">Amount</div>
+                    <div class="order-price">${symbol}${total}</div>
+                </div>
+                <div class="col-6 col-md-4 d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn-outline-rp">
+                        <i class="bi ${aIcon}"></i> ${aText}
+                    </button>
+                    <button type="button" class="btn-outline-rp"
+                        onclick="window.open('${invoiceUrl}','_blank')">
+                        <i class="bi bi-receipt"></i> Invoice
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+
+    async function loadOrders() {
+        const userId = getUserId();
         if (!userId) {
-            if (typeof showToast === 'function') showToast("User ID session missing.", "warning");
+            orderList.innerHTML = '<div class="empty-orders"><i class="bi bi-person-x"></i><p>Please log in to view orders.</p></div>';
             return;
         }
 
-        form.classList.add('d-none');
-        paneLoader.classList.remove('d-none');
-
-        const fetchUrl = `https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/user/${userId}`;
-        // const fetchUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/1`;
+        orderList.innerHTML = '<div class="orders-loading"><div class="spinner-border mb-2" role="status"></div><p class="mb-0">Loading orders&hellip;</p></div>';
 
         try {
-            const response = await fetch(fetchUrl, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const result = await response.json();
+            const res  = await fetch(`${BASE}/user-order-info/${userId}`);
+            const data = await res.json();
 
-            if (response.ok && result.success) {
-                document.getElementById('setFirstName').value  = result.user.first_name  || '';
-                document.getElementById('setLastName').value   = result.user.last_name   || '';
-                document.getElementById('setEmail').value      = result.user.email       || '';
-                if (result.user.phone)       document.getElementById('setPhone').value      = result.user.phone;
-                if (result.user.address)     document.getElementById('setAddress').value    = result.user.address;
-                if (result.user.postal_code) document.getElementById('setPostalCode').value = result.user.postal_code;
+            if (!res.ok || !data.success) throw new Error(data.message || 'Could not load orders.');
+
+            const orders = data.orders || [];
+
+            // Update stat counters
+            const active = orders.filter(o => !['completed','delivered'].includes((o.status||'').toLowerCase())).length;
+            statTotal.textContent  = String(orders.length).padStart(2,'0') + ' Orders';
+            statActive.textContent = String(active).padStart(2,'0') + ' Active';
+
+            if (orders.length === 0) {
+                orderList.innerHTML = '<div class="empty-orders"><i class="bi bi-box-seam"></i><p class="mb-0">No orders found for this account.</p></div>';
             } else {
-                throw new Error(result.message || 'Failed to read database parameters.');
+                orderList.innerHTML = orders.map(renderOrderRow).join('');
             }
-        } catch (error) {
-            console.error("AJAX Fetch Exception Error:", error);
-            if (typeof showToast === 'function') showToast("Error loading account data.", "error");
-        } finally {
-            paneLoader.classList.add('d-none');
-            form.classList.remove('d-none');
+
+            orderList.dataset.loaded = '1';
+
+        } catch (err) {
+            console.error('loadOrders:', err);
+            orderList.innerHTML = `<div class="empty-orders"><i class="bi bi-exclamation-circle"></i><p class="mb-0">${escHtml(err.message)}</p></div>`;
         }
     }
 
-    fetchUserAccountData();
 
-    // ── STEP 2: Save user data via AJAX ──────────────────────────────────────
+    async function loadUserData() {
+        const userId = getUserId();
+        if (!userId) {
+            paneLoader.innerHTML = '<p class="text-danger mt-4">Session not found. Please <a href="/login">log in</a>.</p>';
+            paneLoader.style.display = 'block';
+            return;
+        }
+
+        paneLoader.style.display = 'block';
+        form.style.display = 'none';
+
+        try {
+            const res  = await fetch(`${BASE}/user/${userId}`);
+            const data = await res.json();
+
+            if (!res.ok || !data.success) throw new Error(data.message || 'Failed to load profile.');
+
+            const u = data.user || {};
+            document.getElementById('setFirstName').value  = u.first_name  || '';
+            document.getElementById('setLastName').value   = u.last_name   || '';
+            document.getElementById('setEmail').value      = u.email       || '';
+            document.getElementById('setPhone').value      = u.phone       || '';
+            document.getElementById('setAddress').value    = u.address     || '';
+            document.getElementById('setPostalCode').value = u.postal_code || '';
+
+        } catch (err) {
+            console.error('loadUserData:', err);
+            toast(err.message || 'Error loading profile.', 'error');
+        } finally {
+            paneLoader.style.display = 'none';
+            form.style.display = 'block';
+        }
+    }
+
+
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const accountData = localStorage.getItem('recycleproAccount');
-        if (!accountData) return;
+        const userId = getUserId();
+        if (!userId) { toast('Session expired. Please log in.', 'error'); return; }
 
-        const loggedInUser = JSON.parse(accountData);
-        const userId       = loggedInUser.wp_user_id || loggedInUser.id || '';
-        const newPass      = document.getElementById('setNewPassword').value;
-        const confirmPass  = document.getElementById('setConfirmPassword').value;
+        const newPass  = document.getElementById('setNewPassword').value;
+        const confPass = document.getElementById('setConfirmPassword').value;
 
-        if (newPass !== "" && newPass !== confirmPass) {
-            if (typeof showToast === 'function') showToast("Passwords do not match!", "warning");
-            else alert("Security Check Alert: Passwords do not match!");
+        if (newPass && newPass !== confPass) {
+            toast('Passwords do not match!', 'warning');
             return;
         }
 
         submitBtn.disabled = true;
-        spinner.classList.remove('d-none');
-        icon.classList.add('d-none');
-
-        const updateUrl = `https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/user/update/${userId}`;
-        // const updateUrl = `https://localhost/bkrecyclepro/wp-json/wp/v2/user/update/1`;
+        btnSpinner.classList.remove('d-none');
+        btnIcon.classList.add('d-none');
 
         const payload = {
-            first_name:  document.getElementById('setFirstName').value,
-            last_name:   document.getElementById('setLastName').value,
-            email:       document.getElementById('setEmail').value,
-            phone:       document.getElementById('setPhone').value,
-            address:     document.getElementById('setAddress').value,
-            postal_code: document.getElementById('setPostalCode').value
+            first_name:  document.getElementById('setFirstName').value.trim(),
+            last_name:   document.getElementById('setLastName').value.trim(),
+            email:       document.getElementById('setEmail').value.trim(),
+            phone:       document.getElementById('setPhone').value.trim(),
+            address:     document.getElementById('setAddress').value.trim(),
+            postal_code: document.getElementById('setPostalCode').value.trim(),
         };
-        if (newPass !== "") payload.password = newPass;
+        if (newPass) payload.password = newPass;
 
         try {
-            const response = await fetch(updateUrl, {
+            const res  = await fetch(`${BASE}/user/update/${userId}`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify(payload)
+                body:    JSON.stringify(payload),
             });
-            const result = await response.json();
+            const data = await res.json();
 
-            if (response.ok && result.success) {
-                if (typeof showToast === 'function') showToast("Profile Settings updated successfully!", "success");
-                else alert("Profile Secured! Settings updated successfully.");
+            if (!res.ok || !data.success) throw new Error(data.message || 'Update failed.');
 
-                // Sync localStorage
-                loggedInUser.first_name = payload.first_name;
-                loggedInUser.last_name  = payload.last_name;
-                loggedInUser.email      = payload.email;
-                localStorage.setItem('recycleproAccount', JSON.stringify(loggedInUser));
+            toast('Settings saved successfully!', 'success');
 
-                document.getElementById('setNewPassword').value    = "";
-                document.getElementById('setConfirmPassword').value = "";
-            } else {
-                throw new Error(result.message || 'Update request rejected by endpoint backend.');
-            }
-        } catch (error) {
-            console.error("AJAX Submit Exception Error:", error);
-            if (typeof showToast === 'function') showToast(error.message || "Failed to update backend records.", "error");
-            else alert("Error saving settings data.");
+  
+            saveSession({ first_name: payload.first_name, last_name: payload.last_name, email: payload.email });
+
+            document.getElementById('setNewPassword').value    = '';
+            document.getElementById('setConfirmPassword').value = '';
+
+        } catch (err) {
+            console.error('saveSettings:', err);
+            toast(err.message || 'Failed to save settings.', 'error');
         } finally {
             submitBtn.disabled = false;
-            spinner.classList.add('d-none');
-            icon.classList.remove('d-none');
+            btnSpinner.classList.add('d-none');
+            btnIcon.classList.remove('d-none');
         }
     });
 
-});
+
+    loadUserData();
+
+})();
 </script>
 
 <?php include __DIR__ . '/../../includes/footer.php'; ?>
