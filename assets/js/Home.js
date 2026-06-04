@@ -215,14 +215,17 @@ class Home {
                                 <img src="${p.image}" class="w-100 h-100" alt="${p.name}" style="object-fit: contain;">
                             </a>
 
-                            <div class="custom-overlay d-flex align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
-                                style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px;">
+                            <div class="custom-overlay d-flex flex-column align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
+                                style="background-color: rgba(255, 255, 255, 0.88); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px; padding: 20px;">
                                 
-                                <a href="/shop/buy/${p.permalink || '#'}" class="btn btn-primary btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 12px; background-color: #13564f; border-color: #13564f;">
-                                    <i class="bi bi-bag-check me-1"></i> Shop
+                                <a href="/shop/buy/${p.slug || '#'}" class="btn btn-sm text-white w-70 py-2 fw-bold shadow-sm d-flex align-items-center justify-content-center" 
+                                style="min-width: 100% !important; font-size: 14px; background-color: #13564f; border: none; min-width: 110px; border-radius: 6px;">
+                                    <i class="bi bi-bag-check me-2" style="font-size: 15px;"></i> Shop
                                 </a>
-                                <a href="/shop/buy/${p.permalink || '#'}" class="btn btn-danger btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 12px; background-color: #f26500; border-color: #f26500;">
-                                    <i class="bi bi-tags me-1"></i> Sale
+                                
+                                <a href="https://www.recyclepro.co.uk/" class="btn btn-sm text-white w-70 py-2 fw-bold shadow-sm d-flex align-items-center justify-content-center" 
+                                style="min-width: 100% !important; font-size: 14px; background-color: #004465; border: none; min-width: 110px; border-radius: 6px;">
+                                    <i class="bi bi-arrow-left-right me-2" style="font-size: 15px;"></i> Sell
                                 </a>
                             </div>
                         </div>
@@ -402,16 +405,19 @@ class Home {
                             <img src="${p.image}" class="img-fluid h-100" alt="${p.name}" style="object-fit: contain; max-width: 100%;">
                         </a>
 
-                        <div class="custom-overlay d-flex align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
-                            style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px;">
+                        <div class="custom-overlay d-flex flex-column align-items-center justify-content-center gap-2 position-absolute top-0 start-0 w-100 h-100"
+                            style="background-color: rgba(255, 255, 255, 0.88); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease-in-out; z-index: 2; border-radius: 12px; padding: 20px;">
                             
-                            <a href="/shop/buy/${p.slug || '#'}" class="btn btn-primary btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 11px; background-color: #13564f; border-color: #13564f;">
-                                <i class="bi bi-bag-check me-1"></i> Shop
+                            <a href="/shop/buy/${p.slug || '#'}" class="btn btn-sm text-white w-70 py-2 fw-bold shadow-sm d-flex align-items-center justify-content-center" 
+                            style="max-width:100% !important; min-width: 100% !important; font-size: 14px; background-color: #13564f; border: none; min-width: 110px; border-radius: 6px;">
+                                <i class="bi bi-bag-check me-2" style="font-size: 15px;"></i> Shop
                             </a>
-                            <a href="/shop/buy/${p.slug || '#'}" class="btn btn-danger btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm" style="font-size: 11px; background-color: #f26500; border-color: #f26500;">
-                                <i class="bi bi-tags me-1"></i> Sale
+                            
+                            <a href="https://www.recyclepro.co.uk/" class="btn btn-sm text-white w-70 py-2 fw-bold shadow-sm d-flex align-items-center justify-content-center" 
+                            style="max-width:100% !important;min-width: 100% !important; font-size: 14px; background-color: #004465; border: none; min-width: 110px; border-radius: 6px;">
+                                <i class="bi bi-arrow-left-right me-2" style="font-size: 15px;"></i> Sell
                             </a>
-                        </div>
+                    </div>
                     </div>
                 </div>
 

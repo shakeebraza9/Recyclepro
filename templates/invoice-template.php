@@ -92,7 +92,7 @@
         <td class="address-column">
             <div class="address-title">From</div>
             <div class="address-text">
-                <strong>Recycle pro.</strong>
+                <strong>Recycle pro</strong>
               
                 <div class="address-email">Order@recyclepro.co.uk</div>
             </div>
@@ -103,7 +103,7 @@
                 <strong><?= htmlspecialchars($customer_name) ?></strong>
                 <?= htmlspecialchars($billing_address) ?><br>
                 <?= htmlspecialchars($billing_location) ?><br>
-                <?= htmlspecialchars($billing['country']) ?><br>
+                <?= htmlspecialchars($country) ?><br>
                 <div class="address-email"><?= htmlspecialchars($customer_email) ?></div>
                 <div class="address-email"><?= htmlspecialchars($customer_phone) ?></div>
             </div>

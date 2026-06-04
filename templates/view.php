@@ -9,7 +9,7 @@ use Dompdf\Options;
 $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
 if (!$order_id) { die("Order ID is missing."); }
 
-$api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/order-details/" . $order_id;
+$api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/order-info/" . $order_id;
 $response = file_get_contents($api_url);
 $order_data = json_decode($response, true);
 
@@ -32,7 +32,7 @@ $customer_email = $billing['email'];
 $customer_phone = $billing['phone'];
 $billing_address = $billing['address_1'] . ($billing['address_2'] ? ', ' . $billing['address_2'] : '');
 $billing_location = $billing['city'] . ', ' . $billing['state'] . ' ' . $billing['postcode'];
-
+$country = $order['shipping_address']['country'] ?? '';
 
 $subtotal      = (float)$order['subtotal'];
 $grand_total   = (float)$order['total'];
@@ -46,7 +46,7 @@ if (isset($order['items'])) {
         $items[] = [
             'name'  => $item['name'],
             'qty'   => (int)$item['quantity'],
-            'price' => (float)$item['price'],
+            'price' => (float)$item['total'],
             'image' => $item['image'] ?? ''
         ];
     }

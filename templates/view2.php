@@ -6,14 +6,16 @@ $url = $config['BASE_URL'];
 $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
 if (!$order_id) { die("Order ID is missing."); }
 
-$api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/order-details/" . $order_id;
+$api_url = "https://www.recyclepro.co.uk/rp-dashboard/wp-json/wp/v2/order-info/" . $order_id;
 $response = file_get_contents($api_url);
 $order_data = json_decode($response, true);
-
+echo "<pre>";
+print_r($order_data);
+echo "</pre>";
 if (!$order_data || !isset($order_data['success']) || $order_data['success'] !== true) {
     die("Unable to fetch order details.");
 }
-
+var_dump($order_data );
 $order = $order_data['order'];
 
 $invoice_no    = $order['order_number'] ?? $order['order_id'];
@@ -39,17 +41,16 @@ if (isset($order['items'])) {
         $items[] = [
             'name'  => $item['name'],
             'qty'   => (int)$item['quantity'],
-            'price' => (float)$item['price'],
+            'price' => (float)$item['total'],
             'image' => $item['image'] ?? ''
         ];
     }
 }
 
-// Template ko buffer mein load kar rahe hain
-ob_start();
+
 require 'invoice-template.php'; 
 $html = ob_get_clean();
 
-// --- LOGIC FIX: Ab browser pe data display hoga ---
+
 echo $html;
 exit;

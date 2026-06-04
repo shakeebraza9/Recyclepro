@@ -221,7 +221,7 @@ include __DIR__ . '/../../includes/header.php';
 </style>
 
 <main class="rp-settings">
-<div class="container" style="max-width:1200px;">
+<div class="container" style="max-width:82%;">
 <div class="rp-shell">
 
 
